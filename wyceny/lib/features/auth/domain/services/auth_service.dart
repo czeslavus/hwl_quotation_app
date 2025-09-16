@@ -1,5 +1,8 @@
 
 abstract class AuthService {
+
+  String get user;
+
   Future<bool> init();
 
   Future<bool> login(String username, String password);

@@ -1,4 +1,4 @@
-import 'package:e_kierowca_app/app/env/app_environment.dart';
+import 'package:wyceny/app/env/app_environment.dart';
 
 class EnvLoader {
   static const apiHost = 'https://0ba23e508118.ngrok-free.app/api';

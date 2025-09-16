@@ -1,20 +1,24 @@
-import 'package:e_kierowca_app/app/auth.dart';
+import 'package:wyceny/app/auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 
-/// ViewModel odpowiedzialny za logikę ekranu logowania.
+enum LoginError {
+  invalidCredentials,
+  network,
+  unknown,
+}
+
 class LoginViewModel extends ChangeNotifier {
   final AuthState _auth;
-
   LoginViewModel(this._auth);
 
   bool _isLoading = false;
-  String? _error;
+  LoginError? _error;
   bool _obscurePassword = true;
   CancelToken? _cancelToken;
 
   bool get isLoading => _isLoading;
-  String? get error => _error;
+  LoginError? get error => _error;
   bool get obscurePassword => _obscurePassword;
 
   void togglePasswordVisibility() {
@@ -22,7 +26,6 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Próba logowania. Zwraca true przy powodzeniu.
   Future<bool> login({
     required String username,
     required String password,
@@ -34,11 +37,11 @@ class LoginViewModel extends ChangeNotifier {
     try {
       final ok = await _auth.login(username, password);
       if (!ok) {
-        _error = 'Nieprawidłowe dane logowania.';
+        _error = LoginError.invalidCredentials;
       }
       return ok;
     } catch (e) {
-      _error = _humanizeError(e);
+      _error = _mapError(e);
       return false;
     } finally {
       _setLoading(false);
@@ -46,7 +49,6 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  /// Opcjonalnie: odzyskiwanie hasła
   Future<bool> recover({required String username}) async {
     _setLoading(true);
     _error = null;
@@ -55,7 +57,7 @@ class LoginViewModel extends ChangeNotifier {
       await _auth.recoverRequest(username);
       return true;
     } catch (e) {
-      _error = _humanizeError(e);
+      _error = _mapError(e);
       return false;
     } finally {
       _setLoading(false);
@@ -63,9 +65,7 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  void cancel() {
-    _cancelToken?.cancel('Canceled by user');
-  }
+  void cancel() => _cancelToken?.cancel('Canceled by user');
 
   void clearError() {
     if (_error != null) {
@@ -81,8 +81,11 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  String _humanizeError(Object e) {
-    // Tu możesz rozwinąć mapowanie wyjątków na czytelne komunikaty
-    return 'Wystąpił błąd podczas logowania.';
+  LoginError _mapError(Object e) {
+    // Proste mapowanie — można rozszerzyć
+    if (e is DioException && e.type == DioExceptionType.connectionTimeout) {
+      return LoginError.network;
+    }
+    return LoginError.unknown;
   }
 }

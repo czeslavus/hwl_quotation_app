@@ -1,218 +1,258 @@
 import 'package:flutter/material.dart';
-import 'package:e_kierowca_app/features/auth/domain/services/auth_service.dart';
+import 'package:get_it/get_it.dart';
+import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmodel.dart';
+import 'package:wyceny/l10n/app_localizations.dart';
 
 class RecoverSetPasswordScreen extends StatefulWidget {
-  final AuthService authService;
-  const RecoverSetPasswordScreen({super.key, required this.authService});
+  const RecoverSetPasswordScreen({super.key});
 
   @override
-  State<RecoverSetPasswordScreen> createState() =>
-      _RecoverSetPasswordScreenState();
+  State<RecoverSetPasswordScreen> createState() => _RecoverSetPasswordScreenState();
 }
 
 class _RecoverSetPasswordScreenState extends State<RecoverSetPasswordScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _userCtrl = TextEditingController();
-  final _codeCtrl = TextEditingController();
-  final _pass1Ctrl = TextEditingController();
-  final _pass2Ctrl = TextEditingController();
-
-  bool _loadingCode = false;
-  bool _loadingSet = false;
-  String? _codeInfo;
-  String? _setError;
-  String? _codeError;
-
-  Future<void> _sendCode() async {
-    setState(() {
-      _loadingCode = true;
-      _codeError = null;
-      _codeInfo = null;
-    });
-    try {
-      final ok = await widget.authService.recoverRequest(_userCtrl.text.trim());
-      if (ok) {
-        setState(() {
-          _codeInfo = 'Kod został wysłany SMS-em';
-        });
-      } else {
-        setState(() {
-          _codeError = 'Nieprawidłowy login lub brak numeru telefonu';
-        });
-      }
-    } catch (_) {
-      setState(() {
-        _codeError = 'Wystąpił błąd. Spróbuj ponownie.';
-      });
-    } finally {
-      setState(() {
-        _loadingCode = false;
-      });
-    }
-  }
-
-  Future<void> _setPassword() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _loadingSet = true;
-      _setError = null;
-    });
-    try {
-      final ok = await widget.authService.recoverSetPassword(
-        _userCtrl.text.trim(),
-        _codeCtrl.text.trim(),
-        _pass1Ctrl.text,
-      );
-      if (ok && mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Hasło zostało zmienione. Możesz się zalogować.'),
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _setError = e is Exception
-            ? e.toString()
-            : 'Wystąpił błąd. Spróbuj ponownie.';
-      });
-    } finally {
-      setState(() {
-        _loadingSet = false;
-      });
-    }
-  }
+  late final RecoverSetPasswordViewModel _vm = GetIt.I<RecoverSetPasswordViewModel>();
 
   @override
   void dispose() {
-    _userCtrl.dispose();
-    _codeCtrl.dispose();
-    _pass1Ctrl.dispose();
-    _pass2Ctrl.dispose();
+    _vm.dispose(); // VM zwalnia swoje kontrolery
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Odzyskiwanie hasła')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Card(
-            margin: const EdgeInsets.all(24),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // GÓRNA CZĘŚĆ: wysyłanie kodu
-                  TextFormField(
-                    controller: _userCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Nazwa użytkownika',
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _loadingCode ? null : _sendCode,
-                      child: _loadingCode
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Wyślij kod'),
-                    ),
-                  ),
-                  if (_codeInfo != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        _codeInfo!,
-                        style: const TextStyle(color: Colors.green),
-                      ),
-                    ),
-                  if (_codeError != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        _codeError!,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  const Divider(height: 32),
-                  // DOLNA CZĘŚĆ: ustawianie nowego hasła
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: _codeCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Kod z SMS',
+      extendBodyBehindAppBar: true,
+      // brak AppBar — layout jak na ekranie logowania
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // TŁO
+          Image.asset('assets/portal-background-2_0.jpg', fit: BoxFit.cover),
+          Container(color: Colors.black.withOpacity(0.35)), // scrim
+
+          // KARTA POŚRODKU
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: ListenableBuilder(
+                listenable: _vm,
+                builder: (context, _) {
+                  return Card(
+                    elevation: 8,
+                    color: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
+                      child: Theme(
+                        // ten sam InputDecorationTheme co na loginie
+                        data: Theme.of(context).copyWith(
+                          inputDecorationTheme: InputDecorationTheme(
+                            isDense: true,
+                            filled: true,
+                            fillColor: const Color(0xFFF5F7FA),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: scheme.primary, width: 1.5),
+                            ),
+                            labelStyle: const TextStyle(color: Color(0xFF6B7280)),
                           ),
-                          validator: (v) =>
-                              (v == null || v.isEmpty) ? 'Podaj kod' : null,
                         ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _pass1Ctrl,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Nowe hasło',
-                          ),
-                          validator: (v) =>
-                              (v == null || v.isEmpty) ? 'Podaj hasło' : null,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _pass2Ctrl,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Powtórz hasło',
-                          ),
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return 'Powtórz hasło';
-                            if (v != _pass1Ctrl.text) {
-                              return 'Hasła się nie zgadzają';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        if (_setError != null)
-                          Text(
-                            _setError!,
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _loadingSet ? null : _setPassword,
-                            child: _loadingSet
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // LOGO
+                            Align(
+                              alignment: Alignment.center,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                radius: 64,
+                                child: Image.asset('assets/hellmannblue.png', height: 64, fit: BoxFit.contain),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // TYTUŁ
+                            Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                t.recover_title,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF0F172A),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // ── GÓRA: wysyłanie kodu ───────────────────────
+                            TextFormField(
+                              controller: _vm.usernameCtrl,
+                              decoration: InputDecoration(labelText: t.auth_usernameLabel),
+                              textInputAction: TextInputAction.done,
+                              autofillHints: const [AutofillHints.username, AutofillHints.email],
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 44,
+                              width: double.infinity,
+                              child: FilledButton(
+                                style: FilledButton.styleFrom(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: _vm.loadingCode ? null : _vm.sendCode,
+                                child: _vm.loadingCode
+                                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                    : Text(t.recover_sendCode),
+                              ),
+                            ),
+                            if (_vm.codeInfo != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Text(_codeInfoToText(_vm.codeInfo!, t), style: const TextStyle(color: Colors.green)),
+                              ),
+                            if (_vm.codeError != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Text(_codeErrorToText(_vm.codeError!, t), style: TextStyle(color: scheme.error)),
+                              ),
+
+                            const Divider(height: 32),
+
+                            // ── DÓŁ: ustawianie nowego hasła ───────────────
+                            Form(
+                              key: _vm.formKey,
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: _vm.codeCtrl,
+                                    decoration: InputDecoration(labelText: t.recover_codeLabel),
+                                    validator: (v) => (v == null || v.isEmpty) ? t.recover_codeRequired : null,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _vm.pass1Ctrl,
+                                    obscureText: _vm.obscure1,
+                                    decoration: InputDecoration(
+                                      labelText: t.recover_newPasswordLabel,
+                                      suffixIcon: IconButton(
+                                        splashRadius: 20,
+                                        icon: Icon(_vm.obscure1 ? Icons.visibility : Icons.visibility_off, color: const Color(0xFF64748B)),
+                                        tooltip: _vm.obscure1 ? t.auth_showPassword : t.auth_hidePassword,
+                                        onPressed: _vm.toggleObscure1,
+                                      ),
                                     ),
-                                  )
-                                : const Text('Ustaw nowe hasło'),
-                          ),
+                                    validator: (v) => (v == null || v.isEmpty) ? t.auth_passwordRequired : null,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _vm.pass2Ctrl,
+                                    obscureText: _vm.obscure2,
+                                    decoration: InputDecoration(
+                                      labelText: t.recover_repeatPasswordLabel,
+                                      suffixIcon: IconButton(
+                                        splashRadius: 20,
+                                        icon: Icon(_vm.obscure2 ? Icons.visibility : Icons.visibility_off, color: const Color(0xFF64748B)),
+                                        tooltip: _vm.obscure2 ? t.auth_showPassword : t.auth_hidePassword,
+                                        onPressed: _vm.toggleObscure2,
+                                      ),
+                                    ),
+                                    validator: (v) {
+                                      if (v == null || v.isEmpty) return t.recover_repeatPasswordRequired;
+                                      if (v != _vm.pass1Ctrl.text) return t.recover_passwordsMismatch;
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  if (_vm.setError != null)
+                                    Text(_setErrorToText(_vm.setError!, t), style: TextStyle(color: scheme.error)),
+
+                                  SizedBox(
+                                    height: 44,
+                                    width: double.infinity,
+                                    child: FilledButton(
+                                      style: FilledButton.styleFrom(
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                      onPressed: _vm.loadingSet
+                                          ? null
+                                          : () async {
+                                        final ok = await _vm.setPassword();
+                                        if (!mounted) return;
+                                        if (ok) {
+                                          Navigator.of(context).pop();
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(t.recover_passwordChangedSnack)),
+                                          );
+                                        }
+                                      },
+                                      child: _vm.loadingSet
+                                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                          : Text(t.recover_setPassword),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
+  }
+
+  // mapowanie enumów → teksty z lokalizacji
+  String _codeInfoToText(RecoverCodeInfo info, AppLocalizations t) {
+    switch (info) {
+      case RecoverCodeInfo.sentSms:
+        return t.recover_codeSentInfo;
+    }
+  }
+
+  String _codeErrorToText(RecoverCodeError err, AppLocalizations t) {
+    switch (err) {
+      case RecoverCodeError.invalidLoginOrPhone:
+        return t.recover_invalidLoginOrPhone;
+      case RecoverCodeError.network:
+        return t.common_networkError;
+      case RecoverCodeError.unknown:
+        return t.common_unknownError;
+    }
+  }
+
+  String _setErrorToText(RecoverSetError err, AppLocalizations t) {
+    switch (err) {
+      case RecoverSetError.invalidCodeOrPolicy:
+        return t.recover_invalidCodeOrPolicy;
+      case RecoverSetError.network:
+        return t.common_networkError;
+      case RecoverSetError.unknown:
+        return t.common_unknownError;
+    }
   }
 }

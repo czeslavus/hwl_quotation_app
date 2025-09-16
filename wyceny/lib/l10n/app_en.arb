@@ -1,0 +1,57 @@
+{
+  "@@locale": "en",
+  "appTitle": "HWL International Quotations",
+  "signIn_title": "Sign in",
+  "greeting": "Hello {name}!",
+  "@greeting": {
+    "description": "Greets the user by name.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "itemsCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
+
+  "app_companyName": "Hellmann Worldwide Logistics",
+  "nav_quote": "Quote",
+  "nav_order": "Order",
+  "nav_history": "History",
+  "nav_settings": "Settings",
+  "menu_account": "Account",
+  "menu_settings": "Settings",
+  "menu_logout": "Log out",
+  "frame_exampleSubscreen": "Example sub-screen",
+  "frame_placeholder": "Add the content of \"{title}\" screen here.",
+  "@frame_placeholder": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+
+  "recover_title": "Password recovery",
+  "recover_sendCode": "Send code",
+  "recover_codeLabel": "SMS code",
+  "recover_codeRequired": "Enter the code",
+  "recover_newPasswordLabel": "New password",
+  "recover_repeatPasswordLabel": "Repeat password",
+  "recover_repeatPasswordRequired": "Repeat the password",
+  "recover_passwordsMismatch": "Passwords do not match",
+  "recover_setPassword": "Set new password",
+  "recover_codeSentInfo": "The code has been sent via SMS",
+  "recover_invalidLoginOrPhone": "Invalid login or missing phone number",
+  "recover_invalidCodeOrPolicy": "Invalid code or password does not meet requirements",
+  "recover_passwordChangedSnack": "Password changed. You can sign in now.",
+  "common_networkError": "Connection error. Check your internet.",
+  "common_unknownError": "An unexpected error occurred.",
+
+    "auth_loginTitle": "Sign in",
+    "auth_usernameLabel": "Username",
+    "auth_usernameRequired": "Please enter your username",
+    "auth_passwordLabel": "Password",
+    "auth_passwordRequired": "Please enter your password",
+    "auth_loginButton": "Sign in",
+    "auth_forgotPassword": "Forgot password?",
+    "auth_enterUsernameSnack": "Enter your username.",
+    "auth_recoverSentSnack": "Password recovery instructions sent.",
+    "auth_showPassword": "Show password",
+    "auth_hidePassword": "Hide password",
+
+    "login_invalidCredentials": "Invalid username or password.",
+    "login_network": "Connection error. Check your internet.",
+    "login_unknown": "An unexpected error occurred."
+}

@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:e_kierowca_app/app/di/locator.dart';
-import 'package:e_kierowca_app/features/logs/data/service/logger_service.dart';
+import 'package:get_it/get_it.dart';
+import 'package:wyceny/features/logs/data/service/logger_service.dart';
 
 class LoggingInterceptor extends Interceptor {
-  final _logger = getIt<LogService>().logger; // singleton z DI
+  final _logger = GetIt.I<LogService>().logger; // singleton z DI
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {

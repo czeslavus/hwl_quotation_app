@@ -12,6 +12,10 @@ class AuthServiceImpl implements AuthService {
   final AuthRepository _repo;
   final TokenStorage _secureStorage;
 
+  @override
+  String get user => _displayUserName;
+
+  String _displayUserName = '';
 
   AuthServiceImpl({
     required AuthRepository repository,
@@ -43,6 +47,8 @@ class AuthServiceImpl implements AuthService {
     // TODO: dopasuj do kształtu payloadu backendu
     final access = res['access_token'] as String?;
     final refresh = res['refresh_token'] as String?;
+    final du = res['user']?['username'] as String?;
+    _displayUserName = du ?? username;
 
     if (access == null || refresh == null) {
       return false;

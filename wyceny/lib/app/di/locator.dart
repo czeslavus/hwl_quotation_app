@@ -11,7 +11,7 @@ import 'package:wyceny/app/env/app_environment.dart';
 import 'package:wyceny/app/env/env_config.dart';
 import 'package:wyceny/core/network/dio_client.dart';
 
-import 'package:wyceny/core/services/token_storage.dart';
+import 'package:wyceny/features/auth/data/services/token_storage.dart';
 import 'package:wyceny/app/router.dart';
 
 import 'package:wyceny/features/auth/domain/services/auth_service.dart';
@@ -21,13 +21,13 @@ import 'package:wyceny/features/auth/data/repositories/auth_repository_impl.dart
 
 import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmodel.dart';
 
-import 'package:wyceny/core/services/token_storage/token_storage_secure.dart'
-    if (dart.library.html) '../../core/services/token_storage/token_storage_memory_web.dart';
+import 'package:wyceny/features/auth/data/services/token_storage/token_storage_secure.dart'
+    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart';
 
 final getIt = GetIt.instance;
 
 // Przełącznik - zmień na 'false', aby używać prawdziwego API
-const bool USE_MOCK_API = false;
+const bool USE_MOCK_API = true;
 
 Future<void> setupDI() async {
   // 1) Konfiguracja środowiska
@@ -61,9 +61,12 @@ Future<void> setupDI() async {
     () => AuthServiceImpl(
       repository: getIt<AuthRepository>(),
       storage: getIt<TokenStorage>(),
-      deviceIdService: getIt<DeviceIdService>(),
     ),
   );
+
+  getIt.registerLazySingleton<AuthState>(() => AuthState(
+      service: getIt<AuthService>()
+  ));
 
   getIt.registerLazySingleton<Dio>(() {
     final storage = getIt<TokenStorage>();
@@ -85,7 +88,7 @@ Future<void> setupDI() async {
 
   getIt.registerLazySingleton<GoRouter>(() => buildRouter(getIt<AuthState>()));
 
-  getIt.registerLazySingleton<ApiService>(() => ApiServiceImpl(getIt<Dio>(), getIt<OutboxRepository>()));
+  // getIt.registerLazySingleton<ApiService>(() => ApiServiceImpl(getIt<Dio>(), getIt<OutboxRepository>()));
 
 
   // if (USE_MOCK_API) {

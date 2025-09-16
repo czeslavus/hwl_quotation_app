@@ -70,7 +70,7 @@ Future<String?> platformLogsDirPath() async {
 }
 
 /// Lista ścieżek plików logów (IO)
-Future<List<String>> listLogFiles() async {
+Future<List<String>> platformListLogFiles() async {
   final path = await platformLogsDirPath();
   if (path == null) return [];
   final dir = Directory(path);

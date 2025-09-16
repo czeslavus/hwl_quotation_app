@@ -1,0 +1,54 @@
+{
+  "@@locale": "pl",
+  "appTitle": "Wyceny przejazdów międzynarodowych HWL",
+  "signIn_title": "Zaloguj się",
+  "greeting": "Dzień dobry {name}!",
+  "itemsCount": "{count, plural, =0{Brak elementów} =1{1 element} other{{count} elementy}}",
+
+  "app_companyName": "Hellmann Worldwide Logistics",
+  "nav_quote": "Wycena",
+  "nav_order": "Zamówienie",
+  "nav_history": "Historia",
+  "nav_settings": "Ustawienia",
+  "menu_account": "Konto",
+  "menu_settings": "Ustawienia",
+  "menu_logout": "Wyloguj",
+  "frame_exampleSubscreen": "Przykładowy sub-ekran",
+  "frame_placeholder": "Tu dodaj treść ekranu \"{title}\".",
+  "@frame_placeholder": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+
+  "recover_title": "Odzyskiwanie hasła",
+  "recover_sendCode": "Wyślij kod",
+  "recover_codeLabel": "Kod z SMS",
+  "recover_codeRequired": "Podaj kod",
+  "recover_newPasswordLabel": "Nowe hasło",
+  "recover_repeatPasswordLabel": "Powtórz hasło",
+  "recover_repeatPasswordRequired": "Powtórz hasło",
+  "recover_passwordsMismatch": "Hasła się nie zgadzają",
+  "recover_setPassword": "Ustaw nowe hasło",
+  "recover_codeSentInfo": "Kod został wysłany SMS-em",
+  "recover_invalidLoginOrPhone": "Nieprawidłowy login lub brak numeru telefonu",
+  "recover_invalidCodeOrPolicy": "Nieprawidłowy kod lub hasło nie spełnia wymagań",
+  "recover_passwordChangedSnack": "Hasło zostało zmienione. Możesz się zalogować.",
+  "common_networkError": "Błąd połączenia. Sprawdź internet.",
+  "common_unknownError": "Wystąpił nieoczekiwany błąd.",
+
+    "auth_loginTitle": "Zaloguj się",
+    "auth_usernameLabel": "Użytkownik",
+    "auth_usernameRequired": "Podaj nazwę użytkownika",
+    "auth_passwordLabel": "Hasło",
+    "auth_passwordRequired": "Podaj hasło",
+    "auth_loginButton": "Zaloguj",
+    "auth_forgotPassword": "Nie pamiętasz hasła?",
+    "auth_enterUsernameSnack": "Podaj nazwę użytkownika.",
+    "auth_recoverSentSnack": "Wysłano instrukcje odzyskiwania hasła.",
+    "auth_showPassword": "Pokaż hasło",
+    "auth_hidePassword": "Ukryj hasło",
+
+    "login_invalidCredentials": "Nieprawidłowe dane logowania.",
+    "login_network": "Błąd połączenia. Sprawdź internet.",
+    "login_unknown": "Wystąpił nieoczekiwany błąd."
+
+}

@@ -6,6 +6,8 @@ import 'package:wyceny/features/auth/domain/services/auth_service.dart';
 class AuthState extends ChangeNotifier {
   final AuthService _service;
 
+  String get user => _service.user;
+
   AuthState({
     required AuthService service,
   })  : _service = service;
