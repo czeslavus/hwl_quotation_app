@@ -355,6 +355,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred.'**
   String get login_unknown;
+
+  /// No description provided for @settings_language.
+  ///
+  /// In en, this message translates to:
+  /// **'App language'**
+  String get settings_language;
+
+  /// No description provided for @settings_lang_system.
+  ///
+  /// In en, this message translates to:
+  /// **'System language'**
+  String get settings_lang_system;
 }
 
 class _AppLocalizationsDelegate

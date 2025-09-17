@@ -66,7 +66,7 @@ class _AppScaffoldState extends State<AppScaffold> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    final isWide = MediaQuery.sizeOf(context).width >= 900;
+    final isWide = MediaQuery.sizeOf(context).width >= 600;
 
     final mobileDestinations = [
       NavigationDestination(icon: const Icon(Icons.euro_outlined), selectedIcon: const Icon(Icons.euro), label: t.nav_quote),

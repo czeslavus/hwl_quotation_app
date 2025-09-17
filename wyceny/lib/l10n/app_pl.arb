@@ -35,20 +35,24 @@
   "common_networkError": "Błąd połączenia. Sprawdź internet.",
   "common_unknownError": "Wystąpił nieoczekiwany błąd.",
 
-    "auth_loginTitle": "Zaloguj się",
-    "auth_usernameLabel": "Użytkownik",
-    "auth_usernameRequired": "Podaj nazwę użytkownika",
-    "auth_passwordLabel": "Hasło",
-    "auth_passwordRequired": "Podaj hasło",
-    "auth_loginButton": "Zaloguj",
-    "auth_forgotPassword": "Nie pamiętasz hasła?",
-    "auth_enterUsernameSnack": "Podaj nazwę użytkownika.",
-    "auth_recoverSentSnack": "Wysłano instrukcje odzyskiwania hasła.",
-    "auth_showPassword": "Pokaż hasło",
-    "auth_hidePassword": "Ukryj hasło",
+  "auth_loginTitle": "Zaloguj się",
+  "auth_usernameLabel": "Użytkownik",
+  "auth_usernameRequired": "Podaj nazwę użytkownika",
+  "auth_passwordLabel": "Hasło",
+  "auth_passwordRequired": "Podaj hasło",
+  "auth_loginButton": "Zaloguj",
+  "auth_forgotPassword": "Nie pamiętasz hasła?",
+  "auth_enterUsernameSnack": "Podaj nazwę użytkownika.",
+  "auth_recoverSentSnack": "Wysłano instrukcje odzyskiwania hasła.",
+  "auth_showPassword": "Pokaż hasło",
+  "auth_hidePassword": "Ukryj hasło",
 
-    "login_invalidCredentials": "Nieprawidłowe dane logowania.",
-    "login_network": "Błąd połączenia. Sprawdź internet.",
-    "login_unknown": "Wystąpił nieoczekiwany błąd."
+  "login_invalidCredentials": "Nieprawidłowe dane logowania.",
+  "login_network": "Błąd połączenia. Sprawdź internet.",
+  "login_unknown": "Wystąpił nieoczekiwany błąd.",
+
+  "settings_language": "Język aplikacji",
+  "settings_lang_system": "Język systemowy"
+
 
 }

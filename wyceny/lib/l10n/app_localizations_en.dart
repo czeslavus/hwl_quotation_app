@@ -152,4 +152,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get login_unknown => 'An unexpected error occurred.';
+
+  @override
+  String get settings_language => 'App language';
+
+  @override
+  String get settings_lang_system => 'System language';
 }

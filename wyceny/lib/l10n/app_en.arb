@@ -39,19 +39,22 @@
   "common_networkError": "Connection error. Check your internet.",
   "common_unknownError": "An unexpected error occurred.",
 
-    "auth_loginTitle": "Sign in",
-    "auth_usernameLabel": "Username",
-    "auth_usernameRequired": "Please enter your username",
-    "auth_passwordLabel": "Password",
-    "auth_passwordRequired": "Please enter your password",
-    "auth_loginButton": "Sign in",
-    "auth_forgotPassword": "Forgot password?",
-    "auth_enterUsernameSnack": "Enter your username.",
-    "auth_recoverSentSnack": "Password recovery instructions sent.",
-    "auth_showPassword": "Show password",
-    "auth_hidePassword": "Hide password",
+  "auth_loginTitle": "Sign in",
+  "auth_usernameLabel": "Username",
+  "auth_usernameRequired": "Please enter your username",
+  "auth_passwordLabel": "Password",
+  "auth_passwordRequired": "Please enter your password",
+  "auth_loginButton": "Sign in",
+  "auth_forgotPassword": "Forgot password?",
+  "auth_enterUsernameSnack": "Enter your username.",
+  "auth_recoverSentSnack": "Password recovery instructions sent.",
+  "auth_showPassword": "Show password",
+  "auth_hidePassword": "Hide password",
 
-    "login_invalidCredentials": "Invalid username or password.",
-    "login_network": "Connection error. Check your internet.",
-    "login_unknown": "An unexpected error occurred."
+  "login_invalidCredentials": "Invalid username or password.",
+  "login_network": "Connection error. Check your internet.",
+  "login_unknown": "An unexpected error occurred.",
+
+  "settings_language": "App language",
+  "settings_lang_system": "System language"
 }

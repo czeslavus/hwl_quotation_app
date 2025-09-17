@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wyceny/app/locale_controller.dart';
 
 import 'package:wyceny/features/auth/ui/viewmodels/login_view_model.dart';
 import 'package:wyceny/app/auth.dart';
@@ -22,7 +23,8 @@ import 'package:wyceny/features/auth/data/repositories/auth_repository_impl.dart
 import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmodel.dart';
 
 import 'package:wyceny/features/auth/data/services/token_storage/token_storage_secure.dart'
-    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart';
+//    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
+    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_web_secure.dart';
 
 final getIt = GetIt.instance;
 
@@ -30,15 +32,15 @@ final getIt = GetIt.instance;
 const bool USE_MOCK_API = true;
 
 Future<void> setupDI() async {
-  // 1) Konfiguracja środowiska
+  // Konfiguracja środowiska
   final envConfig = EnvLoader.fromDartDefine();
   getIt.registerSingleton<EnvConfig>(envConfig);
 
-  // 1) LogService jako singleton (instancja jedna na cały proces)
+  // singletony
   getIt.registerSingleton<LogService>(LogService());
 
+  getIt.registerLazySingleton<LocaleController>(() => LocaleController());
 
-  // 2) Core singletons
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),
   );

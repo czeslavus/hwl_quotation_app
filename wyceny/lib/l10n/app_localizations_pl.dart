@@ -152,4 +152,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get login_unknown => 'Wystąpił nieoczekiwany błąd.';
+
+  @override
+  String get settings_language => 'Język aplikacji';
+
+  @override
+  String get settings_lang_system => 'Język systemowy';
 }
