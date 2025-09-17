@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../common/screen_frame.dart';
+import 'package:wyceny/features/common/screen_frame.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});

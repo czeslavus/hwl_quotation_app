@@ -50,7 +50,7 @@ class RecoverSetPasswordViewModel extends ChangeNotifier {
       } else {
         codeError = RecoverCodeError.invalidLoginOrPhone;
       }
-    } on DioError {
+    } on DioException {
       codeError = RecoverCodeError.network;
     } catch (_) {
       codeError = RecoverCodeError.unknown;
@@ -82,7 +82,7 @@ class RecoverSetPasswordViewModel extends ChangeNotifier {
         notifyListeners();
         return false;
       }
-    } on DioError {
+    } on DioException {
       loadingSet = false;
       setError = RecoverSetError.network;
       notifyListeners();

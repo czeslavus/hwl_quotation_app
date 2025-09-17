@@ -1,4 +1,4 @@
-import 'quotation_item.dart';
+import 'package:wyceny/features/quotations/domain/models/quotation_item.dart';
 
 class Quotation {
   final int? id;

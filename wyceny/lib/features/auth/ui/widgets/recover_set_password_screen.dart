@@ -21,7 +21,7 @@ class _RecoverSetPasswordScreenState extends State<RecoverSetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(

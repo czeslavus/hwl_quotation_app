@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _onLogin() async {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     FocusScope.of(context).unfocus();
 
     if (!(_formKey.currentState?.validate() ?? false)) {
@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -144,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Align(
                                   alignment: Alignment.center,
                                   child: CircleAvatar(
-                                    backgroundColor: const Color(0xFFFFFF),
+                                    backgroundColor: const Color(0x00ffffff),
                                     radius: 64,
                                     child: Image.asset(
                                       'assets/hellmannblue.png',

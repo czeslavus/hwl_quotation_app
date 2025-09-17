@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../common/screen_frame.dart';
+import 'package:wyceny/features/common/screen_frame.dart';
 
 class QuotationsScreen extends StatelessWidget {
   const QuotationsScreen({super.key});

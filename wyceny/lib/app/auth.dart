@@ -21,7 +21,6 @@ class AuthState extends ChangeNotifier {
 
   /// Wywołaj raz na starcie (Splash)
   Future<void> init() async {
-    print('In init');
     try {
       final ok = await _service.init();
       _loggedIn = ok;
@@ -42,7 +41,6 @@ class AuthState extends ChangeNotifier {
 
 
   Future<void> logout() async {
-    print('In logout');
     await _service.logout();
     _loggedIn = false;
     notifyListeners();

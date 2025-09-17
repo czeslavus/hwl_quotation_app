@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'auth.dart';
+import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
 class _AppVersionText extends StatefulWidget {
@@ -54,7 +54,7 @@ class _AppScaffoldState extends State<AppScaffold> {
   void _onTap(int i) => widget.shell.goBranch(i, initialLocation: i == index);
 
   String _titleFor(BuildContext context, int i) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     switch (i) {
       case 0: return t.nav_quote;
       case 1: return t.nav_order;
@@ -65,7 +65,7 @@ class _AppScaffoldState extends State<AppScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final isWide = MediaQuery.sizeOf(context).width >= 600;
 
     final mobileDestinations = [
@@ -83,7 +83,7 @@ class _AppScaffoldState extends State<AppScaffold> {
     final content = ClipRect(child: widget.shell);
 
     if (isWide) {
-      final t = AppLocalizations.of(context)!;
+      final t = AppLocalizations.of(context);
 
       final rail = NavigationRail(
         selectedIndex: index,
@@ -199,7 +199,7 @@ class _UserMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final auth = AuthScope.of(context);
     final display = auth.user;
     final initials = (display.isNotEmpty ? display.trim()[0].toUpperCase() : 'U');
@@ -241,7 +241,7 @@ class _LogoutButton extends StatelessWidget {
   const _LogoutButton();
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final auth = AuthScope.of(context);
     return IconButton(
       tooltip: t.menu_logout,

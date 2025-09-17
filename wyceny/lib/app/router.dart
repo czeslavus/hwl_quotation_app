@@ -7,10 +7,10 @@ import 'package:wyceny/app/app_scaffold.dart';
 import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 
-import '../features/auth/ui/widgets/recover_set_password_screen.dart';
-import '../features/logs/ui/widgets/logs_screen.dart';
-import '../features/orders/ui/widgets/orders_screen.dart';
-import '../features/preferences/ui/widgets/preferences_screen.dart';
+import 'package:wyceny/features/auth/ui/widgets/recover_set_password_screen.dart';
+import 'package:wyceny/features/logs/ui/widgets/logs_screen.dart';
+import 'package:wyceny/features/orders/ui/widgets/orders_screen.dart';
+import 'package:wyceny/features/preferences/ui/widgets/preferences_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 

@@ -24,7 +24,7 @@ class _LanguageSettingTileState extends State<LanguageSettingTile> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final locales = AppLocalizations.supportedLocales;
 
     return ListenableBuilder(

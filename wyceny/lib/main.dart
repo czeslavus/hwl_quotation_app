@@ -1,12 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wyceny/app/locale_controller.dart';
-import 'app/auth.dart';
-import 'app/di/locator.dart';
+import 'package:wyceny/app/auth.dart';
+import 'package:wyceny/app/di/locator.dart';
 
-import 'l10n/app_localizations.dart';
+import 'package:wyceny/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +45,7 @@ class MyApp extends StatelessWidget {
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             title: 'HWL Quotation App',
-            onGenerateTitle: (ctx) => AppLocalizations.of(ctx)!.appTitle,
+            onGenerateTitle: (ctx) => AppLocalizations.of(ctx).appTitle,
             theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
             routerConfig: router,
           );

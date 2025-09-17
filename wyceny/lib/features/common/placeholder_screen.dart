@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screen_frame.dart';
+import 'package:wyceny/features/common/screen_frame.dart';
 
 class PlaceholderScreen extends StatelessWidget {
   final String title;

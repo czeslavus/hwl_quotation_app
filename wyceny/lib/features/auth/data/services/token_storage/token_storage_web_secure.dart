@@ -8,7 +8,7 @@ import 'dart:js_interop';             // toJS / toDart + JS* typy
 import 'dart:js_util' as jsu;         // jsify, promiseToFuture
 import 'package:web/web.dart' as web; // Web APIs
 
-import '../token_storage.dart';
+import 'package:wyceny/features/auth/data/services/token_storage.dart';
 
 TokenStorage createPlatformTokenStorage() => SecureWebTokenStorage();
 

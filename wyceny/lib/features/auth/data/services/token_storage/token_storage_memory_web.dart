@@ -1,4 +1,4 @@
-import '../token_storage.dart';
+import 'package:wyceny/features/auth/data/services/token_storage.dart';
 
 TokenStorage createPlatformTokenStorage() => MemoryWebTokenStorage();
 

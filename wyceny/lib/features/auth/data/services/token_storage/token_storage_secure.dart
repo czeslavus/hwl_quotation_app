@@ -1,5 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../token_storage.dart';
+import 'package:wyceny/features/auth/data/services/token_storage.dart';
 
 
 TokenStorage createPlatformTokenStorage() => SecureTokenStorage();

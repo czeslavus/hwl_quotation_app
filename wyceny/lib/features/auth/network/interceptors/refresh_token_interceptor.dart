@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:wyceny/features/auth/data/services/token_storage.dart';
-import '../auth_rules.dart';
+import 'package:wyceny/features/auth/network/auth_rules.dart';
 
 typedef RefreshFn = Future<String?> Function(String? refreshToken);
 
