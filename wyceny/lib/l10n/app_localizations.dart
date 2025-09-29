@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No items} =1{1 item} other{{count} items}}'**
   String itemsCount(num count);
 
+  /// No description provided for @common_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get common_retry;
+
   /// No description provided for @app_companyName.
   ///
   /// In en, this message translates to:
@@ -367,6 +373,420 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System language'**
   String get settings_lang_system;
+
+  /// No description provided for @quotation_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculator'**
+  String get quotation_title;
+
+  /// No description provided for @announcement_line.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements / info about public holidays / restrictions'**
+  String get announcement_line;
+
+  /// No description provided for @overdue_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue payments information'**
+  String get overdue_info;
+
+  /// No description provided for @topbar_logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get topbar_logout;
+
+  /// Top bar title with customer and contractor
+  ///
+  /// In en, this message translates to:
+  /// **'{name} — {contractor}'**
+  String topbar_customer(Object contractor, Object name);
+
+  /// No description provided for @gen_quote_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Quotation number'**
+  String get gen_quote_number;
+
+  /// No description provided for @gen_origin_country.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin country'**
+  String get gen_origin_country;
+
+  /// No description provided for @gen_origin_zip.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin ZIP code'**
+  String get gen_origin_zip;
+
+  /// No description provided for @gen_dest_country.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination country'**
+  String get gen_dest_country;
+
+  /// No description provided for @gen_dest_zip.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination ZIP code'**
+  String get gen_dest_zip;
+
+  /// No description provided for @items_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Order items'**
+  String get items_section;
+
+  /// No description provided for @item_qty.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity (pcs)'**
+  String get item_qty;
+
+  /// No description provided for @item_len_cm.
+  ///
+  /// In en, this message translates to:
+  /// **'Length (cm)'**
+  String get item_len_cm;
+
+  /// No description provided for @item_wid_cm.
+  ///
+  /// In en, this message translates to:
+  /// **'Width (cm)'**
+  String get item_wid_cm;
+
+  /// No description provided for @item_hei_cm.
+  ///
+  /// In en, this message translates to:
+  /// **'Height (cm)'**
+  String get item_hei_cm;
+
+  /// No description provided for @item_w_unit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit weight (kg)'**
+  String get item_w_unit;
+
+  /// No description provided for @item_pack_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Package type'**
+  String get item_pack_type;
+
+  /// No description provided for @item_dangerous.
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous goods (ADR)'**
+  String get item_dangerous;
+
+  /// No description provided for @item_delete_tt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove item'**
+  String get item_delete_tt;
+
+  /// No description provided for @add_item.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get add_item;
+
+  /// No description provided for @extra_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional services'**
+  String get extra_section;
+
+  /// No description provided for @extra_pre_advice.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-advice'**
+  String get extra_pre_advice;
+
+  /// No description provided for @extra_insurance_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Goods value for insurance (PLN)'**
+  String get extra_insurance_value;
+
+  /// No description provided for @pricing_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing panel'**
+  String get pricing_section;
+
+  /// No description provided for @fee_baf.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel surcharge (BAF)'**
+  String get fee_baf;
+
+  /// No description provided for @fee_myt.
+  ///
+  /// In en, this message translates to:
+  /// **'Road toll (MYT)'**
+  String get fee_myt;
+
+  /// No description provided for @fee_infl.
+  ///
+  /// In en, this message translates to:
+  /// **'Inflation adj.'**
+  String get fee_infl;
+
+  /// No description provided for @fee_recalc_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Chargeable weight (kg)'**
+  String get fee_recalc_weight;
+
+  /// No description provided for @fee_freight.
+  ///
+  /// In en, this message translates to:
+  /// **'Freight price'**
+  String get fee_freight;
+
+  /// No description provided for @fee_all_in.
+  ///
+  /// In en, this message translates to:
+  /// **'All-in price'**
+  String get fee_all_in;
+
+  /// No description provided for @fee_insurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get fee_insurance;
+
+  /// No description provided for @fee_adr.
+  ///
+  /// In en, this message translates to:
+  /// **'ADR'**
+  String get fee_adr;
+
+  /// No description provided for @fee_service.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get fee_service;
+
+  /// No description provided for @fee_pre_advice.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-advice'**
+  String get fee_pre_advice;
+
+  /// No description provided for @fee_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get fee_total;
+
+  /// No description provided for @action_quote.
+  ///
+  /// In en, this message translates to:
+  /// **'QUOTE'**
+  String get action_quote;
+
+  /// No description provided for @action_submit.
+  ///
+  /// In en, this message translates to:
+  /// **'APPROVE & SEND ORDER'**
+  String get action_submit;
+
+  /// No description provided for @action_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'CLEAR'**
+  String get action_clear;
+
+  /// No description provided for @action_reject.
+  ///
+  /// In en, this message translates to:
+  /// **'REJECT'**
+  String get action_reject;
+
+  /// No description provided for @map_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'MAP (independent widget)'**
+  String get map_placeholder;
+
+  /// No description provided for @map_icon_tt.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get map_icon_tt;
+
+  /// No description provided for @quotations_title.
+  ///
+  /// In en, this message translates to:
+  /// **'International quotations'**
+  String get quotations_title;
+
+  /// No description provided for @filter_date_from.
+  ///
+  /// In en, this message translates to:
+  /// **'Date from'**
+  String get filter_date_from;
+
+  /// No description provided for @filter_date_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Date to'**
+  String get filter_date_to;
+
+  /// No description provided for @filter_apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply filters'**
+  String get filter_apply;
+
+  /// No description provided for @filter_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get filter_clear;
+
+  /// No description provided for @list_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No quotations found.'**
+  String get list_empty;
+
+  /// No description provided for @error_generic.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {msg}'**
+  String error_generic(Object msg);
+
+  /// No description provided for @col_qnr.
+  ///
+  /// In en, this message translates to:
+  /// **'Quotation no.'**
+  String get col_qnr;
+
+  /// No description provided for @col_order_nr.
+  ///
+  /// In en, this message translates to:
+  /// **'Order no.'**
+  String get col_order_nr;
+
+  /// No description provided for @col_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get col_status;
+
+  /// No description provided for @col_created.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get col_created;
+
+  /// No description provided for @col_valid_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid to'**
+  String get col_valid_to;
+
+  /// No description provided for @col_decision_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted/Rejected'**
+  String get col_decision_date;
+
+  /// No description provided for @col_origin_country.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin country'**
+  String get col_origin_country;
+
+  /// No description provided for @col_origin_zip.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin ZIP'**
+  String get col_origin_zip;
+
+  /// No description provided for @col_dest_country.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination country'**
+  String get col_dest_country;
+
+  /// No description provided for @col_dest_zip.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination ZIP'**
+  String get col_dest_zip;
+
+  /// No description provided for @col_mp_sum.
+  ///
+  /// In en, this message translates to:
+  /// **'MP (sum)'**
+  String get col_mp_sum;
+
+  /// No description provided for @col_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get col_weight;
+
+  /// No description provided for @col_price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get col_price;
+
+  /// No description provided for @col_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get col_actions;
+
+  /// No description provided for @action_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get action_edit;
+
+  /// No description provided for @action_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get action_copy;
+
+  /// No description provided for @reason_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get reason_optional;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @pagination_page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {p}'**
+  String pagination_page(Object p);
+
+  /// No description provided for @pagination_page_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows per page'**
+  String get pagination_page_size;
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:wyceny/features/auth/ui/widgets/login_screen.dart';
+import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotations_screen.dart';
 import 'package:wyceny/features/splash/ui/widgets/splash_screen.dart';
 import 'package:wyceny/app/app_scaffold.dart';
@@ -61,22 +64,15 @@ GoRouter buildRouter(AuthState auth) {
               GoRoute(
                 path: '/quote',
                 name: 'quote',
-                pageBuilder: (context, state) =>
-                const NoTransitionPage(child: QuotationsScreen()),
-//                 routes: [
-//                   GoRoute(
-//                     path: 'stops/:id',
-//                     builder: (context, state) {
-//                       final id = state.pathParameters['id'];
-//                       return Provider<DistRideStopsViewModel>(
-//                           create: (_)=>getIt<DistRideStopsViewModel>(param1:id),
-//                           dispose: (_, vm) => vm.dispose(),
-//                           child: DistRideStopsScreen(),
-//                       );
-// //                      return DistRideStopsScreen(id);
-//                     },
-//                   ),
-//                 ],
+                pageBuilder: (context, state) {
+                  return MaterialPage(
+                    key: state.pageKey,
+                    child: ChangeNotifierProvider(
+                      create: (_) => getIt<QuotationViewModel>()..init(),
+                      child: const QuotationScreen(),
+                    ),
+                  );
+                }
               ),
             ],
           ),

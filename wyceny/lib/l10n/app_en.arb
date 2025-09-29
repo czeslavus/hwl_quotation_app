@@ -8,6 +8,7 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "itemsCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
+  "common_retry": "Retry",
 
   "app_companyName": "Hellmann Worldwide Logistics",
   "nav_quote": "Quote",
@@ -56,5 +57,88 @@
   "login_unknown": "An unexpected error occurred.",
 
   "settings_language": "App language",
-  "settings_lang_system": "System language"
+  "settings_lang_system": "System language",
+
+    "quotation_title": "Calculator",
+    "announcement_line": "Announcements / info about public holidays / restrictions",
+    "overdue_info": "Overdue payments information",
+    "topbar_logout": "Log out",
+    "topbar_customer": "{name} — {contractor}",
+    "@topbar_customer": {
+      "description": "Top bar title with customer and contractor"
+    },
+
+  "gen_quote_number": "Quotation number",
+  "gen_origin_country": "Origin country",
+  "gen_origin_zip": "Origin ZIP code",
+  "gen_dest_country": "Destination country",
+  "gen_dest_zip": "Destination ZIP code",
+
+  "items_section": "Order items",
+  "item_qty": "Quantity (pcs)",
+  "item_len_cm": "Length (cm)",
+  "item_wid_cm": "Width (cm)",
+  "item_hei_cm": "Height (cm)",
+  "item_w_unit": "Unit weight (kg)",
+  "item_pack_type": "Package type",
+  "item_dangerous": "Dangerous goods (ADR)",
+  "item_delete_tt": "Remove item",
+  "add_item": "Add item",
+
+  "extra_section": "Additional services",
+  "extra_pre_advice": "Pre-advice",
+  "extra_insurance_value": "Goods value for insurance (PLN)",
+
+  "pricing_section": "Pricing panel",
+  "fee_baf": "Fuel surcharge (BAF)",
+  "fee_myt": "Road toll (MYT)",
+  "fee_infl": "Inflation adj.",
+  "fee_recalc_weight": "Chargeable weight (kg)",
+  "fee_freight": "Freight price",
+  "fee_all_in": "All-in price",
+  "fee_insurance": "Insurance",
+  "fee_adr": "ADR",
+  "fee_service": "Service",
+  "fee_pre_advice": "Pre-advice",
+  "fee_total": "Total",
+
+  "action_quote": "QUOTE",
+  "action_submit": "APPROVE & SEND ORDER",
+  "action_clear": "CLEAR",
+  "action_reject": "REJECT",
+
+  "map_placeholder": "MAP (independent widget)",
+  "map_icon_tt": "Map",
+
+  "quotations_title": "International quotations",
+  "filter_date_from": "Date from",
+  "filter_date_to": "Date to",
+  "filter_apply": "Apply filters",
+  "filter_clear": "Clear",
+  "list_empty": "No quotations found.",
+  "error_generic": "Error: {msg}",
+  "@error_generic": {"placeholders": {"msg": {}}},
+  "col_qnr": "Quotation no.",
+  "col_order_nr": "Order no.",
+  "col_status": "Status",
+  "col_created": "Created",
+  "col_valid_to": "Valid to",
+  "col_decision_date": "Accepted/Rejected",
+  "col_origin_country": "Origin country",
+  "col_origin_zip": "Origin ZIP",
+  "col_dest_country": "Destination country",
+  "col_dest_zip": "Destination ZIP",
+  "col_mp_sum": "MP (sum)",
+  "col_weight": "Weight",
+  "col_price": "Price",
+  "col_actions": "Actions",
+  "action_edit": "Edit",
+  "action_copy": "Copy",
+  "reason_optional": "Reason (optional)",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "pagination_page": "Page {p}",
+  "@pagination_page": {"placeholders": {"p": {}}},
+  "pagination_page_size": "Rows per page"
+
 }

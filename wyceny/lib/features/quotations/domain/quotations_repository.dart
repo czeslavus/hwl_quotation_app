@@ -6,7 +6,14 @@ import 'package:wyceny/features/quotations/domain/models/reject_model.dart';
 
 abstract class QuotationsRepository {
   Future<Quotation> getQuotation(int id);
-  Future<List<Quotation>> getArchive({int page = 1, int pageSize = 10});
+  Future<List<Quotation>> getArchive({
+    int page = 1,
+    int pageSize = 10,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    int? originCountryId,
+    int? destCountryId
+  });
   Future<Quotation> create(QuotationPostModel model);
   Future<Quotation> update(QuotationPostModel model);
 

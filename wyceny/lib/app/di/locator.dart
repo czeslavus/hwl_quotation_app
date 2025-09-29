@@ -25,6 +25,9 @@ import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmode
 import 'package:wyceny/features/auth/data/services/token_storage/token_storage_secure.dart'
 //    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
     if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_web_secure.dart';
+import 'package:wyceny/features/quotations/data/quotation_repository_mock.dart';
+import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
+import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 
 final getIt = GetIt.instance;
 
@@ -90,7 +93,7 @@ Future<void> setupDI() async {
 
   getIt.registerLazySingleton<GoRouter>(() => buildRouter(getIt<AuthState>()));
 
-  // getIt.registerLazySingleton<ApiService>(() => ApiServiceImpl(getIt<Dio>(), getIt<OutboxRepository>()));
+  getIt.registerLazySingleton<QuotationsRepository>(() => MockQuotationsRepository());
 
 
   // if (USE_MOCK_API) {
@@ -114,6 +117,8 @@ Future<void> setupDI() async {
   getIt.registerFactory<LoginViewModel>(
     () => LoginViewModel(getIt<AuthState>()),
   );
+
+  getIt.registerFactory<QuotationViewModel>(() => QuotationViewModel());
 
   await getIt.allReady();
 }

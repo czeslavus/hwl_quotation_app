@@ -8,6 +8,10 @@ class AuthState extends ChangeNotifier {
 
   String get user => _service.user;
 
+  String get contractorName => "Nazwa z SL";
+  String get forename => "Jan";
+  String get surname => "Kowalski";
+
   AuthState({
     required AuthService service,
   })  : _service = service;

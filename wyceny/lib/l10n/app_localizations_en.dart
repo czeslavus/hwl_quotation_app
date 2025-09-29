@@ -32,6 +32,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get common_retry => 'Retry';
+
+  @override
   String get app_companyName => 'Hellmann Worldwide Logistics';
 
   @override
@@ -158,4 +161,218 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_lang_system => 'System language';
+
+  @override
+  String get quotation_title => 'Calculator';
+
+  @override
+  String get announcement_line =>
+      'Announcements / info about public holidays / restrictions';
+
+  @override
+  String get overdue_info => 'Overdue payments information';
+
+  @override
+  String get topbar_logout => 'Log out';
+
+  @override
+  String topbar_customer(Object contractor, Object name) {
+    return '$name — $contractor';
+  }
+
+  @override
+  String get gen_quote_number => 'Quotation number';
+
+  @override
+  String get gen_origin_country => 'Origin country';
+
+  @override
+  String get gen_origin_zip => 'Origin ZIP code';
+
+  @override
+  String get gen_dest_country => 'Destination country';
+
+  @override
+  String get gen_dest_zip => 'Destination ZIP code';
+
+  @override
+  String get items_section => 'Order items';
+
+  @override
+  String get item_qty => 'Quantity (pcs)';
+
+  @override
+  String get item_len_cm => 'Length (cm)';
+
+  @override
+  String get item_wid_cm => 'Width (cm)';
+
+  @override
+  String get item_hei_cm => 'Height (cm)';
+
+  @override
+  String get item_w_unit => 'Unit weight (kg)';
+
+  @override
+  String get item_pack_type => 'Package type';
+
+  @override
+  String get item_dangerous => 'Dangerous goods (ADR)';
+
+  @override
+  String get item_delete_tt => 'Remove item';
+
+  @override
+  String get add_item => 'Add item';
+
+  @override
+  String get extra_section => 'Additional services';
+
+  @override
+  String get extra_pre_advice => 'Pre-advice';
+
+  @override
+  String get extra_insurance_value => 'Goods value for insurance (PLN)';
+
+  @override
+  String get pricing_section => 'Pricing panel';
+
+  @override
+  String get fee_baf => 'Fuel surcharge (BAF)';
+
+  @override
+  String get fee_myt => 'Road toll (MYT)';
+
+  @override
+  String get fee_infl => 'Inflation adj.';
+
+  @override
+  String get fee_recalc_weight => 'Chargeable weight (kg)';
+
+  @override
+  String get fee_freight => 'Freight price';
+
+  @override
+  String get fee_all_in => 'All-in price';
+
+  @override
+  String get fee_insurance => 'Insurance';
+
+  @override
+  String get fee_adr => 'ADR';
+
+  @override
+  String get fee_service => 'Service';
+
+  @override
+  String get fee_pre_advice => 'Pre-advice';
+
+  @override
+  String get fee_total => 'Total';
+
+  @override
+  String get action_quote => 'QUOTE';
+
+  @override
+  String get action_submit => 'APPROVE & SEND ORDER';
+
+  @override
+  String get action_clear => 'CLEAR';
+
+  @override
+  String get action_reject => 'REJECT';
+
+  @override
+  String get map_placeholder => 'MAP (independent widget)';
+
+  @override
+  String get map_icon_tt => 'Map';
+
+  @override
+  String get quotations_title => 'International quotations';
+
+  @override
+  String get filter_date_from => 'Date from';
+
+  @override
+  String get filter_date_to => 'Date to';
+
+  @override
+  String get filter_apply => 'Apply filters';
+
+  @override
+  String get filter_clear => 'Clear';
+
+  @override
+  String get list_empty => 'No quotations found.';
+
+  @override
+  String error_generic(Object msg) {
+    return 'Error: $msg';
+  }
+
+  @override
+  String get col_qnr => 'Quotation no.';
+
+  @override
+  String get col_order_nr => 'Order no.';
+
+  @override
+  String get col_status => 'Status';
+
+  @override
+  String get col_created => 'Created';
+
+  @override
+  String get col_valid_to => 'Valid to';
+
+  @override
+  String get col_decision_date => 'Accepted/Rejected';
+
+  @override
+  String get col_origin_country => 'Origin country';
+
+  @override
+  String get col_origin_zip => 'Origin ZIP';
+
+  @override
+  String get col_dest_country => 'Destination country';
+
+  @override
+  String get col_dest_zip => 'Destination ZIP';
+
+  @override
+  String get col_mp_sum => 'MP (sum)';
+
+  @override
+  String get col_weight => 'Weight';
+
+  @override
+  String get col_price => 'Price';
+
+  @override
+  String get col_actions => 'Actions';
+
+  @override
+  String get action_edit => 'Edit';
+
+  @override
+  String get action_copy => 'Copy';
+
+  @override
+  String get reason_optional => 'Reason (optional)';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String pagination_page(Object p) {
+    return 'Page $p';
+  }
+
+  @override
+  String get pagination_page_size => 'Rows per page';
 }

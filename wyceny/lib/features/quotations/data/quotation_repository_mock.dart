@@ -54,7 +54,14 @@ class MockQuotationsRepository implements QuotationsRepository {
   }
 
   @override
-  Future<List<Quotation>> getArchive({int page = 1, int pageSize = 10}) async {
+  Future<List<Quotation>> getArchive({
+    int page = 1,
+    int pageSize = 10,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    int? originCountryId,
+    int? destCountryId
+  }) async {
     final start = (page - 1) * pageSize;
     return _archive.skip(start).take(pageSize).toList();
   }
@@ -224,7 +231,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       status: 4, // Rejected
       quotationItems: p.quotationItems,
       shippingPrice: p.shippingPrice,
-      comments: 'Rejected: ${model.rejectCause}',
+      comments: 'Rejected: ${model.reason}',
     );
     _byId[p.id!] = rejected;
     final idx = _archive.indexWhere((x) => x.id == p.id);

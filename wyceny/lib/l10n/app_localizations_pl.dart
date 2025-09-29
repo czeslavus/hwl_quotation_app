@@ -32,6 +32,9 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get common_retry => 'Ponów';
+
+  @override
   String get app_companyName => 'Hellmann Worldwide Logistics';
 
   @override
@@ -158,4 +161,218 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get settings_lang_system => 'Język systemowy';
+
+  @override
+  String get quotation_title => 'Kalkulator';
+
+  @override
+  String get announcement_line =>
+      'Ogłoszenia / informacje o świętach / ograniczeniach';
+
+  @override
+  String get overdue_info => 'Informacje o zaległych płatnościach';
+
+  @override
+  String get topbar_logout => 'Wyloguj';
+
+  @override
+  String topbar_customer(Object contractor, Object name) {
+    return '$name — $contractor';
+  }
+
+  @override
+  String get gen_quote_number => 'Nr wyceny';
+
+  @override
+  String get gen_origin_country => 'Kraj nadania';
+
+  @override
+  String get gen_origin_zip => 'Kod pocztowy nadania';
+
+  @override
+  String get gen_dest_country => 'Kraj dostawy';
+
+  @override
+  String get gen_dest_zip => 'Kod pocztowy dostawy';
+
+  @override
+  String get items_section => 'Pozycje zamówienia';
+
+  @override
+  String get item_qty => 'Ilość (szt.)';
+
+  @override
+  String get item_len_cm => 'Długość (cm)';
+
+  @override
+  String get item_wid_cm => 'Szerokość (cm)';
+
+  @override
+  String get item_hei_cm => 'Wysokość (cm)';
+
+  @override
+  String get item_w_unit => 'Waga 1 opak. (kg)';
+
+  @override
+  String get item_pack_type => 'Typ opakowania';
+
+  @override
+  String get item_dangerous => 'Towar niebezpieczny (ADR)';
+
+  @override
+  String get item_delete_tt => 'Usuń pozycję';
+
+  @override
+  String get add_item => 'Dodaj pozycję';
+
+  @override
+  String get extra_section => 'Usługi dodatkowe';
+
+  @override
+  String get extra_pre_advice => 'Awizacja';
+
+  @override
+  String get extra_insurance_value => 'Wartość towaru do ubezpieczenia (PLN)';
+
+  @override
+  String get pricing_section => 'Panel wyceny';
+
+  @override
+  String get fee_baf => 'Opłata paliwowa BAF';
+
+  @override
+  String get fee_myt => 'Opłata drogowa MYT';
+
+  @override
+  String get fee_infl => 'Korekta infl.';
+
+  @override
+  String get fee_recalc_weight => 'Waga przeliczeniowa (kg)';
+
+  @override
+  String get fee_freight => 'Cena fracht';
+
+  @override
+  String get fee_all_in => 'Cena all-in';
+
+  @override
+  String get fee_insurance => 'Ubezpieczenie';
+
+  @override
+  String get fee_adr => 'ADR';
+
+  @override
+  String get fee_service => 'Serwis';
+
+  @override
+  String get fee_pre_advice => 'Awizacja';
+
+  @override
+  String get fee_total => 'Suma';
+
+  @override
+  String get action_quote => 'WYCENA';
+
+  @override
+  String get action_submit => 'ZATWIERDŹ I PRZEŚLIJ ZLECENIE';
+
+  @override
+  String get action_clear => 'WYCZYŚĆ DANE';
+
+  @override
+  String get action_reject => 'ODRZUĆ';
+
+  @override
+  String get map_placeholder => 'MAPA (widget niezależny)';
+
+  @override
+  String get map_icon_tt => 'Mapa';
+
+  @override
+  String get quotations_title => 'Wyceny międzynarodowe';
+
+  @override
+  String get filter_date_from => 'Data od';
+
+  @override
+  String get filter_date_to => 'Data do';
+
+  @override
+  String get filter_apply => 'Zastosuj filtry';
+
+  @override
+  String get filter_clear => 'Wyczyść';
+
+  @override
+  String get list_empty => 'Brak wycen do wyświetlenia.';
+
+  @override
+  String error_generic(Object msg) {
+    return 'Błąd: $msg';
+  }
+
+  @override
+  String get col_qnr => 'Numer wyceny';
+
+  @override
+  String get col_order_nr => 'Numer zlecenia';
+
+  @override
+  String get col_status => 'Status';
+
+  @override
+  String get col_created => 'Data wyceny';
+
+  @override
+  String get col_valid_to => 'Data ważności';
+
+  @override
+  String get col_decision_date => 'Data akcept./odrzuc.';
+
+  @override
+  String get col_origin_country => 'Kraj nadania';
+
+  @override
+  String get col_origin_zip => 'Kod nadania';
+
+  @override
+  String get col_dest_country => 'Kraj dostawy';
+
+  @override
+  String get col_dest_zip => 'Kod dostawy';
+
+  @override
+  String get col_mp_sum => 'MP (suma)';
+
+  @override
+  String get col_weight => 'Waga';
+
+  @override
+  String get col_price => 'Cena';
+
+  @override
+  String get col_actions => 'Akcje';
+
+  @override
+  String get action_edit => 'Edytuj';
+
+  @override
+  String get action_copy => 'Kopiuj';
+
+  @override
+  String get reason_optional => 'Powód (opcjonalnie)';
+
+  @override
+  String get cancel => 'Anuluj';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String pagination_page(Object p) {
+    return 'Strona $p';
+  }
+
+  @override
+  String get pagination_page_size => 'Wierszy na stronę';
 }
