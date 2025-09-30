@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/features/auth/ui/widgets/login_screen.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotations_list_screen.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotations_screen.dart';
 import 'package:wyceny/features/splash/ui/widgets/splash_screen.dart';
 import 'package:wyceny/app/app_scaffold.dart';
@@ -69,10 +70,21 @@ GoRouter buildRouter(AuthState auth) {
                     key: state.pageKey,
                     child: ChangeNotifierProvider(
                       create: (_) => getIt<QuotationViewModel>()..init(),
-                      child: const QuotationScreen(),
+                      child: const QuotationsListScreen(),
                     ),
                   );
-                }
+                },
+                routes: [
+                  GoRoute(
+                    path: ':quotationId',
+                    builder: (context, state) {
+                    final quotationId = state.pathParameters['quotationId']!;
+                    return ChangeNotifierProvider(
+                      create: (_) => getIt<QuotationViewModel>()..init(),
+                      child: const QuotationScreen(),
+                    );
+                  },),
+                ],
               ),
             ],
           ),

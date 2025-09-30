@@ -360,6 +360,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get action_copy => 'Kopiuj';
 
   @override
+  String get action_new_quotation => 'Nowa wycena';
+
+  @override
   String get reason_optional => 'Powód (opcjonalnie)';
 
   @override

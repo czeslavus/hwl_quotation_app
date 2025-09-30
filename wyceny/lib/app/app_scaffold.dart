@@ -85,52 +85,45 @@ class _AppScaffoldState extends State<AppScaffold> {
     if (isWide) {
       final t = AppLocalizations.of(context);
 
-      final rail = NavigationRail(
-        selectedIndex: index,
-        onDestinationSelected: _onTap,
-        labelType: NavigationRailLabelType.all,
-        // bez leading/trailing – kontrolujemy layout sami
-        destinations: railDestinations,
+      final rail = Theme(
+        data: Theme.of(context).copyWith(
+          navigationRailTheme: NavigationRailThemeData(
+            backgroundColor: Colors.indigo,
+            indicatorColor: Colors.white70, // highlight pod wybranym
+            selectedIconTheme: const IconThemeData(color: Colors.black),
+            unselectedIconTheme: const IconThemeData(color: Colors.white),
+            selectedLabelTextStyle: const TextStyle(color: Colors.white),
+            unselectedLabelTextStyle: const TextStyle(color: Colors.white),
+          ),
+        ),
+        child: NavigationRail(
+          selectedIndex: index,
+          onDestinationSelected: _onTap,
+          labelType: NavigationRailLabelType.all,
+          destinations: railDestinations,
+        ),
       );
 
       return Scaffold(
-        // appBar: AppBar(
-        //   title: Text(
-        //     _titleFor(context, index),
-        //     style: const TextStyle(fontWeight: FontWeight.bold),
-        //     overflow: TextOverflow.ellipsis,
-        //   ),
-        //   actions: [
-        //     _UserMenu(
-        //       onOpenSettings: () => widget.shell.goBranch(5, initialLocation: false),
-        //       onLogoutDone: () { if (context.mounted) context.go('/login'); },
-        //     ),
-        //   ],
-        // ),
         body: Row(
           children: [
-            // Własny sidebar z logo u góry, rail pośrodku i akcjami przy dolnej krawędzi
             Container(
-              // koloru tła możesz nie potrzebować; zostawiam dla pewności
-              color: Theme.of(context).colorScheme.surface,
+              // teraz tło raila jest indigo
+              color: Colors.indigo,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 80), // dopasuj do stylu
+                constraints: const BoxConstraints(minWidth: 80),
                 child: Column(
                   children: [
-                    // LOGO u góry
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10.0),
                       child: Image.asset(
-                        'assets/hellmannblue.png',
+                        'assets/hellmann256.png',
                         height: 64,
                         fit: BoxFit.contain,
                         semanticLabel: t.app_companyName,
                       ),
                     ),
-                    // RAIL wypełnia dostępną wysokość
                     Expanded(child: rail),
-
-                    // AKCJE przy samej dolnej krawędzi ekranu
                     SafeArea(
                       top: false,
                       minimum: const EdgeInsets.only(bottom: 8),
@@ -147,7 +140,6 @@ class _AppScaffoldState extends State<AppScaffold> {
                 ),
               ),
             ),
-
             const VerticalDivider(width: 1),
             Expanded(child: content),
           ],
@@ -239,17 +231,19 @@ class _UserMenu extends StatelessWidget {
 
 class _LogoutButton extends StatelessWidget {
   const _LogoutButton();
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final auth = AuthScope.of(context);
+
     return IconButton(
       tooltip: t.menu_logout,
       onPressed: () async {
         await auth.logout();
         if (context.mounted) context.go('/login');
       },
-      icon: const Icon(Icons.logout),
+      icon: const Icon(Icons.logout, color: Colors.white),
     );
   }
 }

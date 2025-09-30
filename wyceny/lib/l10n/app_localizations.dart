@@ -758,6 +758,12 @@ abstract class AppLocalizations {
   /// **'Copy'**
   String get action_copy;
 
+  /// No description provided for @action_new_quotation.
+  ///
+  /// In en, this message translates to:
+  /// **'New quotation'**
+  String get action_new_quotation;
+
   /// No description provided for @reason_optional.
   ///
   /// In en, this message translates to:

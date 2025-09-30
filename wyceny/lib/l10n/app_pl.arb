@@ -127,6 +127,7 @@
   "col_actions": "Akcje",
   "action_edit": "Edytuj",
   "action_copy": "Kopiuj",
+  "action_new_quotation": "Nowa wycena",
   "reason_optional": "Powód (opcjonalnie)",
   "cancel": "Anuluj",
   "ok": "OK",

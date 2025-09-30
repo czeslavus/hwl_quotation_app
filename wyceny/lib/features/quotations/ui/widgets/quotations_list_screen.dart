@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/common/top_bar_appbar.dart';
+import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotations_list_viewmodel.dart';
@@ -33,6 +35,7 @@ class _QuotationsListView extends StatelessWidget {
         onLogout: () {/* TODO: logout */},
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Nagłówek + informacje
           Padding(
@@ -49,8 +52,20 @@ class _QuotationsListView extends StatelessWidget {
           // Filtry
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: _FiltersBar(vm: vm),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // LEWA: filtry (Wrap)
+                Expanded(child: _FiltersLeft(vm: vm)),
+                const SizedBox(width: 12),
+                // PRAWA: zielony przycisk "Nowa wycena"
+                _NewQuotationButton(onPressed: () {
+                  context.push('/quote/new');
+                }),
+              ],
+            ),
           ),
+
           const Divider(height: 1),
 
           // Lista
@@ -199,6 +214,112 @@ class _FiltersBarState extends State<_FiltersBar> {
   }
 }
 
+class _NewQuotationButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _NewQuotationButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    return FilledButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(Icons.add),
+      label: Text(t.action_new_quotation),
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all(Colors.green), // zielony
+        foregroundColor: WidgetStateProperty.all(Colors.white),
+      ),
+    );
+  }
+}
+
+class _FiltersLeft extends StatefulWidget {
+  final QuotationsListViewModel vm;
+  const _FiltersLeft({required this.vm});
+  @override
+  State<_FiltersLeft> createState() => _FiltersLeftState();
+}
+
+class _FiltersLeftState extends State<_FiltersLeft> {
+  DateTime? _from;
+  DateTime? _to;
+
+  @override
+  void initState() {
+    super.initState();
+    _from = widget.vm.dateFrom;
+    _to = widget.vm.dateTo;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final vm = widget.vm;
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Row(mainAxisSize: MainAxisSize.min, children: [
+          _dateField(context: context, label: t.filter_date_from, value: _from, onPick: (d) => setState(() => _from = d)),
+          const SizedBox(width: 8),
+          _dateField(context: context, label: t.filter_date_to, value: _to, onPick: (d) => setState(() => _to = d)),
+        ]),
+        SizedBox(
+          width: 240,
+          child: DropdownButtonFormField<int>(
+            isExpanded: true,
+            value: vm.originCountryId,
+            decoration: InputDecoration(labelText: t.gen_origin_country),
+            items: vm.countries.map((c) => DropdownMenuItem(
+              value: c.id, child: Text(CountryLocalizer.localize(c.country, context)),
+            )).toList(),
+            onChanged: (id) => setState(() => vm.originCountryId = id),
+          ),
+        ),
+        SizedBox(
+          width: 240,
+          child: DropdownButtonFormField<int>(
+            isExpanded: true,
+            value: vm.destCountryId,
+            decoration: InputDecoration(labelText: t.gen_dest_country),
+            items: vm.countries.map((c) => DropdownMenuItem(
+              value: c.id, child: Text(CountryLocalizer.localize(c.country, context)),
+            )).toList(),
+            onChanged: (id) => setState(() => vm.destCountryId = id),
+          ),
+        ),
+        FilledButton.icon(
+          onPressed: () => vm.applyFilters(from: _from, to: _to, originId: vm.originCountryId, destId: vm.destCountryId),
+          icon: const Icon(Icons.filter_alt),
+          label: Text(t.filter_apply),
+        ),
+        TextButton(onPressed: () { setState(() { _from = null; _to = null; }); vm.applyFilters(from: null, to: null, originId: null, destId: null); },
+          child: Text(t.filter_clear),
+        ),
+      ],
+    );
+  }
+
+  Widget _dateField({required BuildContext context, required String label, required DateTime? value, required ValueChanged<DateTime?> onPick}) {
+    return SizedBox(
+      width: 190,
+      child: InkWell(
+        onTap: () async {
+          final now = DateTime.now();
+          final picked = await showDatePicker(context: context, initialDate: value ?? now, firstDate: DateTime(now.year - 2), lastDate: DateTime(now.year + 1));
+          onPick(picked);
+        },
+        child: InputDecorator(
+          decoration: InputDecoration(labelText: label),
+          child: Text(value != null ? "${value.toLocal()}".split(' ')[0] : "—"),
+        ),
+      ),
+    );
+  }
+}
+
 class _QuotationsTable extends StatelessWidget {
   final QuotationsListViewModel vm;
   const _QuotationsTable({required this.vm});
@@ -207,50 +328,119 @@ class _QuotationsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
 
+    const double kMinTableWidth = 1400;
+
+    Widget _h(String s, {double? w}) =>
+        SizedBox(width: w, child: Text(s, overflow: TextOverflow.ellipsis));
+    Widget _c(Widget w, {double? width}) =>
+        width == null ? w : SizedBox(width: width, child: w);
+
     return Scrollbar(
       thumbVisibility: true,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 1200),
+          constraints: const BoxConstraints(minWidth: kMinTableWidth),
           child: DataTable(
+            columnSpacing: 16,
+            headingRowHeight: 48,
+            dataRowMinHeight: 44,
+            dataRowMaxHeight: 64,
             columns: [
-              DataColumn(label: Text(t.col_qnr)),
-              DataColumn(label: Text(t.col_order_nr)),
-              DataColumn(label: Text(t.col_status)),
-              DataColumn(label: Text(t.col_created)),
-              DataColumn(label: Text(t.col_valid_to)),
-              DataColumn(label: Text(t.col_decision_date)),
-              DataColumn(label: Text(t.col_origin_country)),
-              DataColumn(label: Text(t.col_origin_zip)),
-              DataColumn(label: Text(t.col_dest_country)),
-              DataColumn(label: Text(t.col_dest_zip)),
-              DataColumn(label: Text(t.col_mp_sum)),
-              DataColumn(label: Text(t.col_weight)),
-              DataColumn(label: Text(t.col_price)),
-              DataColumn(label: Text(t.col_actions)),
+              DataColumn(label: _h(t.col_qnr,            w: 120)),
+              DataColumn(label: _h(t.col_order_nr,       w: 140)),
+              DataColumn(label: _h(t.col_status,         w: 140)),
+              DataColumn(label: _h(t.col_created,        w: 120)),
+              DataColumn(label: _h(t.col_valid_to,       w: 140)),
+              DataColumn(label: _h(t.col_decision_date,  w: 160)),
+              DataColumn(label: _h(t.col_origin_country, w: 160)),
+              DataColumn(label: _h(t.col_origin_zip,     w: 120)),
+              DataColumn(label: _h(t.col_dest_country,   w: 180)),
+              DataColumn(label: _h(t.col_dest_zip,       w: 120)),
+              DataColumn(label: _h(t.col_mp_sum,         w: 100)),
+              DataColumn(label: _h(t.col_weight,         w: 100)),
+              DataColumn(label: _h(t.col_price,          w: 120)),
+              DataColumn(label: _h(t.col_actions,        w: 220)),
             ],
-            rows: vm.items.map((q) {
+            rows: vm.items.map<DataRow>((q) {
               final mp = (q.quotationItems ?? const [])
                   .fold<double>(0.0, (s, it) => s + (it.ldm ?? 0));
-              return DataRow(cells: [
-                DataCell(Text(q.id?.toString() ?? q.guid ?? "-")),
-                DataCell(Text(q.orderNrSl ?? "—")),
-                DataCell(Text(vm.statusLabel(q.status))),
-                DataCell(Text(q.createDate?.toLocal().toString().split(' ').first ?? "—")),
-                DataCell(Text(q.ttTime ?? "—")), // brak pola 'validTo' w modelu -> używam ttTime jako placeholder
-                DataCell(Text(q.orderDateSl?.toLocal().toString().split(' ').first ?? "—")),
-                DataCell(Text(vm.localizeCountryName(q.receiptCountry, context))),
-                DataCell(Text(q.receiptZipCode)),
-                DataCell(Text(vm.localizeCountryName(q.deliveryCountry, context))),
-                DataCell(Text(q.deliveryZipCode)),
-                DataCell(Text(mp.toStringAsFixed(2))),
-                DataCell(Text((q.weightChgw ?? 0).toStringAsFixed(2))),
-                DataCell(Text((q.allIn ?? q.shippingPrice ?? 0).toStringAsFixed(2))),
-                DataCell(_RowActions(q: q, vm: vm)),
-              ]);
+
+              return DataRow(
+                cells: [
+                  DataCell(_c(Text(q.id?.toString() ?? q.guid ?? "-"),              width: 120)),
+                  DataCell(_c(Text(q.orderNrSl ?? "—"),                             width: 140)),
+                  DataCell(_c(Text(vm.statusLabel(q.status)),                       width: 140)),
+                  DataCell(_c(Text(q.createDate?.toLocal().toString().split(' ').first ?? "—"),
+                      width: 120)),
+                  DataCell(_c(Text(q.ttTime ?? "—"),                                width: 140)), // podmień na validTo jeśli masz
+                  DataCell(_c(Text(q.orderDateSl?.toLocal().toString().split(' ').first ?? "—"),
+                      width: 160)),
+                  DataCell(_c(Text(vm.localizeCountryName(q.receiptCountry, context)),
+                      width: 160)),
+                  DataCell(_c(Text(q.receiptZipCode),                               width: 120)),
+                  DataCell(_c(Text(vm.localizeCountryName(q.deliveryCountry, context)),
+                      width: 180)),
+                  DataCell(_c(Text(q.deliveryZipCode),                              width: 120)),
+                  DataCell(_c(Text(mp.toStringAsFixed(2)),                          width: 100)),
+                  DataCell(_c(Text((q.weightChgw ?? 0).toStringAsFixed(2)),         width: 100)),
+                  DataCell(_c(Text((q.allIn ?? q.shippingPrice ?? 0).toStringAsFixed(2)),
+                      width: 120)),
+                  DataCell(_ActionsCell(quotation: q, vm: vm)), // ⬅️ akcje w stałej szerokości
+                ],
+              );
             }).toList(),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionsCell extends StatelessWidget {
+  final Quotation quotation;
+  final QuotationsListViewModel vm;
+  const _ActionsCell({required this.quotation, required this.vm});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    return SizedBox(
+      width: 220, // dopasowane do szerokości kolumny "Actions"
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: t.action_submit,
+              icon: const Icon(Icons.check_circle_outline),
+              onPressed: () => vm.approve(quotation.id!),
+            ),
+            IconButton(
+              tooltip: t.action_edit,
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () {
+                // TODO: np. context.push('/quote/${quotation.id}')
+              },
+            ),
+            IconButton(
+              tooltip: t.action_copy,
+              icon: const Icon(Icons.copy_outlined),
+              onPressed: () async {
+                await vm.copy(quotation.id!);
+                // TODO: nawigacja/refresh, jeśli chcesz
+              },
+            ),
+            IconButton(
+              tooltip: t.action_reject,
+              icon: const Icon(Icons.cancel_outlined),
+              onPressed: () {
+                // TODO: dialog z powodem + vm.reject(...)
+              },
+            ),
+          ],
         ),
       ),
     );

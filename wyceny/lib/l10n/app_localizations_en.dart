@@ -360,6 +360,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get action_copy => 'Copy';
 
   @override
+  String get action_new_quotation => 'New quotation';
+
+  @override
   String get reason_optional => 'Reason (optional)';
 
   @override

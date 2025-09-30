@@ -134,6 +134,7 @@
   "col_actions": "Actions",
   "action_edit": "Edit",
   "action_copy": "Copy",
+  "action_new_quotation": "New quotation",
   "reason_optional": "Reason (optional)",
   "cancel": "Cancel",
   "ok": "OK",

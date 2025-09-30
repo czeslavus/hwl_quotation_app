@@ -21,13 +21,14 @@ import 'package:wyceny/features/auth/domain/repositories/auth_repository.dart';
 import 'package:wyceny/features/auth/data/repositories/auth_repository_impl.dart';
 
 import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmodel.dart';
+import 'package:wyceny/features/quotations/data/quotation_repository_mock.dart';
+import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
+import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
+import 'package:wyceny/features/quotations/ui/viewmodels/quotations_list_viewmodel.dart';
 
 import 'package:wyceny/features/auth/data/services/token_storage/token_storage_secure.dart'
 //    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
     if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_web_secure.dart';
-import 'package:wyceny/features/quotations/data/quotation_repository_mock.dart';
-import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
-import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 
 final getIt = GetIt.instance;
 
@@ -118,6 +119,7 @@ Future<void> setupDI() async {
     () => LoginViewModel(getIt<AuthState>()),
   );
 
+  getIt.registerFactory<QuotationsListViewModel>(() => QuotationsListViewModel(repo: getIt<QuotationsRepository>(), auth: getIt<AuthState>() ));
   getIt.registerFactory<QuotationViewModel>(() => QuotationViewModel());
 
   await getIt.allReady();
