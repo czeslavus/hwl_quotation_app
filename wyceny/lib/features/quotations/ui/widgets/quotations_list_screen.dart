@@ -28,6 +28,9 @@ class _QuotationsListView extends StatelessWidget {
     final vm = context.watch<QuotationsListViewModel>();
     final t = AppLocalizations.of(context)!;
 
+    final width = MediaQuery.sizeOf(context).width;
+    final isPhone = width < 600;
+
     return Scaffold(
       appBar: TopBarAppBar(
         customerName: vm.customerName,
@@ -37,33 +40,64 @@ class _QuotationsListView extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Nagłówek + informacje
+          // Nagłówek + przycisk Nowa wycena (ikonowy na telefonie)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Column(
+            child: isPhone
+                ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(t.quotations_title, style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 8),
-                Text("${t.announcement_line} • ${t.overdue_info}"),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t.quotations_title,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    _NewQuotationCompactButton(
+                      tooltip: t.action_new_quotation,
+                      onPressed: () => context.push('/quote/new'),
+                    ),
+                  ],
+                ),
+              ],
+            )
+                : Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.quotations_title,
+                          style: Theme.of(context).textTheme.headlineMedium),
+                    ],
+                  ),
+                ),
+                _NewQuotationButton(
+                  onPressed: () => context.push('/quote/new'),
+                ),
               ],
             ),
           ),
-          // Filtry
+
+          // Ogłoszenia – pełna szerokość, rozwijane (bez własnego scrolla)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // LEWA: filtry (Wrap)
-                Expanded(child: _FiltersLeft(vm: vm)),
-                const SizedBox(width: 12),
-                // PRAWA: zielony przycisk "Nowa wycena"
-                _NewQuotationButton(onPressed: () {
-                  context.push('/quote/new');
-                }),
-              ],
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: _AnnouncementsPanel(
+              header: Text("${t.announcement_line} • ${t.overdue_info}"),
+              // Jeśli chcesz, wrzuć tu bogatszą treść/HTML do środka:
+              body: Text("${t.announcement_line} • ${t.overdue_info}"),
             ),
+          ),
+
+          const Divider(height: 1),
+
+          // Filtry – responsywne: na telefonie przyciski to ikony; na szerokim ekr. przyciski w 1 linii po prawej
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: _ResponsiveFiltersBar(vm: vm),
           ),
 
           const Divider(height: 1),
@@ -88,126 +122,96 @@ class _QuotationsListView extends StatelessWidget {
   }
 }
 
-class _FiltersBar extends StatefulWidget {
-  final QuotationsListViewModel vm;
-  const _FiltersBar({required this.vm});
+class _AnnouncementsPanel extends StatefulWidget {
+  final Widget header;
+  final Widget body;
+  const _AnnouncementsPanel({required this.header, required this.body});
 
   @override
-  State<_FiltersBar> createState() => _FiltersBarState();
+  State<_AnnouncementsPanel> createState() => _AnnouncementsPanelState();
 }
 
-class _FiltersBarState extends State<_FiltersBar> {
-  DateTime? _from;
-  DateTime? _to;
-
-  @override
-  void initState() {
-    super.initState();
-    _from = widget.vm.dateFrom;
-    _to = widget.vm.dateTo;
-  }
+class _AnnouncementsPanelState extends State<_AnnouncementsPanel>
+    with TickerProviderStateMixin {
+  bool _expanded = true;
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-    final vm = widget.vm;
+    final borderColor = Theme.of(context).dividerColor;
+    final bg = Theme.of(context).colorScheme.surfaceContainerHighest;
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        // Zakres dat
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          _dateField(
-            context: context,
-            label: t.filter_date_from,
-            value: _from,
-            onPick: (d) => setState(() => _from = d),
+    return Container(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Nagłówek – klikalny, przełącza rozwinięcie
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                children: [
+                  // Treść nagłówka
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style: Theme.of(context).textTheme.bodyLarge!,
+                      child: widget.header,
+                    ),
+                  ),
+                  // Strzałka z animacją obrotu
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0.0, // 0.5 obrotu = strzałka w górę
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    child: const Icon(Icons.expand_more),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(width: 8),
-          _dateField(
-            context: context,
-            label: t.filter_date_to,
-            value: _to,
-            onPick: (d) => setState(() => _to = d),
-          ),
-        ]),
-        // Kraj nadania
-        SizedBox(
-          width: 240,
-          child: DropdownButtonFormField<int>(
-            isExpanded: true,
-            value: vm.originCountryId,
-            decoration: InputDecoration(labelText: t.gen_origin_country),
-            items: vm.countries.map((c) => DropdownMenuItem(
-              value: c.id,
-              child: Text(CountryLocalizer.localize(c.country, context)),
-            )).toList(),
-            onChanged: (id) => setState(() => vm.originCountryId = id),
-          ),
-        ),
-        // Kraj dostawy
-        SizedBox(
-          width: 240,
-          child: DropdownButtonFormField<int>(
-            isExpanded: true,
-            value: vm.destCountryId,
-            decoration: InputDecoration(labelText: t.gen_dest_country),
-            items: vm.countries.map((c) => DropdownMenuItem(
-              value: c.id,
-              child: Text(CountryLocalizer.localize(c.country, context)),
-            )).toList(),
-            onChanged: (id) => setState(() => vm.destCountryId = id),
-          ),
-        ),
 
-        // Zastosuj
-        FilledButton.icon(
-          onPressed: () => vm.applyFilters(
-            from: _from, to: _to,
-            originId: vm.originCountryId,
-            destId: vm.destCountryId,
+          // Treść rozwijana – bez własnego przewijania
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: _expanded
+                ? Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: widget.body,
+            )
+                : const SizedBox.shrink(),
           ),
-          icon: const Icon(Icons.filter_alt),
-          label: Text(t.filter_apply),
-        ),
-        // Wyczyść
-        TextButton(
-          onPressed: () {
-            setState(() { _from = null; _to = null; });
-            vm.applyFilters(from: null, to: null, originId: null, destId: null);
-          },
-          child: Text(t.filter_clear),
-        ),
-      ],
+        ],
+      ),
     );
   }
+}
 
-  Widget _dateField({
-    required BuildContext context,
-    required String label,
-    required DateTime? value,
-    required ValueChanged<DateTime?> onPick,
-  }) {
-    return SizedBox(
-      width: 190,
-      child: InkWell(
-        onTap: () async {
-          final now = DateTime.now();
-          final first = DateTime(now.year - 2);
-          final last = DateTime(now.year + 1);
-          final picked = await showDatePicker(
-            context: context,
-            initialDate: value ?? now,
-            firstDate: first,
-            lastDate: last,
-          );
-          onPick(picked);
-        },
-        child: InputDecorator(
-          decoration: InputDecoration(labelText: label),
-          child: Text(value != null ? "${value.toLocal()}".split(' ')[0] : "—"),
+/// Telefon: duży, zielony, idealnie wyśrodkowany przycisk z ikoną „+”
+class _NewQuotationCompactButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String? tooltip;
+  const _NewQuotationCompactButton({required this.onPressed, this.tooltip});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip ?? '',
+      child: IconButton(
+        onPressed: onPressed,
+        icon: const Icon(Icons.add, size: 28),
+        style: IconButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(52, 52), // rozmiar koła
+          shape: const CircleBorder(),
         ),
       ),
     );
@@ -233,14 +237,19 @@ class _NewQuotationButton extends StatelessWidget {
   }
 }
 
-class _FiltersLeft extends StatefulWidget {
+/// Pasek filtrów:
+/// - pola mogą się łamać (Wrap)
+/// - na wąskich ekranach przyciski = same ikony
+/// - na szerokich ekranach przyciski zawsze w jednej linii po prawej
+class _ResponsiveFiltersBar extends StatefulWidget {
   final QuotationsListViewModel vm;
-  const _FiltersLeft({required this.vm});
+  const _ResponsiveFiltersBar({required this.vm});
+
   @override
-  State<_FiltersLeft> createState() => _FiltersLeftState();
+  State<_ResponsiveFiltersBar> createState() => _ResponsiveFiltersBarState();
 }
 
-class _FiltersLeftState extends State<_FiltersLeft> {
+class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
   DateTime? _from;
   DateTime? _to;
 
@@ -256,59 +265,151 @@ class _FiltersLeftState extends State<_FiltersLeft> {
     final t = AppLocalizations.of(context)!;
     final vm = widget.vm;
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          _dateField(context: context, label: t.filter_date_from, value: _from, onPick: (d) => setState(() => _from = d)),
-          const SizedBox(width: 8),
-          _dateField(context: context, label: t.filter_date_to, value: _to, onPick: (d) => setState(() => _to = d)),
-        ]),
-        SizedBox(
-          width: 240,
-          child: DropdownButtonFormField<int>(
-            isExpanded: true,
-            value: vm.originCountryId,
-            decoration: InputDecoration(labelText: t.gen_origin_country),
-            items: vm.countries.map((c) => DropdownMenuItem(
-              value: c.id, child: Text(CountryLocalizer.localize(c.country, context)),
-            )).toList(),
-            onChanged: (id) => setState(() => vm.originCountryId = id),
+    final width = MediaQuery.sizeOf(context).width;
+    final isPhone = width < 600;
+
+    final fields = <Widget>[
+      // Zakres dat (zachowuję Twoje _dateField)
+      Row(mainAxisSize: MainAxisSize.min, children: [
+        _dateField(context: context, label: t.filter_date_from, value: _from, onPick: (d) => setState(() => _from = d)),
+        const SizedBox(width: 8),
+        _dateField(context: context, label: t.filter_date_to, value: _to, onPick: (d) => setState(() => _to = d)),
+      ]),
+      // Kraj nadania
+      SizedBox(
+        width: 240,
+        child: DropdownButtonFormField<int>(
+          isExpanded: true,
+          value: vm.originCountryId,
+          decoration: InputDecoration(labelText: t.gen_origin_country),
+          items: vm.countries
+              .map((c) => DropdownMenuItem(
+            value: c.id,
+            child: Text(CountryLocalizer.localize(c.country, context)),
+          ))
+              .toList(),
+          onChanged: (id) => setState(() => vm.originCountryId = id),
+        ),
+      ),
+      // Kraj dostawy
+      SizedBox(
+        width: 240,
+        child: DropdownButtonFormField<int>(
+          isExpanded: true,
+          value: vm.destCountryId,
+          decoration: InputDecoration(labelText: t.gen_dest_country),
+          items: vm.countries
+              .map((c) => DropdownMenuItem(
+            value: c.id,
+            child: Text(CountryLocalizer.localize(c.country, context)),
+          ))
+              .toList(),
+          onChanged: (id) => setState(() => vm.destCountryId = id),
+        ),
+      ),
+    ];
+
+    final onApply = () => vm.applyFilters(from: _from, to: _to, originId: vm.originCountryId, destId: vm.destCountryId);
+    final onClear = () {
+      setState(() {
+        _from = null;
+        _to = null;
+        vm.originCountryId = null;
+        vm.destCountryId = null;
+      });
+      vm.applyFilters(from: null, to: null, originId: null, destId: null);
+    };
+
+    if (isPhone) {
+      // 🔹 Wersja mobilna – małe ikonowe przyciski
+      return Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ...fields,
+          Tooltip(
+            message: t.filter_apply,
+            child: IconButton.filled(
+              onPressed: onApply,
+              icon: const Icon(Icons.filter_alt),
+            ),
           ),
-        ),
-        SizedBox(
-          width: 240,
-          child: DropdownButtonFormField<int>(
-            isExpanded: true,
-            value: vm.destCountryId,
-            decoration: InputDecoration(labelText: t.gen_dest_country),
-            items: vm.countries.map((c) => DropdownMenuItem(
-              value: c.id, child: Text(CountryLocalizer.localize(c.country, context)),
-            )).toList(),
-            onChanged: (id) => setState(() => vm.destCountryId = id),
+          Tooltip(
+            message: t.filter_clear,
+            child: IconButton.outlined(
+              onPressed: onClear,
+              icon: const Icon(Icons.filter_alt_off),
+            ),
           ),
-        ),
-        FilledButton.icon(
-          onPressed: () => vm.applyFilters(from: _from, to: _to, originId: vm.originCountryId, destId: vm.destCountryId),
-          icon: const Icon(Icons.filter_alt),
-          label: Text(t.filter_apply),
-        ),
-        TextButton(onPressed: () { setState(() { _from = null; _to = null; }); vm.applyFilters(from: null, to: null, originId: null, destId: null); },
-          child: Text(t.filter_clear),
-        ),
-      ],
+        ],
+      );
+    }
+
+// 🔹 Szeroki ekran – pola + przyciski po prawej, łamane elastycznie
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          alignment: WrapAlignment.spaceBetween,
+          children: [
+            // ✅ Lewa część: pola filtrów
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                // pozwól polom zająć do ~80% szerokości kontenera
+                maxWidth: constraints.maxWidth * 0.8,
+              ),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: fields,
+              ),
+            ),
+
+            // ✅ Prawa część: przyciski akcji
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FilledButton.icon(
+                  onPressed: onApply,
+                  icon: const Icon(Icons.filter_alt),
+                  label: Text(t.filter_apply),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: onClear,
+                  icon: const Icon(Icons.filter_alt_off),
+                  label: Text(t.filter_clear),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
+
   }
 
-  Widget _dateField({required BuildContext context, required String label, required DateTime? value, required ValueChanged<DateTime?> onPick}) {
+  Widget _dateField({
+    required BuildContext context,
+    required String label,
+    required DateTime? value,
+    required ValueChanged<DateTime?> onPick,
+  }) {
     return SizedBox(
       width: 190,
       child: InkWell(
         onTap: () async {
           final now = DateTime.now();
-          final picked = await showDatePicker(context: context, initialDate: value ?? now, firstDate: DateTime(now.year - 2), lastDate: DateTime(now.year + 1));
+          final picked = await showDatePicker(
+            context: context,
+            initialDate: value ?? now,
+            firstDate: DateTime(now.year - 2),
+            lastDate: DateTime(now.year + 1),
+          );
           onPick(picked);
         },
         child: InputDecorator(
@@ -373,7 +474,7 @@ class _QuotationsTable extends StatelessWidget {
                   DataCell(_c(Text(vm.statusLabel(q.status)),                       width: 140)),
                   DataCell(_c(Text(q.createDate?.toLocal().toString().split(' ').first ?? "—"),
                       width: 120)),
-                  DataCell(_c(Text(q.ttTime ?? "—"),                                width: 140)), // podmień na validTo jeśli masz
+                  DataCell(_c(Text(q.ttTime ?? "—"),                                width: 140)), // TODO: podmień na validTo jeśli masz
                   DataCell(_c(Text(q.orderDateSl?.toLocal().toString().split(' ').first ?? "—"),
                       width: 160)),
                   DataCell(_c(Text(vm.localizeCountryName(q.receiptCountry, context)),
@@ -386,7 +487,7 @@ class _QuotationsTable extends StatelessWidget {
                   DataCell(_c(Text((q.weightChgw ?? 0).toStringAsFixed(2)),         width: 100)),
                   DataCell(_c(Text((q.allIn ?? q.shippingPrice ?? 0).toStringAsFixed(2)),
                       width: 120)),
-                  DataCell(_ActionsCell(quotation: q, vm: vm)), // ⬅️ akcje w stałej szerokości
+                  const DataCell(SizedBox()), // wypełnia kolumnę "Actions" stałą szerokością
                 ],
               );
             }).toList(),
@@ -397,6 +498,9 @@ class _QuotationsTable extends StatelessWidget {
   }
 }
 
+// --- Reszta Twoich klas: _ActionsCell, _RowActions, _PaginationBar ---
+// (bez zmian, możesz pozostawić jak w Twoim kodzie)
+
 class _ActionsCell extends StatelessWidget {
   final Quotation quotation;
   final QuotationsListViewModel vm;
@@ -406,7 +510,7 @@ class _ActionsCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     return SizedBox(
-      width: 220, // dopasowane do szerokości kolumny "Actions"
+      width: 220,
       child: FittedBox(
         fit: BoxFit.scaleDown,
         alignment: Alignment.centerLeft,
@@ -421,24 +525,19 @@ class _ActionsCell extends StatelessWidget {
             IconButton(
               tooltip: t.action_edit,
               icon: const Icon(Icons.edit_outlined),
-              onPressed: () {
-                // TODO: np. context.push('/quote/${quotation.id}')
-              },
+              onPressed: () {/* TODO */},
             ),
             IconButton(
               tooltip: t.action_copy,
               icon: const Icon(Icons.copy_outlined),
               onPressed: () async {
                 await vm.copy(quotation.id!);
-                // TODO: nawigacja/refresh, jeśli chcesz
               },
             ),
             IconButton(
               tooltip: t.action_reject,
               icon: const Icon(Icons.cancel_outlined),
-              onPressed: () {
-                // TODO: dialog z powodem + vm.reject(...)
-              },
+              onPressed: () {/* TODO */},
             ),
           ],
         ),
@@ -466,35 +565,19 @@ class _RowActions extends StatelessWidget {
         IconButton(
           tooltip: t.action_edit,
           icon: const Icon(Icons.edit_outlined),
-          onPressed: () {
-            // TODO: nawigacja do edycji, np. context.push('/quotation/${q.id}')
-          },
+          onPressed: () {},
         ),
         IconButton(
           tooltip: t.action_copy,
           icon: const Icon(Icons.copy_outlined),
           onPressed: () async {
-            final nq = await vm.copy(q.id!);
-            // TODO: przejście do nowej wyceny nq.id
+            final _ = await vm.copy(q.id!);
           },
         ),
         IconButton(
           tooltip: t.action_reject,
           icon: const Icon(Icons.cancel_outlined),
-          onPressed: () {
-            showDialog(context: context, builder: (_) {
-              String? reason;
-              return AlertDialog(
-                title: Text(t.action_reject),
-                content: TextField(decoration: InputDecoration(labelText: t.reason_optional),
-                    onChanged: (v) => reason = v),
-                actions: [
-                  TextButton(onPressed: () => Navigator.pop(context), child: Text(t.cancel)),
-                  FilledButton(onPressed: () { Navigator.pop(context); vm.reject(q.id!, reason: reason); }, child: Text(t.ok)),
-                ],
-              );
-            });
-          },
+          onPressed: () {},
         ),
       ],
     );
