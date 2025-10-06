@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/features/auth/ui/widgets/login_screen.dart';
+import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
+import 'package:wyceny/features/orders/ui/widgets/order_screen.dart';
+import 'package:wyceny/features/orders/ui/widgets/orders_list_screen.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotations_list_screen.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotations_screen.dart';
@@ -94,20 +97,26 @@ GoRouter buildRouter(AuthState auth) {
               GoRoute(
                 path: '/order',
                 name: 'order',
-                pageBuilder: (context, state) =>
-                const NoTransitionPage(child: OrdersScreen()),
-                // routes: [
-                //   GoRoute(
-                //     path: 'stop/:transitNr/:destinationBranch',
-                //   builder: (context, state) {
-                //     final transitNr = state.pathParameters['transitNr']!;
-                //     final destinationBranch = state.pathParameters['destinationBranch']!;
-                //     return LineRideStopScreen(
-                //       transitNr: transitNr,
-                //       destinationBranch: destinationBranch,
-                //     );
-                //   },),
-                // ],
+                pageBuilder: (context, state) {
+                  return MaterialPage(
+                    key: state.pageKey,
+                    child: ChangeNotifierProvider(
+                      create: (_) => getIt<QuotationViewModel>()..init(),
+                      child: const OrdersListScreen(),
+                    ),
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    path: ':orderId',
+                    builder: (context, state) {
+                      final orderId = state.pathParameters['orderId']!;
+                      return ChangeNotifierProvider(
+                        create: (_) => getIt<OrderViewModel>()..init(),
+                        child: const OrderScreen(),
+                      );
+                    },),
+                ],
               ),
             ],
           ),

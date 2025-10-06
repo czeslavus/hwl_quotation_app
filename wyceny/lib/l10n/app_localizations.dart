@@ -793,6 +793,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rows per page'**
   String get pagination_page_size;
+
+  /// No description provided for @orders_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get orders_title;
+
+  /// No description provided for @action_new_order.
+  ///
+  /// In en, this message translates to:
+  /// **'New order'**
+  String get action_new_order;
+
+  /// No description provided for @action_view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get action_view;
+
+  /// No description provided for @action_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get action_cancel;
+
+  /// No description provided for @col_items_count.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get col_items_count;
+
+  /// No description provided for @order_title.
+  ///
+  /// In en, this message translates to:
+  /// **'New order'**
+  String get order_title;
+
+  /// No description provided for @section_sender.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender'**
+  String get section_sender;
+
+  /// No description provided for @section_recipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient'**
+  String get section_recipient;
+
+  /// No description provided for @field_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get field_name;
+
+  /// No description provided for @field_city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get field_city;
+
+  /// No description provided for @field_street.
+  ///
+  /// In en, this message translates to:
+  /// **'Street'**
+  String get field_street;
+
+  /// No description provided for @field_phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get field_phone;
+
+  /// No description provided for @items_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Goods / packages'**
+  String get items_title;
+
+  /// No description provided for @label_qty.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty (pcs)'**
+  String get label_qty;
+
+  /// No description provided for @label_pack_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Packaging type'**
+  String get label_pack_type;
+
+  /// No description provided for @label_length_cm.
+  ///
+  /// In en, this message translates to:
+  /// **'Length (cm)'**
+  String get label_length_cm;
+
+  /// No description provided for @label_width_cm.
+  ///
+  /// In en, this message translates to:
+  /// **'Width (cm)'**
+  String get label_width_cm;
+
+  /// No description provided for @label_height_cm.
+  ///
+  /// In en, this message translates to:
+  /// **'Height (cm)'**
+  String get label_height_cm;
+
+  /// No description provided for @label_weight_real_kg.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual weight (kg)'**
+  String get label_weight_real_kg;
+
+  /// No description provided for @label_item_cbm.
+  ///
+  /// In en, this message translates to:
+  /// **'Item CBM'**
+  String get label_item_cbm;
+
+  /// No description provided for @services_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional services'**
+  String get services_title;
+
+  /// No description provided for @services_services.
+  ///
+  /// In en, this message translates to:
+  /// **'Services (extra handling)'**
+  String get services_services;
+
+  /// No description provided for @services_pre_advice.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-advice'**
+  String get services_pre_advice;
+
+  /// No description provided for @services_cargo_insurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional CARGO insurance (value)'**
+  String get services_cargo_insurance;
+
+  /// No description provided for @summary_cbm.
+  ///
+  /// In en, this message translates to:
+  /// **'CBM'**
+  String get summary_cbm;
+
+  /// No description provided for @summary_all_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Total (ALL-IN)'**
+  String get summary_all_in;
+
+  /// No description provided for @action_calculate.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate'**
+  String get action_calculate;
+
+  /// No description provided for @action_submit_order.
+  ///
+  /// In en, this message translates to:
+  /// **'CONFIRM ORDER'**
+  String get action_submit_order;
+
+  /// No description provided for @status_new.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get status_new;
+
+  /// No description provided for @status_in_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get status_in_progress;
+
+  /// No description provided for @status_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get status_done;
+
+  /// No description provided for @status_canceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get status_canceled;
+
+  /// No description provided for @status_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get status_unknown;
 }
 
 class _AppLocalizationsDelegate

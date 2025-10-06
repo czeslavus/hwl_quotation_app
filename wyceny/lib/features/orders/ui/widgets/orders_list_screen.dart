@@ -3,30 +3,30 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/common/top_bar_appbar.dart';
-import 'package:wyceny/features/quotations/domain/models/quotation.dart';
-import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
-import 'package:wyceny/features/quotations/ui/viewmodels/quotations_list_viewmodel.dart';
 
-class QuotationsListScreen extends StatelessWidget {
-  const QuotationsListScreen({super.key});
+import '../viewmodels/orders_list_viewmodel.dart';
+import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
+
+class OrdersListScreen extends StatelessWidget {
+  const OrdersListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => getIt<QuotationsListViewModel>()..init(),
-      child: const _QuotationsListView(),
+      create: (_) => getIt<OrdersListViewModel>()..init(),
+      child: const _OrdersListView(),
     );
   }
 }
 
-class _QuotationsListView extends StatelessWidget {
-  const _QuotationsListView();
+class _OrdersListView extends StatelessWidget {
+  const _OrdersListView();
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<QuotationsListViewModel>();
+    final vm = context.watch<OrdersListViewModel>();
     final t = AppLocalizations.of(context)!;
 
     final width = MediaQuery.sizeOf(context).width;
@@ -41,61 +41,52 @@ class _QuotationsListView extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Nagłówek + przycisk Nowa wycena (ikonowy na telefonie)
+          // Nagłówek + „Nowe zamówienie”
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: isPhone
-                ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+                ? Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        t.quotations_title,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    _NewQuotationCompactButton(
-                      tooltip: t.action_new_quotation,
-                      onPressed: () => context.push('/quote/new'),
-                    ),
-                  ],
+                Expanded(
+                  child: Text(
+                    t.orders_title, // dodaj w l10n (np. „Zamówienia”)
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                _NewOrderCompactButton(
+                  tooltip: t.action_new_order, // dodaj w l10n
+                  onPressed: () => context.push('/order/new'),
                 ),
               ],
             )
                 : Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.quotations_title,
-                          style: Theme.of(context).textTheme.headlineMedium),
-                    ],
+                  child: Text(
+                    t.orders_title,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
-                _NewQuotationButton(
-                  onPressed: () => context.push('/quote/new'),
+                _NewOrderButton(
+                  onPressed: () => context.push('/order/new'),
                 ),
               ],
             ),
           ),
 
-          // Ogłoszenia – pełna szerokość, rozwijane (bez własnego scrolla)
+          // Ogłoszenia
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: AnnouncementsPanel(
               header: Text("${t.announcement_line} • ${t.overdue_info}"),
-              // Jeśli chcesz, wrzuć tu bogatszą treść/HTML do środka:
               body: Text("${t.announcement_line} • ${t.overdue_info}"),
             ),
           ),
 
           const Divider(height: 1),
 
-          // Filtry – responsywne: na telefonie przyciski to ikony; na szerokim ekr. przyciski w 1 linii po prawej
+          // Filtry
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: _ResponsiveFiltersBar(vm: vm),
@@ -111,10 +102,9 @@ class _QuotationsListView extends StatelessWidget {
                 ? Center(child: Text(t.error_generic(vm.error.toString())))
                 : vm.items.isEmpty
                 ? Center(child: Text(t.list_empty))
-                : _QuotationsTable(vm: vm),
+                : _OrdersTable(vm: vm),
           ),
 
-          // Paginacja na dole
           const Divider(height: 1),
           _PaginationBar(vm: vm),
         ],
@@ -123,12 +113,12 @@ class _QuotationsListView extends StatelessWidget {
   }
 }
 
+// ————— Akcje nagłówka —————
 
-/// Telefon: duży, zielony, idealnie wyśrodkowany przycisk z ikoną „+”
-class _NewQuotationCompactButton extends StatelessWidget {
+class _NewOrderCompactButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String? tooltip;
-  const _NewQuotationCompactButton({required this.onPressed, this.tooltip});
+  const _NewOrderCompactButton({required this.onPressed, this.tooltip});
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +130,7 @@ class _NewQuotationCompactButton extends StatelessWidget {
         style: IconButton.styleFrom(
           backgroundColor: Colors.green,
           foregroundColor: Colors.white,
-          minimumSize: const Size(52, 52), // rozmiar koła
+          minimumSize: const Size(52, 52),
           shape: const CircleBorder(),
         ),
       ),
@@ -148,9 +138,9 @@ class _NewQuotationCompactButton extends StatelessWidget {
   }
 }
 
-class _NewQuotationButton extends StatelessWidget {
+class _NewOrderButton extends StatelessWidget {
   final VoidCallback onPressed;
-  const _NewQuotationButton({required this.onPressed});
+  const _NewOrderButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -158,21 +148,19 @@ class _NewQuotationButton extends StatelessWidget {
     return FilledButton.icon(
       onPressed: onPressed,
       icon: const Icon(Icons.add),
-      label: Text(t.action_new_quotation),
+      label: Text(t.action_new_order),
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.green), // zielony
+        backgroundColor: WidgetStateProperty.all(Colors.green),
         foregroundColor: WidgetStateProperty.all(Colors.white),
       ),
     );
   }
 }
 
-/// Pasek filtrów:
-/// - pola mogą się łamać (Wrap)
-/// - na wąskich ekranach przyciski = same ikony
-/// - na szerokich ekranach przyciski zawsze w jednej linii po prawej
+// ————— Pasek filtrów —————
+
 class _ResponsiveFiltersBar extends StatefulWidget {
-  final QuotationsListViewModel vm;
+  final OrdersListViewModel vm;
   const _ResponsiveFiltersBar({required this.vm});
 
   @override
@@ -199,15 +187,13 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     final isPhone = width < 600;
 
     final fields = <Widget>[
-      // Zakres dat (zachowuję Twoje _dateField)
       Row(mainAxisSize: MainAxisSize.min, children: [
         _dateField(context: context, label: t.filter_date_from, value: _from, onPick: (d) => setState(() => _from = d)),
         const SizedBox(width: 8),
         _dateField(context: context, label: t.filter_date_to, value: _to, onPick: (d) => setState(() => _to = d)),
       ]),
-      // Kraj nadania
       SizedBox(
-        width: 240,
+        width: 220,
         child: DropdownButtonFormField<int>(
           isExpanded: true,
           value: vm.originCountryId,
@@ -221,9 +207,8 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
           onChanged: (id) => setState(() => vm.originCountryId = id),
         ),
       ),
-      // Kraj dostawy
       SizedBox(
-        width: 240,
+        width: 220,
         child: DropdownButtonFormField<int>(
           isExpanded: true,
           value: vm.destCountryId,
@@ -237,21 +222,33 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
           onChanged: (id) => setState(() => vm.destCountryId = id),
         ),
       ),
+      SizedBox(
+        width: 200,
+        child: DropdownButtonFormField<String>(
+          isExpanded: true,
+          value: vm.status,
+          decoration: InputDecoration(labelText: t.col_status),
+          items: vm.statusOptions
+              .map((s) => DropdownMenuItem(value: s, child: Text(vm.statusLabel(s))))
+              .toList(),
+          onChanged: (s) => setState(() => vm.status = s),
+        ),
+      ),
     ];
 
-    final onApply = () => vm.applyFilters(from: _from, to: _to, originId: vm.originCountryId, destId: vm.destCountryId);
+    final onApply = () => vm.applyFilters(from: _from, to: _to, originId: vm.originCountryId, destId: vm.destCountryId, status: vm.status);
     final onClear = () {
       setState(() {
         _from = null;
         _to = null;
         vm.originCountryId = null;
         vm.destCountryId = null;
+        vm.status = null;
       });
-      vm.applyFilters(from: null, to: null, originId: null, destId: null);
+      vm.applyFilters(from: null, to: null, originId: null, destId: null, status: null);
     };
 
     if (isPhone) {
-      // 🔹 Wersja mobilna – małe ikonowe przyciski
       return Wrap(
         spacing: 12,
         runSpacing: 12,
@@ -260,23 +257,17 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
           ...fields,
           Tooltip(
             message: t.filter_apply,
-            child: IconButton.filled(
-              onPressed: onApply,
-              icon: const Icon(Icons.filter_alt),
-            ),
+            child: IconButton.filled(onPressed: onApply, icon: const Icon(Icons.filter_alt)),
           ),
           Tooltip(
             message: t.filter_clear,
-            child: IconButton.outlined(
-              onPressed: onClear,
-              icon: const Icon(Icons.filter_alt_off),
-            ),
+            child: IconButton.outlined(onPressed: onClear, icon: const Icon(Icons.filter_alt_off)),
           ),
         ],
       );
     }
 
-// 🔹 Szeroki ekran – pola + przyciski po prawej, łamane elastycznie
+    // szeroko: przyciski po prawej, tylko gdy jest miejsce na pola
     return LayoutBuilder(
       builder: (context, constraints) {
         return Wrap(
@@ -285,12 +276,8 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
           crossAxisAlignment: WrapCrossAlignment.center,
           alignment: WrapAlignment.spaceBetween,
           children: [
-            // ✅ Lewa część: pola filtrów
             ConstrainedBox(
-              constraints: BoxConstraints(
-                // pozwól polom zająć do ~80% szerokości kontenera
-                maxWidth: constraints.maxWidth * 0.8,
-              ),
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.8),
               child: Wrap(
                 spacing: 12,
                 runSpacing: 12,
@@ -298,8 +285,6 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
                 children: fields,
               ),
             ),
-
-            // ✅ Prawa część: przyciski akcji
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -320,7 +305,6 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         );
       },
     );
-
   }
 
   Widget _dateField({
@@ -351,9 +335,11 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
   }
 }
 
-class _QuotationsTable extends StatelessWidget {
-  final QuotationsListViewModel vm;
-  const _QuotationsTable({required this.vm});
+// ————— Tabela —————
+
+class _OrdersTable extends StatelessWidget {
+  final OrdersListViewModel vm;
+  const _OrdersTable({required this.vm});
 
   @override
   Widget build(BuildContext context) {
@@ -376,49 +362,31 @@ class _QuotationsTable extends StatelessWidget {
         dataRowMinHeight: 44,
         dataRowMaxHeight: 64,
         columns: [
-          DataColumn(label: _h(t.col_qnr,            w: 120)),
           DataColumn(label: _h(t.col_order_nr,       w: 140)),
           DataColumn(label: _h(t.col_status,         w: 140)),
-          DataColumn(label: _h(t.col_created,        w: 120)),
-          DataColumn(label: _h(t.col_valid_to,       w: 140)),
-          DataColumn(label: _h(t.col_decision_date,  w: 160)),
+          DataColumn(label: _h(t.col_created,        w: 140)),
           DataColumn(label: _h(t.col_origin_country, w: 160)),
           DataColumn(label: _h(t.col_origin_zip,     w: 120)),
           DataColumn(label: _h(t.col_dest_country,   w: 180)),
           DataColumn(label: _h(t.col_dest_zip,       w: 120)),
-          DataColumn(label: _h(t.col_mp_sum,         w: 100)),
-          DataColumn(label: _h(t.col_weight,         w: 100)),
-          DataColumn(label: _h(t.col_price,          w: 120)),
+          DataColumn(label: _h(t.col_items_count,    w: 120)),
+          DataColumn(label: _h(t.col_weight,         w: 120)),
+          DataColumn(label: _h(t.col_price,          w: 140)),
           DataColumn(label: _h(t.col_actions,        w: 220)),
         ],
-        rows: vm.items.map<DataRow>((q) {
-          final mp = (q.quotationItems ?? const [])
-              .fold<double>(0.0, (s, it) => s + (it.ldm ?? 0));
-
-          return DataRow(
-            cells: [
-              DataCell(_c(Text(q.id?.toString() ?? q.guid ?? "-"),              width: 120)),
-              DataCell(_c(Text(q.orderNrSl ?? "—"),                             width: 140)),
-              DataCell(_c(Text(vm.statusLabel(q.status)),                       width: 140)),
-              DataCell(_c(Text(q.createDate?.toLocal().toString().split(' ').first ?? "—"),
-                  width: 120)),
-              DataCell(_c(Text(q.ttTime ?? "—"),                                width: 140)), // TODO: podmień na validTo jeśli masz
-              DataCell(_c(Text(q.orderDateSl?.toLocal().toString().split(' ').first ?? "—"),
-                  width: 160)),
-              DataCell(_c(Text(vm.localizeCountryName(q.receiptCountry, context)),
-                  width: 160)),
-              DataCell(_c(Text(q.receiptZipCode),                               width: 120)),
-              DataCell(_c(Text(vm.localizeCountryName(q.deliveryCountry, context)),
-                  width: 180)),
-              DataCell(_c(Text(q.deliveryZipCode),                              width: 120)),
-              DataCell(_c(Text(mp.toStringAsFixed(2)),                          width: 100)),
-              DataCell(_c(Text((q.weightChgw ?? 0).toStringAsFixed(2)),         width: 100)),
-              DataCell(_c(Text((q.allIn ?? q.shippingPrice ?? 0).toStringAsFixed(2)),
-                  width: 120)),
-              DataCell(_ActionsCell(quotationId: q.id!, vm: vm)), // wypełnia kolumnę "Actions" stałą szerokością
-            ],
-          );
-        }).toList(),
+        rows: vm.items.map<DataRow>((o) => DataRow(cells: [
+          DataCell(_c(Text(o.orderNr ?? o.id ?? "—"),                    width: 140)),
+          DataCell(_c(Text(vm.statusLabel(o.status)),                     width: 140)),
+          DataCell(_c(Text(o.createdAt?.toLocal().toString().split(' ').first ?? "—"), width: 140)),
+          DataCell(_c(Text(vm.localizeCountryName(o.originCountry, context)),          width: 160)),
+          DataCell(_c(Text(o.originZip ?? "—"),                           width: 120)),
+          DataCell(_c(Text(vm.localizeCountryName(o.destCountry, context)),            width: 180)),
+          DataCell(_c(Text(o.destZip ?? "—"),                             width: 120)),
+          DataCell(_c(Text("${o.itemsCount}"),                            width: 120)),
+          DataCell(_c(Text(o.weightChg?.toStringAsFixed(2) ?? "0.00"),    width: 120)),
+          DataCell(_c(Text(o.total?.toStringAsFixed(2) ?? "0.00"),        width: 140)),
+          DataCell(_ActionsCell(vm: vm, orderId: o.id!)),
+        ])).toList(),
       ),
     );
 
@@ -448,9 +416,9 @@ class _QuotationsTable extends StatelessWidget {
 }
 
 class _ActionsCell extends StatelessWidget {
-  final int quotationId;
-  final QuotationsListViewModel vm;
-  const _ActionsCell({required this.quotationId, required this.vm});
+  final OrdersListViewModel vm;
+  final String orderId;
+  const _ActionsCell({required this.vm, required this.orderId});
 
   @override
   Widget build(BuildContext context) {
@@ -464,26 +432,24 @@ class _ActionsCell extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              tooltip: t.action_submit,
-              icon: const Icon(Icons.check_circle_outline),
-              onPressed: () => vm.approve(quotationId),
+              tooltip: t.action_view,
+              icon: const Icon(Icons.visibility_outlined),
+              onPressed: () => vm.view(orderId),
             ),
             IconButton(
               tooltip: t.action_edit,
               icon: const Icon(Icons.edit_outlined),
-              onPressed: () {/* TODO */},
+              onPressed: () => vm.edit(orderId),
             ),
             IconButton(
               tooltip: t.action_copy,
               icon: const Icon(Icons.copy_outlined),
-              onPressed: () async {
-                await vm.copy(quotationId);
-              },
+              onPressed: () => vm.copy(orderId),
             ),
             IconButton(
-              tooltip: t.action_reject,
+              tooltip: t.action_cancel,
               icon: const Icon(Icons.cancel_outlined),
-              onPressed: () {/* TODO */},
+              onPressed: () => vm.cancel(orderId),
             ),
           ],
         ),
@@ -492,46 +458,10 @@ class _ActionsCell extends StatelessWidget {
   }
 }
 
-class _RowActions extends StatelessWidget {
-  final Quotation q;
-  final QuotationsListViewModel vm;
-  const _RowActions({required this.q, required this.vm});
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-    return Wrap(
-      spacing: 6,
-      children: [
-        IconButton(
-          tooltip: t.action_submit,
-          icon: const Icon(Icons.check_circle_outline),
-          onPressed: () => vm.approve(q.id!),
-        ),
-        IconButton(
-          tooltip: t.action_edit,
-          icon: const Icon(Icons.edit_outlined),
-          onPressed: () {},
-        ),
-        IconButton(
-          tooltip: t.action_copy,
-          icon: const Icon(Icons.copy_outlined),
-          onPressed: () async {
-            final _ = await vm.copy(q.id!);
-          },
-        ),
-        IconButton(
-          tooltip: t.action_reject,
-          icon: const Icon(Icons.cancel_outlined),
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
-}
+// ————— Paginacja —————
 
 class _PaginationBar extends StatelessWidget {
-  final QuotationsListViewModel vm;
+  final OrdersListViewModel vm;
   const _PaginationBar({required this.vm});
 
   @override

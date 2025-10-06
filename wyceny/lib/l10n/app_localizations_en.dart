@@ -378,4 +378,103 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pagination_page_size => 'Rows per page';
+
+  @override
+  String get orders_title => 'Orders';
+
+  @override
+  String get action_new_order => 'New order';
+
+  @override
+  String get action_view => 'View';
+
+  @override
+  String get action_cancel => 'Cancel';
+
+  @override
+  String get col_items_count => 'Items';
+
+  @override
+  String get order_title => 'New order';
+
+  @override
+  String get section_sender => 'Sender';
+
+  @override
+  String get section_recipient => 'Recipient';
+
+  @override
+  String get field_name => 'Name';
+
+  @override
+  String get field_city => 'City';
+
+  @override
+  String get field_street => 'Street';
+
+  @override
+  String get field_phone => 'Phone';
+
+  @override
+  String get items_title => 'Goods / packages';
+
+  @override
+  String get label_qty => 'Qty (pcs)';
+
+  @override
+  String get label_pack_type => 'Packaging type';
+
+  @override
+  String get label_length_cm => 'Length (cm)';
+
+  @override
+  String get label_width_cm => 'Width (cm)';
+
+  @override
+  String get label_height_cm => 'Height (cm)';
+
+  @override
+  String get label_weight_real_kg => 'Actual weight (kg)';
+
+  @override
+  String get label_item_cbm => 'Item CBM';
+
+  @override
+  String get services_title => 'Additional services';
+
+  @override
+  String get services_services => 'Services (extra handling)';
+
+  @override
+  String get services_pre_advice => 'Pre-advice';
+
+  @override
+  String get services_cargo_insurance => 'Additional CARGO insurance (value)';
+
+  @override
+  String get summary_cbm => 'CBM';
+
+  @override
+  String get summary_all_in => 'Total (ALL-IN)';
+
+  @override
+  String get action_calculate => 'Calculate';
+
+  @override
+  String get action_submit_order => 'CONFIRM ORDER';
+
+  @override
+  String get status_new => 'New';
+
+  @override
+  String get status_in_progress => 'In progress';
+
+  @override
+  String get status_done => 'Completed';
+
+  @override
+  String get status_canceled => 'Canceled';
+
+  @override
+  String get status_unknown => '—';
 }

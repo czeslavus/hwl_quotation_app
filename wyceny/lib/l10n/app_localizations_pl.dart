@@ -315,7 +315,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get col_qnr => 'Numer wyceny';
 
   @override
-  String get col_order_nr => 'Numer zlecenia';
+  String get col_order_nr => 'Nr zlecenia';
 
   @override
   String get col_status => 'Status';
@@ -378,4 +378,104 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get pagination_page_size => 'Wierszy na stronę';
+
+  @override
+  String get orders_title => 'Zamówienia';
+
+  @override
+  String get action_new_order => 'Nowe zamówienie';
+
+  @override
+  String get action_view => 'Podgląd';
+
+  @override
+  String get action_cancel => 'Anuluj';
+
+  @override
+  String get col_items_count => 'Pozycje';
+
+  @override
+  String get order_title => 'Nowe zlecenie';
+
+  @override
+  String get section_sender => 'Nadawca';
+
+  @override
+  String get section_recipient => 'Odbiorca';
+
+  @override
+  String get field_name => 'Nazwa';
+
+  @override
+  String get field_city => 'Miasto';
+
+  @override
+  String get field_street => 'Ulica';
+
+  @override
+  String get field_phone => 'Telefon';
+
+  @override
+  String get items_title => 'Towar / paczki';
+
+  @override
+  String get label_qty => 'Ilość (szt)';
+
+  @override
+  String get label_pack_type => 'Typ opakowania';
+
+  @override
+  String get label_length_cm => 'Długość (cm)';
+
+  @override
+  String get label_width_cm => 'Szerokość (cm)';
+
+  @override
+  String get label_height_cm => 'Wysokość (cm)';
+
+  @override
+  String get label_weight_real_kg => 'Waga rzeczywista (kg)';
+
+  @override
+  String get label_item_cbm => 'CBM pozycji';
+
+  @override
+  String get services_title => 'Usługi dodatkowe';
+
+  @override
+  String get services_services => 'Serwisy (dodatkowe czynności)';
+
+  @override
+  String get services_pre_advice => 'Awizacja';
+
+  @override
+  String get services_cargo_insurance =>
+      'Dodatkowe ubezpieczenie CARGO (wartość)';
+
+  @override
+  String get summary_cbm => 'CBM';
+
+  @override
+  String get summary_all_in => 'Suma (ALL-IN)';
+
+  @override
+  String get action_calculate => 'Przelicz';
+
+  @override
+  String get action_submit_order => 'ZATWIERDŹ ZLECENIE';
+
+  @override
+  String get status_new => 'Nowe';
+
+  @override
+  String get status_in_progress => 'W realizacji';
+
+  @override
+  String get status_done => 'Zrealizowane';
+
+  @override
+  String get status_canceled => 'Anulowane';
+
+  @override
+  String get status_unknown => '—';
 }

@@ -133,5 +133,107 @@
   "ok": "OK",
   "pagination_page": "Strona {p}",
   "@pagination_page": {"placeholders": {"p": {}}},
-  "pagination_page_size": "Wierszy na stronę"
+  "pagination_page_size": "Wierszy na stronę",
+
+  "orders_title": "Zamówienia",
+    "@orders_title": {"description": "Nagłówek listy zamówień"},
+
+    "action_new_order": "Nowe zamówienie",
+    "@action_new_order": {"description": "Przycisk utworzenia nowego zamówienia"},
+
+    "action_view": "Podgląd",
+    "@action_view": {"description": "Akcja podglądu szczegółów"},
+
+    "action_cancel": "Anuluj",
+    "@action_cancel": {"description": "Akcja anulowania zamówienia"},
+
+    "col_order_nr": "Nr zlecenia",
+    "@col_order_nr": {"description": "Kolumna: numer zlecenia"},
+
+    "col_items_count": "Pozycje",
+    "@col_items_count": {"description": "Kolumna: liczba pozycji"},
+
+    "order_title": "Nowe zlecenie",
+    "@order_title": {"description": "Nagłówek ekranu tworzenia zlecenia"},
+
+    "section_sender": "Nadawca",
+    "@section_sender": {"description": "Sekcja formularza: nadawca"},
+
+    "section_recipient": "Odbiorca",
+    "@section_recipient": {"description": "Sekcja formularza: odbiorca"},
+
+    "field_name": "Nazwa",
+    "@field_name": {"description": "Etykieta pola: nazwa firmy/osoby"},
+
+    "field_city": "Miasto",
+    "@field_city": {"description": "Etykieta pola: miasto"},
+
+    "field_street": "Ulica",
+    "@field_street": {"description": "Etykieta pola: ulica"},
+
+    "field_phone": "Telefon",
+    "@field_phone": {"description": "Etykieta pola: telefon"},
+
+    "items_title": "Towar / paczki",
+    "@items_title": {"description": "Nagłówek sekcji pozycji zlecenia"},
+
+    "label_qty": "Ilość (szt)",
+    "@label_qty": {"description": "Etykieta pola ilości"},
+
+    "label_pack_type": "Typ opakowania",
+    "@label_pack_type": {"description": "Etykieta wyboru typu opakowania"},
+
+    "label_length_cm": "Długość (cm)",
+    "@label_length_cm": {"description": "Etykieta pola długości w cm"},
+
+    "label_width_cm": "Szerokość (cm)",
+    "@label_width_cm": {"description": "Etykieta pola szerokości w cm"},
+
+    "label_height_cm": "Wysokość (cm)",
+    "@label_height_cm": {"description": "Etykieta pola wysokości w cm"},
+
+    "label_weight_real_kg": "Waga rzeczywista (kg)",
+    "@label_weight_real_kg": {"description": "Etykieta pola wagi rzeczywistej w kg"},
+
+    "label_item_cbm": "CBM pozycji",
+    "@label_item_cbm": {"description": "Etykieta z wartością CBM dla pozycji"},
+
+    "services_title": "Usługi dodatkowe",
+    "@services_title": {"description": "Nagłówek sekcji usług dodatkowych"},
+
+    "services_services": "Serwisy (dodatkowe czynności)",
+    "@services_services": {"description": "Checkbox: serwisy dodatkowe"},
+
+    "services_pre_advice": "Awizacja",
+    "@services_pre_advice": {"description": "Checkbox: awizacja"},
+
+    "services_cargo_insurance": "Dodatkowe ubezpieczenie CARGO (wartość)",
+    "@services_cargo_insurance": {"description": "Etykieta pola wartości ubezpieczenia"},
+
+    "summary_cbm": "CBM",
+    "@summary_cbm": {"description": "Podsumowanie: CBM"},
+
+    "summary_all_in": "Suma (ALL-IN)",
+    "@summary_all_in": {"description": "Podsumowanie: łączna cena"},
+
+    "action_calculate": "Przelicz",
+    "@action_calculate": {"description": "Akcja przeliczenia / kalkulacji"},
+
+    "action_submit_order": "ZATWIERDŹ ZLECENIE",
+    "@action_submit_order": {"description": "Akcja zatwierdzenia zlecenia (wyróżniona)"},
+
+    "status_new": "Nowe",
+    "@status_new": {"description": "Status zamówienia: nowe"},
+
+    "status_in_progress": "W realizacji",
+    "@status_in_progress": {"description": "Status zamówienia: w realizacji"},
+
+    "status_done": "Zrealizowane",
+    "@status_done": {"description": "Status zamówienia: zrealizowane"},
+
+    "status_canceled": "Anulowane",
+    "@status_canceled": {"description": "Status zamówienia: anulowane"},
+
+    "status_unknown": "—",
+    "@status_unknown": {"description": "Nieznany status / pauza"}
 }

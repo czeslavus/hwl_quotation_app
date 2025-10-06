@@ -21,6 +21,8 @@ import 'package:wyceny/features/auth/domain/repositories/auth_repository.dart';
 import 'package:wyceny/features/auth/data/repositories/auth_repository_impl.dart';
 
 import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmodel.dart';
+import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
+import 'package:wyceny/features/orders/ui/viewmodels/orders_list_viewmodel.dart';
 import 'package:wyceny/features/quotations/data/quotation_repository_mock.dart';
 import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
@@ -121,6 +123,9 @@ Future<void> setupDI() async {
 
   getIt.registerFactory<QuotationsListViewModel>(() => QuotationsListViewModel(repo: getIt<QuotationsRepository>(), auth: getIt<AuthState>() ));
   getIt.registerFactory<QuotationViewModel>(() => QuotationViewModel());
+
+  getIt.registerFactory<OrdersListViewModel>(() => OrdersListViewModel());
+  getIt.registerFactory<OrderViewModel>(() => OrderViewModel());
 
   await getIt.allReady();
 }
