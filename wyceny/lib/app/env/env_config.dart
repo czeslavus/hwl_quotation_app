@@ -1,10 +1,9 @@
 import 'package:wyceny/app/env/app_environment.dart';
 
 class EnvLoader {
-  static const apiHost = 'https://0ba23e508118.ngrok-free.app/api';
+  static const apiHost = 'https://ekierowca-test.hwl.pl/api';
 
   static EnvConfig fromDartDefine() {
-    // Przekazuj: --dart-define=FLAVOR=dev  oraz  --dart-define=BASE_URL=https://api.dev.example.com
     const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
     const base   = String.fromEnvironment('BASE_URL', defaultValue: apiHost);
 
