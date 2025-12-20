@@ -6,6 +6,7 @@ import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 
 import 'package:wyceny/l10n/app_localizations.dart';
+import 'package:wyceny/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
             supportedLocales: AppLocalizations.supportedLocales,
             title: 'HWL Quotation App',
             onGenerateTitle: (ctx) => AppLocalizations.of(ctx).appTitle,
-            theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+            theme: AppTheme.light(),
             routerConfig: router,
           );
 

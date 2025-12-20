@@ -1,7 +1,7 @@
 import 'package:wyceny/app/env/app_environment.dart';
 
 class EnvLoader {
-  static const apiHost = 'https://ekierowca-test.hwl.pl/api';
+  static const apiHost = 'https://ekierowca-testowy.hwl.pl/api';
 
   static EnvConfig fromDartDefine() {
     const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');

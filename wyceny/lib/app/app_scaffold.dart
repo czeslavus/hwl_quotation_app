@@ -88,15 +88,33 @@ class _AppScaffoldState extends State<AppScaffold> {
       final rail = Theme(
         data: Theme.of(context).copyWith(
           navigationRailTheme: NavigationRailThemeData(
-            backgroundColor: Colors.indigo,
-            indicatorColor: Colors.white70, // highlight pod wybranym
-            selectedIconTheme: const IconThemeData(color: Colors.black),
-            unselectedIconTheme: const IconThemeData(color: Colors.white),
-            selectedLabelTextStyle: const TextStyle(color: Colors.white),
-            unselectedLabelTextStyle: const TextStyle(color: Colors.white),
+            backgroundColor: Colors.indigo,          // <- CAŁY rail niebieski
+            indicatorColor: Colors.white24,          // <- podświetlenie aktywnej pozycji
+            elevation: 0,
+
+            selectedIconTheme: const IconThemeData(
+              color: Colors.white,
+              size: 22,
+            ),
+            unselectedIconTheme: IconThemeData(
+              color: Colors.white.withOpacity(0.75),
+              size: 22,
+            ),
+
+            selectedLabelTextStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+            unselectedLabelTextStyle: TextStyle(
+              color: Colors.white.withOpacity(0.78),
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
           ),
         ),
         child: NavigationRail(
+          backgroundColor: Colors.indigo, // <- DODATKOWO jawnie, żeby nic nie „przebiło”
           selectedIndex: index,
           onDestinationSelected: _onTap,
           labelType: NavigationRailLabelType.all,
