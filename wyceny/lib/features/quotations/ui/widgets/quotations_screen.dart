@@ -8,6 +8,8 @@ import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_table.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_quote_details_panel.dart';
+import 'package:wyceny/ui/widgets/common/danger_action_button.dart';
+import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
 
 class QuotationScreen extends StatelessWidget {
   const QuotationScreen({super.key});
@@ -227,12 +229,15 @@ class _BodySection extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                FilledButton.icon(
+                PositiveActionButton(
                   onPressed: vm.addEmptyItem,
-                  icon: const Icon(Icons.add),
-                  label: Text(t.add_item),
+                  icon: Icons.add,
+                  label: t.add_item,
+                  tooltip: t.add_item,
                 ),
-                OutlinedButton.icon(
+                DangerActionButton(
+                  icon: Icons.delete_outline,
+                  label: t.action_clear,
                   onPressed: () async {
                     final ok = await _confirm(
                       context,
@@ -242,8 +247,7 @@ class _BodySection extends StatelessWidget {
                     if (ok != true) return;
                     vm.clearAllData();
                   },
-                  icon: const Icon(Icons.delete_outline),
-                  label: Text(t.action_clear),
+
                 ),
               ],
             ),
@@ -293,7 +297,7 @@ class _BodySection extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: [
-            FilledButton.tonalIcon(
+            PositiveActionButton(
               onPressed: () async {
                 try {
                   await vm.submitOrder();
@@ -310,15 +314,17 @@ class _BodySection extends StatelessWidget {
                   }
                 }
               },
-              icon: const Icon(Icons.send),
-              label: Text(t.action_submit),
+              icon: Icons.send,
+              label: t.action_submit,
+              tooltip: t.action_submit,
             ),
-            OutlinedButton.icon(
+            DangerActionButton(
+              icon: Icons.block,
+              label: t.action_reject,
+              color: Colors.red.shade800,
               onPressed: () {
-                // TODO: rejection reasons – później
+                // TODO: rejection reasons
               },
-              icon: const Icon(Icons.block),
-              label: Text(t.action_reject),
             ),
           ],
         ),

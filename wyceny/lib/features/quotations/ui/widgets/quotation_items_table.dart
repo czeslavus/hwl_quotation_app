@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_item.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
+import 'package:wyceny/ui/widgets/common/danger_action_button.dart';
 
 class QuotationItemsTable extends StatefulWidget {
   const QuotationItemsTable({
@@ -85,6 +86,7 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
 
   DataRow _row(BuildContext context, int index, QuotationItem it) {
     final vm = widget.vm;
+    final t = AppLocalizations.of(context);
     final adrColor = it.adr ? Colors.red : Colors.grey;
 
     return DataRow(
@@ -117,10 +119,11 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
         DataCell(_doubleField(width: _wM, value: it.ldmCbm, onChanged: (v) => vm.updateItem(index, it.copyWith(ldmCbm: v)))),
         DataCell(_doubleField(width: _wM, value: it.longWeight, onChanged: (v) => vm.updateItem(index, it.copyWith(longWeight: v)))),
         DataCell(
-          IconButton(
-            tooltip: 'Usuń',
-            visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.delete_outline),
+          DangerActionButton(
+            icon: Icons.delete_outline,
+            label: t.item_delete_tt,
+            showCaption: false,
+            tooltip: t.item_delete_tt,
             onPressed: () => vm.removeItemAt(index),
           ),
         ),

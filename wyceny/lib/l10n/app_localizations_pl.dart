@@ -277,16 +277,16 @@ class AppLocalizationsPl extends AppLocalizations {
   String get fee_total => 'Suma';
 
   @override
-  String get action_quote => 'WYCENA';
+  String get action_quote => 'Wycena';
 
   @override
-  String get action_submit => 'ZATWIERDŹ I PRZEŚLIJ ZLECENIE';
+  String get action_submit => 'Zatwierdź i prześlij zlecenie';
 
   @override
-  String get action_clear => 'WYCZYŚĆ DANE';
+  String get action_clear => 'Wyczyść formularz';
 
   @override
-  String get action_reject => 'ODRZUĆ';
+  String get action_reject => 'Odrzuć';
 
   @override
   String get map_placeholder => 'MAPA (widget niezależny)';

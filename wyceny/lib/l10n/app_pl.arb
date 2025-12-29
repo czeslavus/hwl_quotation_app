@@ -97,10 +97,10 @@
   "fee_pre_advice": "Awizacja",
   "fee_total": "Suma",
 
-  "action_quote": "WYCENA",
-  "action_submit": "ZATWIERDŹ I PRZEŚLIJ ZLECENIE",
-  "action_clear": "WYCZYŚĆ DANE",
-  "action_reject": "ODRZUĆ",
+  "action_quote": "Wycena",
+  "action_submit": "Zatwierdź i prześlij zlecenie",
+  "action_clear": "Wyczyść formularz",
+  "action_reject": "Odrzuć",
 
   "map_placeholder": "MAPA (widget niezależny)",
   "map_icon_tt": "Mapa",
