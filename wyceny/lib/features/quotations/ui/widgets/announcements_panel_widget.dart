@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AnnouncementsPanel extends StatefulWidget {
   final Widget header;
   final Widget body;
-  const AnnouncementsPanel({required this.header, required this.body});
+  const AnnouncementsPanel({super.key, required this.header, required this.body});
 
   @override
   State<AnnouncementsPanel> createState() => _AnnouncementsPanelState();

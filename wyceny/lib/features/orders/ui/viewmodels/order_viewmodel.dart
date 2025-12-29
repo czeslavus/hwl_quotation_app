@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:wyceny/features/quotations/domain/models/dictionaries/dicts.dart';
+import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
 
-import 'order_item.dart';
+import 'package:wyceny/features/orders/ui/viewmodels/order_item.dart';
 
 /// Szkielet ViewModelu do ekranu nowego zlecenia.
 /// Podmień logikę cenową w _recalcPricing() pod swoje zasady.
@@ -13,7 +13,7 @@ class OrderViewModel extends ChangeNotifier {
   // ——— Słowniki (kraje) ———
   bool countriesLoading = false;
   Object? countriesError;
-  List<Country> countries = const [];
+  List<CountryDictionary> countries = const [];
 
   // ——— Dane NADAWCY ———
   int? originCountryId;

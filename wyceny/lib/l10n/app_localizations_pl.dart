@@ -35,6 +35,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get common_retry => 'Ponów';
 
   @override
+  String get yes => 'tak';
+
+  @override
+  String get no => 'nie';
+
+  @override
   String get app_companyName => 'Hellmann Worldwide Logistics';
 
   @override
@@ -354,6 +360,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get col_actions => 'Akcje';
 
   @override
+  String get col_details => 'Detale';
+
+  @override
+  String get col_route => 'Z/Do';
+
+  @override
   String get action_edit => 'Edytuj';
 
   @override
@@ -361,6 +373,9 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get action_new_quotation => 'Nowa wycena';
+
+  @override
+  String get action_open_order => 'Pokaż zamówienie';
 
   @override
   String get reason_optional => 'Powód (opcjonalnie)';
@@ -478,4 +493,47 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get status_unknown => '—';
+
+  @override
+  String get confirm_clear_all =>
+      'Usunąć wprowadzone dane wyceny (włączając w to wszystkie pozycje)?';
+
+  @override
+  String get submit_ok => 'Zapisane';
+
+  @override
+  String get submit_error => 'Błąd';
+
+  @override
+  String get items_empty_hint => 'Dodaj pozycję';
+
+  @override
+  String get item_cbm => 'CBM';
+
+  @override
+  String get item_lbm => 'LBM';
+
+  @override
+  String get item_ldm_cbm => 'LBM/CBM';
+
+  @override
+  String get item_long_weight => 'Long weight';
+
+  @override
+  String get sum_packages => 'Razem opakowań';
+
+  @override
+  String get sum_weight => 'Sumaryczna masa';
+
+  @override
+  String get sum_volume => 'Sumaryczna objętość';
+
+  @override
+  String get sum_long_weight => 'Total long weight';
+
+  @override
+  String get details => 'Pokaż szczegóły';
+
+  @override
+  String get no_details => 'Ukryj szczegóły';
 }

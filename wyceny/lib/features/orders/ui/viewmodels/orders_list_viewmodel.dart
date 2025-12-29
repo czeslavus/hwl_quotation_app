@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:wyceny/features/quotations/domain/models/dictionaries/dicts.dart';
+import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
-import '../viewmodels/order_list_item.dart';
+import 'package:wyceny/features/orders/ui/viewmodels/order_list_item.dart';
 
 class OrdersListViewModel extends ChangeNotifier {
   // TopBar
@@ -27,7 +27,7 @@ class OrdersListViewModel extends ChangeNotifier {
   final List<String> statusOptions = const ["new", "in_progress", "done", "canceled"];
 
   // Słowniki
-  List<Country> countries = const [];
+  List<CountryDictionary> countries = const [];
 
   // Lista
   List<OrderListItem> items = const [];
@@ -61,9 +61,9 @@ class OrdersListViewModel extends ChangeNotifier {
         orderNr: "ORD-${idx.toString().padLeft(5, '0')}",
         status: status ?? "new",
         createdAt: DateTime.now().subtract(Duration(days: idx % 30)),
-        originCountry: Country(id: 1, country: "Poland"),
+        originCountry: CountryDictionary(countryId: 1, country: "Poland", countryCode: "PL"),
         originZip: "00-00${idx % 10}",
-        destCountry: Country(id: 2, country: "Germany"),
+        destCountry: CountryDictionary(countryId: 2, country: "Germany", countryCode: "DE"),
         destZip: "10-10${idx % 10}",
         itemsCount: 1 + (idx % 4),
         weightChg: 123.0 + idx,
@@ -139,6 +139,6 @@ class OrdersListViewModel extends ChangeNotifier {
     }
   }
 
-  String localizeCountryName(Country? c, context) =>
+  String localizeCountryName(CountryDictionary? c, context) =>
       c == null ? "—" : CountryLocalizer.localize(c.country, context);
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wyceny/features/quotations/domain/models/dictionaries/dicts.dart';
+import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
+import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotation_items_summary_row.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotation_map.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
-import '../viewmodels/quotation_viewmodel.dart';
-import 'quotation_item_widget.dart';
-import 'quotation_map.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotation_items_table.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotation_quote_details_panel.dart';
 
 class QuotationScreen extends StatelessWidget {
   const QuotationScreen({super.key});
@@ -13,7 +15,7 @@ class QuotationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<QuotationViewModel>();
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -21,6 +23,7 @@ class QuotationScreen extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
+                // zostawiam jak było w Twoim screenie (zakładam, że VM to ma)
                 t.topbar_customer(vm.customerName, vm.contractorName),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -35,279 +38,316 @@ class QuotationScreen extends StatelessWidget {
       ),
       body: LayoutBuilder(
         builder: (context, c) {
-          final isPhone = c.maxWidth < 600;
-          final isWide  = c.maxWidth >= 1100;
+          final w = c.maxWidth;
 
-          final left = _LeftPane(vm: vm, isPhone: isPhone);
-          final right = const QuotationMap();
+          final isPhone = w < 600;
+          final isMedium = w >= 600 && w < 1100;
+          final isWide = w >= 1100;
 
-          if (isWide) {
-            // Desktop / szeroko
-            return Row(
-              children: [
-                // W trybie szerokim _LeftPane sam w sobie ma scroll (ListView)
-                Expanded(flex: 2, child: left),
-                const VerticalDivider(width: 1),
-                Expanded(flex: 1, child: right),
-              ],
-            );
-          } else {
-            // Telefon / wąsko: JEDEN zewnętrzny scroll
+          // PHONE: jedna kolumna, jeden scroll
+          if (isPhone) {
             return ListView(
               padding: EdgeInsets.zero,
               children: [
-                // W trybie wąskim _LeftPane zwraca Column (bez własnego scrolla)
-                left,
+                _HeaderSection(vm: vm, scrollable: false),
                 const Divider(height: 1),
-                // Mapa na samym dole
-                right,
+                SizedBox(
+                  height: 240,
+                  child: const QuotationMap(),
+                ),
+                const Divider(height: 1),
+                _BodySection(vm: vm, embedded: true),
               ],
             );
           }
+
+          // MEDIUM + WIDE: góra split bez scrolla w mapie, dół scrollowany
+          final leftFlex = isWide ? 2 : 3;
+          final rightFlex = 2;
+
+          return Column(
+            children: [
+              // TOP (split, mapa bez scrolla, przyklejona, min wysokość)
+              SizedBox(
+                height: 260, // <- możesz ustawić np. 280/320; to jest stała wysokość topu
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      flex: leftFlex,
+                      child: _HeaderSection(vm: vm, scrollable: true),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(
+                      flex: rightFlex,
+                      child: SizedBox.expand(
+                        child: ClipRect(
+                          child: const QuotationMap(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Divider(height: 1),
+
+              // BOTTOM: pełna szerokość, jeden scroll
+              Expanded(
+                child: _BodySection(vm: vm),
+              ),
+            ],
+          );
         },
       ),
     );
   }
 }
 
-class _LeftPane extends StatelessWidget {
+class _HeaderSection extends StatelessWidget {
   final QuotationViewModel vm;
-  final bool isPhone;
-  const _LeftPane({required this.vm, required this.isPhone});
+  final bool scrollable;
+  const _HeaderSection({required this.vm, required this.scrollable});
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
 
-    final content = [
-      // --- Nagłówek i ogłoszenia ---
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: Text(t.quotation_title, style: Theme.of(context).textTheme.headlineMedium),
-      ),
+    final child = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            t.quotation_title,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _CountryDropdown(
+                      label: t.gen_origin_country,
+                      countriesLoading: vm.countriesLoading,
+                      countriesError: vm.countriesError,
+                      countries: vm.countries,
+                      selectedId: vm.originCountryId,
+                      onChanged: vm.setOriginCountryId,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(labelText: t.gen_origin_zip),
+                      onChanged: vm.setOriginZip,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _CountryDropdown(
+                      label: t.gen_dest_country,
+                      countriesLoading: vm.countriesLoading,
+                      countriesError: vm.countriesError,
+                      countries: vm.countries,
+                      selectedId: vm.destinationCountryId,
+                      onChanged: vm.setDestinationCountryId,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(labelText: t.gen_dest_zip),
+                      onChanged: vm.setDestinationZip,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+
+    // W medium/wide: lewy panel może mieć scroll, ale mapa nadal bez scrolla.
+    if (scrollable) {
+      return ClipRect(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.zero,
+          child: child,
+        ),
+      );
+    }
+
+    // W phone: header jest w głównym ListView, więc tu NIE robimy scrolla.
+    return child;
+  }
+}
+
+class _BodySection extends StatelessWidget {
+  final QuotationViewModel vm;
+  final bool embedded; // <— gdy true: bez własnego scrolla
+  const _BodySection({required this.vm, this.embedded = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+
+    final children = <Widget>[
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Text(
-          "${t.announcement_line} • ${t.overdue_info}",
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        child: Text(t.items_section, style: Theme.of(context).textTheme.titleLarge),
       ),
+      const SizedBox(height: 8),
+
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: QuotationItemsTable(vm: vm),
+      ),
+
       const SizedBox(height: 12),
 
-      // --- Parametry wyceny (nr + kraje + extra) ---
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
+        child: Wrap(
+          spacing: 24,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            TextField(
-              decoration: InputDecoration(labelText: t.gen_quote_number),
-              onChanged: (v) => vm.quotationNumber = v,
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                FilledButton.icon(
+                  onPressed: vm.addEmptyItem,
+                  icon: const Icon(Icons.add),
+                  label: Text(t.add_item),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final ok = await _confirm(
+                      context,
+                      title: t.action_clear,
+                      message: t.confirm_clear_all,
+                    );
+                    if (ok != true) return;
+                    vm.clearAllData();
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(t.action_clear),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Row(children: [
-              Expanded(
-                child: _CountryDropdown(
-                  label: t.gen_origin_country,
-                  countriesLoading: vm.countriesLoading,
-                  countriesError: vm.countriesError,
-                  countries: vm.countries,
-                  selectedId: vm.originCountryId,
-                  onChanged: vm.setOriginCountry,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(labelText: t.gen_origin_zip),
-                  onChanged: (v) => vm.originZip = v,
-                ),
-              ),
-            ]),
-            const SizedBox(height: 8),
-            Row(children: [
-              Expanded(
-                child: _CountryDropdown(
-                  label: t.gen_dest_country,
-                  countriesLoading: vm.countriesLoading,
-                  countriesError: vm.countriesError,
-                  countries: vm.countries,
-                  selectedId: vm.destinationCountryId,
-                  onChanged: vm.setDestinationCountry,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(labelText: t.gen_dest_zip),
-                  onChanged: (v) => vm.destinationZip = v,
-                ),
-              ),
-            ]),
-            const SizedBox(height: 16),
-            // Extra – część „parametrów”
-            CheckboxListTile(
-              value: vm.preAdvice,
-              onChanged: (v) { vm.preAdvice = v ?? false; vm.notifyListeners(); },
-              title: Text(t.extra_pre_advice),
-              contentPadding: EdgeInsets.zero,
-            ),
-            TextField(
-              decoration: InputDecoration(labelText: t.extra_insurance_value),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-              onChanged: (v) => vm.insuranceValue = double.tryParse(v.replaceAll(',', '.')) ?? 0,
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 320),
+              child: QuotationItemsSummaryRow(vm: vm),
             ),
           ],
         ),
       ),
 
-      const SizedBox(height: 20),
+      const SizedBox(height: 16),
 
-      // --- Lista towarów (tytuł + ikonka plus po prawej) ---
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
             Expanded(
-              child: Text(t.items_section, style: Theme.of(context).textTheme.titleLarge),
+              child: FilledButton(
+                onPressed: vm.canQuote ? () => vm.calculateQuote() : null,
+                child: vm.isQuoting
+                    ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                    : Text(t.action_quote),
+              ),
             ),
-            if (isPhone)
-              IconButton(
-                onPressed: vm.addItem,
-                icon: const Icon(Icons.add),
-                tooltip: t.add_item,
-              ),
-          ],
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          children: [
-            for (int i = 0; i < vm.items.length; i++)
-              QuotationItemWidget(
-                index: i,
-                item: vm.items[i],
-                onChanged: (it) => vm.updateItem(i, it),
-                onRemove: () => vm.removeItem(i),
-                isPhone: isPhone,
-              ),
-            if (!isPhone)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: OutlinedButton.icon(
-                  onPressed: vm.addItem,
-                  icon: const Icon(Icons.add),
-                  label: Text(t.add_item),
-                ),
-              ),
           ],
         ),
       ),
 
       const SizedBox(height: 12),
 
-      // --- Blok przycisków #1 (po liście): Wycena + Wyczyść (tylko telefon) ---
-      if (isPhone)
+      if (vm.hasQuote && vm.totalPrice != null)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              FilledButton(onPressed: vm.calculate, child: Text(t.action_quote)),
-              OutlinedButton(onPressed: vm.clear, child: Text(t.action_clear)),
-            ],
-          ),
+          child: QuotationQuoteDetailsPanel(vm: vm),
         ),
 
-      const SizedBox(height: 20),
+      const SizedBox(height: 16),
 
-      // --- Detale wyceny ---
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Text(t.pricing_section, style: Theme.of(context).textTheme.titleLarge),
-      ),
-      const SizedBox(height: 8),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          children: [
-            _kv(t.fee_baf, vm.baf),
-            _kv(t.fee_myt, vm.myt),
-            _kv(t.fee_infl, vm.inflation),
-            _kv(t.fee_recalc_weight, vm.recalculatedWeight),
-            _kv(t.fee_freight, vm.freightPrice),
-            _kv(t.fee_all_in, vm.allInPrice),
-            _kv(t.fee_insurance, vm.insuranceFee),
-            _kv(t.fee_adr, vm.adrFee),
-            _kv(t.fee_service, vm.serviceFee),
-            _kv(t.fee_pre_advice, vm.preAdviceFee),
-            const Divider(),
-            _kv(t.fee_total, vm.total, emphasize: true),
-          ],
-        ),
-      ),
-
-      const SizedBox(height: 12),
-
-      // --- Blok przycisków #2 (po detalach): Zatwierdź + Odrzuć (telefon),
-      //     a na desktopie – stary zestaw pełny
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: isPhone
-            ? Wrap(
+        child: Wrap(
           spacing: 12,
           runSpacing: 12,
           children: [
-            FilledButton.tonal(onPressed: () {/* submit */}, child: Text(t.action_submit)),
-            OutlinedButton(onPressed: () {/* reject */}, child: Text(t.action_reject)),
-          ],
-        )
-            : Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            FilledButton(onPressed: vm.calculate, child: Text(t.action_quote)),
-            FilledButton.tonal(onPressed: () {/* submit */}, child: Text(t.action_submit)),
-            OutlinedButton(onPressed: vm.clear, child: Text(t.action_clear)),
-            OutlinedButton(onPressed: () {/* reject */}, child: Text(t.action_reject)),
+            FilledButton.tonalIcon(
+              onPressed: () async {
+                try {
+                  await vm.submitOrder();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(t.submit_ok)),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${t.submit_error}: $e')),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.send),
+              label: Text(t.action_submit),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                // TODO: rejection reasons – później
+              },
+              icon: const Icon(Icons.block),
+              label: Text(t.action_reject),
+            ),
           ],
         ),
       ),
     ];
 
-    // WERSJE SCROLLOWANIA:
-    // - Desktop/tablet szeroki: własny ListView (wewnętrzny scroll)
-    // - Telefon/wąsko: zwracamy Column (bez scrolla) — scroll robi ListView z rodzica
-    return isPhone
-        ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: content)
-        : ListView(
-      padding: EdgeInsets.zero,
-      children: content,
-    );
-  }
+    if (embedded) {
+      // brak własnego scrolla — rodzic (ListView) skroluje całość
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      );
+    }
 
-  Widget _kv(String k, double v, {bool emphasize = false}) {
-    final style = emphasize
-        ? const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
-        : const TextStyle();
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Expanded(child: Text(k)),
-          Text(v.toStringAsFixed(2), style: style),
-        ],
-      ),
+    // standard (medium/wide): własny scroll
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: children,
     );
   }
 }
+
+// -------------------- Country dropdown --------------------
 
 class _CountryDropdown extends StatelessWidget {
   final String label;
   final bool countriesLoading;
   final Object? countriesError;
-  final List<Country> countries;
+  final List<CountryDictionary> countries;
   final int? selectedId;
   final ValueChanged<int?> onChanged;
 
@@ -322,14 +362,21 @@ class _CountryDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
 
     if (countriesLoading) {
       return InputDecorator(
         decoration: InputDecoration(labelText: label),
-        child: const SizedBox(height: 24, child: Align(alignment: Alignment.centerLeft, child: CircularProgressIndicator(strokeWidth: 2))),
+        child: const SizedBox(
+          height: 24,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
       );
     }
+
     if (countriesError != null) {
       return InputDecorator(
         decoration: InputDecoration(labelText: label, errorText: countriesError.toString()),
@@ -340,18 +387,40 @@ class _CountryDropdown extends StatelessWidget {
         ),
       );
     }
+
     return DropdownButtonFormField<int>(
       value: selectedId,
       isExpanded: true,
       decoration: InputDecoration(labelText: label),
       items: countries
-          .map((c) => DropdownMenuItem<int>(
-        value: c.id,
-        child: Text(CountryLocalizer.localize(c.country, context)),
-      ))
+          .map(
+            (c) => DropdownMenuItem<int>(
+          value: c.countryId,
+          child: Text(CountryLocalizer.localize(c.country, context)),
+        ),
+      )
           .toList(),
       onChanged: onChanged,
     );
   }
 }
 
+// -------------------- Helpers --------------------
+
+Future<bool?> _confirm(
+    BuildContext context, {
+      required String title,
+      required String message,
+    }) {
+  return showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Nie')),
+        FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Tak')),
+      ],
+    ),
+  );
+}

@@ -128,6 +128,18 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get common_retry;
 
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'no'**
+  String get no;
+
   /// No description provided for @app_companyName.
   ///
   /// In en, this message translates to:
@@ -746,6 +758,18 @@ abstract class AppLocalizations {
   /// **'Actions'**
   String get col_actions;
 
+  /// No description provided for @col_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get col_details;
+
+  /// No description provided for @col_route.
+  ///
+  /// In en, this message translates to:
+  /// **'From/To'**
+  String get col_route;
+
   /// No description provided for @action_edit.
   ///
   /// In en, this message translates to:
@@ -763,6 +787,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New quotation'**
   String get action_new_quotation;
+
+  /// No description provided for @action_open_order.
+  ///
+  /// In en, this message translates to:
+  /// **'View shipment'**
+  String get action_open_order;
 
   /// No description provided for @reason_optional.
   ///
@@ -991,6 +1021,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'—'**
   String get status_unknown;
+
+  /// No description provided for @confirm_clear_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all quote data (icluding all items)?'**
+  String get confirm_clear_all;
+
+  /// No description provided for @submit_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit ok.'**
+  String get submit_ok;
+
+  /// No description provided for @submit_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get submit_error;
+
+  /// No description provided for @items_empty_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add position'**
+  String get items_empty_hint;
+
+  /// No description provided for @item_cbm.
+  ///
+  /// In en, this message translates to:
+  /// **'CBM'**
+  String get item_cbm;
+
+  /// No description provided for @item_lbm.
+  ///
+  /// In en, this message translates to:
+  /// **'LBM'**
+  String get item_lbm;
+
+  /// No description provided for @item_ldm_cbm.
+  ///
+  /// In en, this message translates to:
+  /// **'LBM/CBM'**
+  String get item_ldm_cbm;
+
+  /// No description provided for @item_long_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Long weight'**
+  String get item_long_weight;
+
+  /// No description provided for @sum_packages.
+  ///
+  /// In en, this message translates to:
+  /// **'Total packages'**
+  String get sum_packages;
+
+  /// No description provided for @sum_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Total weight'**
+  String get sum_weight;
+
+  /// No description provided for @sum_volume.
+  ///
+  /// In en, this message translates to:
+  /// **'Total volume'**
+  String get sum_volume;
+
+  /// No description provided for @sum_long_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Total long weight'**
+  String get sum_long_weight;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Show details'**
+  String get details;
+
+  /// No description provided for @no_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide details'**
+  String get no_details;
 }
 
 class _AppLocalizationsDelegate

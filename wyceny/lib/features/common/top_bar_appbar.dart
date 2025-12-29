@@ -18,7 +18,7 @@ class TopBarAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     return AppBar(
       title: Row(
         children: [

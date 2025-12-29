@@ -1,13 +1,23 @@
 class QuotationItem {
-  final int? id;
-  final int quotationId;
+  /// API: itemId (nullable)
+  final int? itemId;
+
+  /// UI/API: adr (w API bywa nullable, w UI trzymamy jako bool)
+  ///
+  /// Wymaganie: ikona ADR w wierszu (szara gdy false, czerwona gdy true).
+  final bool adr;
+
+  /// API: quantity/length/width/height/weight (required)
   final int quantity;
   final int length;
   final int width;
   final int height;
   final int weight;
-  final bool? stackability;
+
+  /// API: packaging (nullable)
   final int? packaging;
+
+  /// API: packagingWeight/cbm/ldm/ldmCbm/longWeight (nullable)
   final double? packagingWeight;
   final double? cbm;
   final double? ldm;
@@ -15,14 +25,13 @@ class QuotationItem {
   final double? longWeight;
 
   const QuotationItem({
-    this.id,
-    required this.quotationId,
+    this.itemId,
+    this.adr = false,
     required this.quantity,
     required this.length,
     required this.width,
     required this.height,
     required this.weight,
-    this.stackability,
     this.packaging,
     this.packagingWeight,
     this.cbm,
@@ -32,15 +41,14 @@ class QuotationItem {
   });
 
   factory QuotationItem.fromJson(Map<String, dynamic> json) => QuotationItem(
-    id: json['id'],
-    quotationId: json['pricingId'],
-    quantity: json['quantity'],
-    length: json['length'],
-    width: json['width'],
-    height: json['height'],
-    weight: json['weight'],
-    stackability: json['stackability'],
-    packaging: json['packaging'],
+    itemId: json['itemId'] as int?,
+    adr: (json['adr'] as bool?) ?? false,
+    quantity: json['quantity'] as int,
+    length: json['length'] as int,
+    width: json['width'] as int,
+    height: json['height'] as int,
+    weight: json['weight'] as int,
+    packaging: json['packaging'] as int?,
     packagingWeight: (json['packagingWeight'] as num?)?.toDouble(),
     cbm: (json['cbm'] as num?)?.toDouble(),
     ldm: (json['ldm'] as num?)?.toDouble(),
@@ -49,14 +57,13 @@ class QuotationItem {
   );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'pricingId': quotationId,
+    'itemId': itemId,
+    'adr': adr,
     'quantity': quantity,
     'length': length,
     'width': width,
     'height': height,
     'weight': weight,
-    'stackability': stackability,
     'packaging': packaging,
     'packagingWeight': packagingWeight,
     'cbm': cbm,
@@ -64,4 +71,37 @@ class QuotationItem {
     'ldmCbm': ldmCbm,
     'longWeight': longWeight,
   };
+
+  QuotationItem copyWith({
+    int? itemId,
+    bool? adr,
+    int? quantity,
+    int? length,
+    int? width,
+    int? height,
+    int? weight,
+    int? packaging,
+    double? packagingWeight,
+    double? cbm,
+    double? ldm,
+    double? ldmCbm,
+    double? longWeight,
+    bool clearPackaging = false,
+  }) {
+    return QuotationItem(
+      itemId: itemId ?? this.itemId,
+      adr: adr ?? this.adr,
+      quantity: quantity ?? this.quantity,
+      length: length ?? this.length,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
+      packaging: clearPackaging ? null : (packaging ?? this.packaging),
+      packagingWeight: packagingWeight ?? this.packagingWeight,
+      cbm: cbm ?? this.cbm,
+      ldm: ldm ?? this.ldm,
+      ldmCbm: ldmCbm ?? this.ldmCbm,
+      longWeight: longWeight ?? this.longWeight,
+    );
+  }
 }

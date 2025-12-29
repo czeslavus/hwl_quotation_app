@@ -6,7 +6,7 @@ import 'package:wyceny/features/common/top_bar_appbar.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
 
-import '../viewmodels/orders_list_viewmodel.dart';
+import 'package:wyceny/features/orders/ui/viewmodels/orders_list_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
 
 class OrdersListScreen extends StatelessWidget {
@@ -27,7 +27,7 @@ class _OrdersListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<OrdersListViewModel>();
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
 
     final width = MediaQuery.sizeOf(context).width;
     final isPhone = width < 600;
@@ -144,7 +144,7 @@ class _NewOrderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     return FilledButton.icon(
       onPressed: onPressed,
       icon: const Icon(Icons.add),
@@ -180,7 +180,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     final vm = widget.vm;
 
     final width = MediaQuery.sizeOf(context).width;
@@ -196,11 +196,11 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         width: 220,
         child: DropdownButtonFormField<int>(
           isExpanded: true,
-          value: vm.originCountryId,
+          initialValue: vm.originCountryId,
           decoration: InputDecoration(labelText: t.gen_origin_country),
           items: vm.countries
               .map((c) => DropdownMenuItem(
-            value: c.id,
+            value: c.countryId,
             child: Text(CountryLocalizer.localize(c.country, context)),
           ))
               .toList(),
@@ -211,11 +211,11 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         width: 220,
         child: DropdownButtonFormField<int>(
           isExpanded: true,
-          value: vm.destCountryId,
+          initialValue: vm.destCountryId,
           decoration: InputDecoration(labelText: t.gen_dest_country),
           items: vm.countries
               .map((c) => DropdownMenuItem(
-            value: c.id,
+            value: c.countryId,
             child: Text(CountryLocalizer.localize(c.country, context)),
           ))
               .toList(),
@@ -226,7 +226,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         width: 200,
         child: DropdownButtonFormField<String>(
           isExpanded: true,
-          value: vm.status,
+          initialValue: vm.status,
           decoration: InputDecoration(labelText: t.col_status),
           items: vm.statusOptions
               .map((s) => DropdownMenuItem(value: s, child: Text(vm.statusLabel(s))))
@@ -236,8 +236,8 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
       ),
     ];
 
-    final onApply = () => vm.applyFilters(from: _from, to: _to, originId: vm.originCountryId, destId: vm.destCountryId, status: vm.status);
-    final onClear = () {
+    void onApply() => vm.applyFilters(from: _from, to: _to, originId: vm.originCountryId, destId: vm.destCountryId, status: vm.status);
+    void onClear() {
       setState(() {
         _from = null;
         _to = null;
@@ -246,7 +246,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         vm.status = null;
       });
       vm.applyFilters(from: null, to: null, originId: null, destId: null, status: null);
-    };
+    }
 
     if (isPhone) {
       return Wrap(
@@ -343,12 +343,12 @@ class _OrdersTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     const double kMinTableWidth = 1400;
 
-    Widget _h(String s, {double? w}) =>
+    Widget h(String s, {double? w}) =>
         SizedBox(width: w, child: Text(s, overflow: TextOverflow.ellipsis));
-    Widget _c(Widget w, {double? width}) =>
+    Widget c(Widget w, {double? width}) =>
         width == null ? w : SizedBox(width: width, child: w);
 
     final hCtrl = ScrollController();
@@ -362,29 +362,29 @@ class _OrdersTable extends StatelessWidget {
         dataRowMinHeight: 44,
         dataRowMaxHeight: 64,
         columns: [
-          DataColumn(label: _h(t.col_order_nr,       w: 140)),
-          DataColumn(label: _h(t.col_status,         w: 140)),
-          DataColumn(label: _h(t.col_created,        w: 140)),
-          DataColumn(label: _h(t.col_origin_country, w: 160)),
-          DataColumn(label: _h(t.col_origin_zip,     w: 120)),
-          DataColumn(label: _h(t.col_dest_country,   w: 180)),
-          DataColumn(label: _h(t.col_dest_zip,       w: 120)),
-          DataColumn(label: _h(t.col_items_count,    w: 120)),
-          DataColumn(label: _h(t.col_weight,         w: 120)),
-          DataColumn(label: _h(t.col_price,          w: 140)),
-          DataColumn(label: _h(t.col_actions,        w: 220)),
+          DataColumn(label: h(t.col_order_nr,       w: 140)),
+          DataColumn(label: h(t.col_status,         w: 140)),
+          DataColumn(label: h(t.col_created,        w: 140)),
+          DataColumn(label: h(t.col_origin_country, w: 160)),
+          DataColumn(label: h(t.col_origin_zip,     w: 120)),
+          DataColumn(label: h(t.col_dest_country,   w: 180)),
+          DataColumn(label: h(t.col_dest_zip,       w: 120)),
+          DataColumn(label: h(t.col_items_count,    w: 120)),
+          DataColumn(label: h(t.col_weight,         w: 120)),
+          DataColumn(label: h(t.col_price,          w: 140)),
+          DataColumn(label: h(t.col_actions,        w: 220)),
         ],
         rows: vm.items.map<DataRow>((o) => DataRow(cells: [
-          DataCell(_c(Text(o.orderNr ?? o.id ?? "—"),                    width: 140)),
-          DataCell(_c(Text(vm.statusLabel(o.status)),                     width: 140)),
-          DataCell(_c(Text(o.createdAt?.toLocal().toString().split(' ').first ?? "—"), width: 140)),
-          DataCell(_c(Text(vm.localizeCountryName(o.originCountry, context)),          width: 160)),
-          DataCell(_c(Text(o.originZip ?? "—"),                           width: 120)),
-          DataCell(_c(Text(vm.localizeCountryName(o.destCountry, context)),            width: 180)),
-          DataCell(_c(Text(o.destZip ?? "—"),                             width: 120)),
-          DataCell(_c(Text("${o.itemsCount}"),                            width: 120)),
-          DataCell(_c(Text(o.weightChg?.toStringAsFixed(2) ?? "0.00"),    width: 120)),
-          DataCell(_c(Text(o.total?.toStringAsFixed(2) ?? "0.00"),        width: 140)),
+          DataCell(c(Text(o.orderNr ?? o.id ?? "—"),                    width: 140)),
+          DataCell(c(Text(vm.statusLabel(o.status)),                     width: 140)),
+          DataCell(c(Text(o.createdAt?.toLocal().toString().split(' ').first ?? "—"), width: 140)),
+          DataCell(c(Text(vm.localizeCountryName(o.originCountry, context)),          width: 160)),
+          DataCell(c(Text(o.originZip ?? "—"),                           width: 120)),
+          DataCell(c(Text(vm.localizeCountryName(o.destCountry, context)),            width: 180)),
+          DataCell(c(Text(o.destZip ?? "—"),                             width: 120)),
+          DataCell(c(Text("${o.itemsCount}"),                            width: 120)),
+          DataCell(c(Text(o.weightChg?.toStringAsFixed(2) ?? "0.00"),    width: 120)),
+          DataCell(c(Text(o.total?.toStringAsFixed(2) ?? "0.00"),        width: 140)),
           DataCell(_ActionsCell(vm: vm, orderId: o.id!)),
         ])).toList(),
       ),
@@ -422,7 +422,7 @@ class _ActionsCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     return SizedBox(
       width: 220,
       child: FittedBox(
@@ -466,7 +466,7 @@ class _PaginationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final t = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Row(

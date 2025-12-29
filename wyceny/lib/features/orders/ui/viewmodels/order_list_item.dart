@@ -1,4 +1,5 @@
-import 'package:wyceny/features/quotations/domain/models/dictionaries/dicts.dart';
+
+import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
 
 class OrderListItem {
   final String? id;
@@ -6,9 +7,9 @@ class OrderListItem {
   final String? status;
   final DateTime? createdAt;
 
-  final Country? originCountry;
+  final CountryDictionary? originCountry;
   final String? originZip;
-  final Country? destCountry;
+  final CountryDictionary? destCountry;
   final String? destZip;
 
   final int itemsCount;

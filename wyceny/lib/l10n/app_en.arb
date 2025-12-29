@@ -9,6 +9,8 @@
   },
   "itemsCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
   "common_retry": "Retry",
+  "yes": "yes",
+  "no": "no",
 
   "app_companyName": "Hellmann Worldwide Logistics",
   "nav_quote": "Quote",
@@ -132,9 +134,12 @@
   "col_weight": "Weight",
   "col_price": "Price",
   "col_actions": "Actions",
+  "col_details": "Details",
+  "col_route": "From/To",
   "action_edit": "Edit",
   "action_copy": "Copy",
   "action_new_quotation": "New quotation",
+  "action_open_order": "View shipment",
   "reason_optional": "Reason (optional)",
   "cancel": "Cancel",
   "ok": "OK",
@@ -175,5 +180,21 @@
   "status_in_progress": "In progress",
   "status_done": "Completed",
   "status_canceled": "Canceled",
-  "status_unknown": "—"
+  "status_unknown": "—",
+
+  "confirm_clear_all": "Clear all quote data (icluding all items)?",
+  "submit_ok": "Submit ok.",
+  "submit_error": "Error",
+  "items_empty_hint": "Add position",
+  "item_cbm": "CBM",
+  "item_lbm": "LBM",
+  "item_ldm_cbm": "LBM/CBM",
+  "item_long_weight": "Long weight",
+  "sum_packages" : "Total packages",
+  "sum_weight": "Total weight",
+  "sum_volume": "Total volume",
+  "sum_long_weight": "Total long weight",
+  "details": "Show details",
+  "no_details": "Hide details"
+
 }

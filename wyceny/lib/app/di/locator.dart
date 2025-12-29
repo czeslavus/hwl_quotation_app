@@ -28,6 +28,10 @@ import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotations_list_viewmodel.dart';
 
+import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
+import 'package:wyceny/features/dictionaries/data/dictionaries_repository_mock.dart';
+import 'package:wyceny/features/dictionaries/data/dictionaries_repository_impl.dart';
+
 import 'package:wyceny/features/auth/data/services/token_storage/token_storage_secure.dart'
 //    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
     if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_web_secure.dart';
@@ -96,6 +100,12 @@ Future<void> setupDI() async {
 
   getIt.registerLazySingleton<GoRouter>(() => buildRouter(getIt<AuthState>()));
 
+  if (USE_MOCK_API) {
+    getIt.registerLazySingleton<DictionariesRepository>(() => DictionariesRepositoryMock());
+  } else {
+    getIt.registerLazySingleton<DictionariesRepository>(() => DictionariesRepositoryImpl(getIt<Dio>()));
+  }
+
   getIt.registerLazySingleton<QuotationsRepository>(() => MockQuotationsRepository());
 
 
@@ -127,5 +137,6 @@ Future<void> setupDI() async {
   getIt.registerFactory<OrdersListViewModel>(() => OrdersListViewModel());
   getIt.registerFactory<OrderViewModel>(() => OrderViewModel());
 
+  await getIt<DictionariesRepository>().preload();
   await getIt.allReady();
 }

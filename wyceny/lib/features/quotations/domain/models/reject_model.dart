@@ -1,9 +1,22 @@
 class RejectModel {
+  /// API: quotationId (required)
   final int quotationId;
-  final String reason;
-  const RejectModel({required this.quotationId, required this.reason});
+
+  /// API: rejectCauseId (required)
+  final int rejectCauseId;
+
+  /// API: rejectCause (nullable, opcjonalny opis)
+  final String? rejectCause;
+
+  const RejectModel({
+    required this.quotationId,
+    required this.rejectCauseId,
+    this.rejectCause,
+  });
+
   Map<String, dynamic> toJson() => {
-    'pricingId': quotationId,
-    'rejectCause': reason,
+    'quotationId': quotationId,
+    'rejectCauseId': rejectCauseId,
+    'rejectCause': rejectCause,
   };
 }

@@ -5,6 +5,8 @@
   "greeting": "Dzień dobry {name}!",
   "itemsCount": "{count, plural, =0{Brak elementów} =1{1 element} other{{count} elementy}}",
   "common_retry": "Ponów",
+  "yes": "tak",
+  "no": "nie",
 
   "app_companyName": "Hellmann Worldwide Logistics",
   "nav_quote": "Wycena",
@@ -125,9 +127,12 @@
   "col_weight": "Waga",
   "col_price": "Cena",
   "col_actions": "Akcje",
+  "col_details": "Detale",
+  "col_route": "Z/Do",
   "action_edit": "Edytuj",
   "action_copy": "Kopiuj",
   "action_new_quotation": "Nowa wycena",
+  "action_open_order": "Pokaż zamówienie",
   "reason_optional": "Powód (opcjonalnie)",
   "cancel": "Anuluj",
   "ok": "OK",
@@ -235,5 +240,20 @@
     "@status_canceled": {"description": "Status zamówienia: anulowane"},
 
     "status_unknown": "—",
-    "@status_unknown": {"description": "Nieznany status / pauza"}
+    "@status_unknown": {"description": "Nieznany status / pauza"},
+
+    "confirm_clear_all": "Usunąć wprowadzone dane wyceny (włączając w to wszystkie pozycje)?",
+    "submit_ok": "Zapisane",
+    "submit_error": "Błąd",
+  "items_empty_hint": "Dodaj pozycję",
+  "item_cbm": "CBM",
+  "item_lbm": "LBM",
+  "item_ldm_cbm": "LBM/CBM",
+  "item_long_weight": "Long weight",
+  "sum_packages" : "Razem opakowań",
+  "sum_weight": "Sumaryczna masa",
+  "sum_volume": "Sumaryczna objętość",
+  "sum_long_weight": "Total long weight",
+  "details": "Pokaż szczegóły",
+  "no_details": "Ukryj szczegóły"
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
-import 'package:wyceny/features/quotations/domain/models/dictionaries/dicts.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_map.dart';
 
@@ -420,7 +420,7 @@ class _CountryDropdown extends StatelessWidget {
   final String label;
   final bool countriesLoading;
   final Object? countriesError;
-  final List<Country> countries;
+  final List<CountryDictionary> countries;
   final int? selectedId;
   final ValueChanged<int?> onChanged;
 
@@ -455,12 +455,12 @@ class _CountryDropdown extends StatelessWidget {
       );
     }
     return DropdownButtonFormField<int>(
-      value: selectedId,
+      initialValue: selectedId,
       isExpanded: true,
       decoration: InputDecoration(labelText: label),
       items: countries
           .map((c) => DropdownMenuItem<int>(
-        value: c.id,
+        value: c.countryId,
         child: Text(CountryLocalizer.localize(c.country, context)),
       ))
           .toList(),
@@ -633,7 +633,7 @@ class _PackDropdown extends StatelessWidget {
       "Skrzynie",
     ];
     return DropdownButtonFormField<String>(
-      value: packs.contains(value) ? value : packs.first,
+      initialValue: packs.contains(value) ? value : packs.first,
       isExpanded: true,
       decoration: const InputDecoration(labelText: "Typ opakowania"),
       items: packs.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
