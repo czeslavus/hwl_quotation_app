@@ -182,8 +182,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get topbar_logout => 'Log out';
 
   @override
-  String topbar_customer(Object contractor, Object name) {
-    return '$name — $contractor';
+  String topbar_customer(Object branch, Object name, Object number) {
+    return '$name — $branch ($number)';
   }
 
   @override

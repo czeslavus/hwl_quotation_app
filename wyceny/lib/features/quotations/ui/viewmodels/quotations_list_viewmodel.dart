@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
@@ -16,15 +15,11 @@ class QuotationsListViewModel extends ChangeNotifier {
     AuthState? auth,
   })  : _repo = repo ?? getIt<QuotationsRepository>(),
         _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
-        _auth = auth ?? getIt<AuthState>();
+        auth = auth ?? getIt<AuthState>();
 
   final QuotationsRepository _repo;
-  final AuthState _auth;
+  final AuthState auth;
   final DictionariesRepository _dictRepo;
-
-  // Topbar (zależne od AuthState)
-  String get customerName => "${_auth.forename} ${_auth.surname}";
-  String get contractorName => _auth.contractorName;
 
   // Filtry
   DateTime? dateFrom;
@@ -55,7 +50,7 @@ class QuotationsListViewModel extends ChangeNotifier {
 
   Future<void> _loadCountries() async {
     try {
-      final data = await _dictRepo.countries;
+      final data = _dictRepo.countries;
       countries = data;
 
     } catch (_) {/* brak fatal */}
@@ -63,7 +58,7 @@ class QuotationsListViewModel extends ChangeNotifier {
 
   Future<void> _loadStatuses() async {
     try {
-      final dicts = await _dictRepo.statuses;
+      final dicts = _dictRepo.statuses;
       statuses = {for (final s in dicts) s.statusId: (s.name ?? s.statusId.toString())};
     } catch (_) {/* fallback na ID */}
   }

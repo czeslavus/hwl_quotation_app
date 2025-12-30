@@ -7,10 +7,10 @@ class AuthState extends ChangeNotifier {
   final AuthService _service;
 
   String get user => _service.user;
-
-  String get contractorName => "Nazwa z SL";
-  String get forename => "Jan";
-  String get surname => "Kowalski";
+  String get forename => _service.firstName;
+  String get surname => _service.lastName;
+  String get contractorName => _service.branch;
+  String get skyLogicNumber => _service.skyLogicNumber;
 
   AuthState({
     required AuthService service,

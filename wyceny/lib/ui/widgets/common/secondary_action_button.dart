@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'base_action_button.dart';
 
-class DangerActionButton extends StatelessWidget {
-  const DangerActionButton({
+class SecondaryActionButton extends StatelessWidget {
+  const SecondaryActionButton({
     super.key,
     required this.onPressed,
     required this.icon,
@@ -10,11 +10,18 @@ class DangerActionButton extends StatelessWidget {
     this.tooltip,
     this.showCaption = true,
     this.height = 40,
+
+    /// Można nadpisać kolory:
     this.backgroundColor,
     this.hoverBackgroundColor,
     this.foregroundColor,
     this.disabledBackgroundColor,
     this.disabledForegroundColor,
+
+    /// Można nadpisać border:
+    this.borderColor,
+    this.hoverBorderColor,
+
     this.borderRadius = 8,
     this.iconSize = 18,
   });
@@ -26,18 +33,22 @@ class DangerActionButton extends StatelessWidget {
   final bool showCaption;
   final double height;
 
-  /// Pozostawione do nadpisania
   final Color? backgroundColor;
   final Color? hoverBackgroundColor;
   final Color? foregroundColor;
   final Color? disabledBackgroundColor;
   final Color? disabledForegroundColor;
 
+  final Color? borderColor;
+  final Color? hoverBorderColor;
+
   final double borderRadius;
   final double iconSize;
 
   @override
   Widget build(BuildContext context) {
+    final defaultBorder = BorderSide(color: borderColor ?? const Color(0xFFE0E0E0));
+
     return BaseActionButton(
       onPressed: onPressed,
       icon: icon,
@@ -47,11 +58,19 @@ class DangerActionButton extends StatelessWidget {
       height: height,
       iconSize: iconSize,
       borderRadius: borderRadius,
-      backgroundColor: backgroundColor ?? const Color(0xFFD32F2F), // Red 700
-      hoverBackgroundColor: hoverBackgroundColor,
-      foregroundColor: foregroundColor ?? Colors.white,
-      disabledBackgroundColor: disabledBackgroundColor ?? const Color(0xFFBDBDBD),
-      disabledForegroundColor: disabledForegroundColor ?? Colors.white,
+
+      backgroundColor: backgroundColor ?? Colors.white,
+      hoverBackgroundColor: hoverBackgroundColor ?? const Color(0xFFF5F5F5),
+      foregroundColor: foregroundColor ?? Colors.black87,
+
+      disabledBackgroundColor: disabledBackgroundColor ?? const Color(0xFFE0E0E0),
+      disabledForegroundColor: disabledForegroundColor ?? Colors.grey,
+
+      border: defaultBorder,
+      hoverBorderColor: hoverBorderColor ?? const Color(0xFFBDBDBD),
+
+      // dla secondary cień może być delikatniejszy; zostawiam true, bo ładnie wygląda
+      enableHoverShadow: true,
     );
   }
 }

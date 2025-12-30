@@ -53,7 +53,7 @@ class QuotationQuoteDetailsPanel extends StatelessWidget {
                   subtitle: Text('ADR: ${adr ? t.yes : t.no}'),
                   trailing: Text(price.toStringAsFixed(2)),
                 );
-              }).toList(),
+              }),
           ],
         ),
       ),

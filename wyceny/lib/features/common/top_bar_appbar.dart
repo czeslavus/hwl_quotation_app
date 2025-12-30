@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
 class TopBarAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String customerName;
-  final String contractorName;
-  final VoidCallback? onLogout;
+  final AuthState authState;
 
   const TopBarAppBar({
     super.key,
-    required this.customerName,
-    required this.contractorName,
-    this.onLogout,
+    required this.authState,
   });
 
   @override
@@ -24,14 +21,9 @@ class TopBarAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Expanded(
             child: Text(
-              t.topbar_customer(customerName, contractorName),
+              t.topbar_customer(authState.forename+' '+authState.surname, authState.contractorName, authState.skyLogicNumber),
               overflow: TextOverflow.ellipsis,
             ),
-          ),
-          FilledButton.tonalIcon(
-            onPressed: onLogout,
-            icon: const Icon(Icons.logout),
-            label: Text(t.topbar_logout),
           ),
         ],
       ),

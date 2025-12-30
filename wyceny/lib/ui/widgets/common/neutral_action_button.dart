@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'base_action_button.dart';
 
-class DangerActionButton extends StatelessWidget {
-  const DangerActionButton({
+class NeutralActionButton extends StatelessWidget {
+  const NeutralActionButton({
     super.key,
     required this.onPressed,
     required this.icon,
@@ -26,7 +26,6 @@ class DangerActionButton extends StatelessWidget {
   final bool showCaption;
   final double height;
 
-  /// Pozostawione do nadpisania
   final Color? backgroundColor;
   final Color? hoverBackgroundColor;
   final Color? foregroundColor;
@@ -47,7 +46,7 @@ class DangerActionButton extends StatelessWidget {
       height: height,
       iconSize: iconSize,
       borderRadius: borderRadius,
-      backgroundColor: backgroundColor ?? const Color(0xFFD32F2F), // Red 700
+      backgroundColor: backgroundColor ?? const Color(0xFF1976D2), // Blue 700
       hoverBackgroundColor: hoverBackgroundColor,
       foregroundColor: foregroundColor ?? Colors.white,
       disabledBackgroundColor: disabledBackgroundColor ?? const Color(0xFFBDBDBD),

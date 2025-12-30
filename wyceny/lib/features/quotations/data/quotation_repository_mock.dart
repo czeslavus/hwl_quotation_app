@@ -22,6 +22,7 @@ class MockQuotationsRepository implements QuotationsRepository {
         quotationId: id,
         deliveryCountryId: random.nextInt(4)+1,
         deliveryZipCode: '00-00${i % 10}',
+        receiptCountryId: random.nextInt(4)+1,
         receiptZipCode: '11-11${i % 10}',
         createDate: DateTime.now().subtract(Duration(days: 30 - i)),
         status: (i % 4) + 1,
@@ -98,6 +99,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       insuranceValue: model.insuranceValue,
       deliveryCountryId: model.deliveryCountryId,
       deliveryZipCode: model.deliveryZipCode,
+      receiptCountryId: model.receiptCountryId,
       receiptZipCode: model.receiptZipCode,
       userName: model.userName,
       quotationPositions: model.quotationPositions,
@@ -120,6 +122,8 @@ class MockQuotationsRepository implements QuotationsRepository {
       inflCorrection: model.inflCorrection,
     );
 
+    await Future.delayed(const Duration(seconds: 2));
+
     _byId[id] = q;
     _archive.insert(0, q);
     return q;
@@ -138,6 +142,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       // request fields
       deliveryCountryId: model.deliveryCountryId,
       deliveryZipCode: model.deliveryZipCode,
+      receiptCountryId: model.receiptCountryId,
       receiptZipCode: model.receiptZipCode,
       additionalServiceId: model.additionalServiceId ?? existing.additionalServiceId,
       adr: model.adr ?? existing.adr,
@@ -165,6 +170,8 @@ class MockQuotationsRepository implements QuotationsRepository {
       inflCorrection: model.inflCorrection ?? existing.inflCorrection,
     );
 
+    await Future.delayed(const Duration(seconds: 2));
+
     _byId[id] = updated;
     final idx = _archive.indexWhere((x) => x.quotationId == id);
     if (idx >= 0) _archive[idx] = updated;
@@ -183,6 +190,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       quotationId: newId,
       deliveryCountryId: src.deliveryCountryId,
       deliveryZipCode: src.deliveryZipCode,
+      receiptCountryId: src.receiptCountryId,
       receiptZipCode: src.receiptZipCode,
       createDate: DateTime.now(),
       status: 1,
@@ -210,6 +218,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       quotationId: q.quotationId,
       deliveryCountryId: q.deliveryCountryId,
       deliveryZipCode: q.deliveryZipCode,
+      receiptCountryId: q.receiptCountryId,
       receiptZipCode: q.receiptZipCode,
       createDate: q.createDate,
       status: 3, // Approved
@@ -239,6 +248,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       quotationId: q.quotationId,
       deliveryCountryId: q.deliveryCountryId,
       deliveryZipCode: q.deliveryZipCode,
+      receiptCountryId: q.receiptCountryId,
       receiptZipCode: q.receiptZipCode,
       createDate: q.createDate,
       status: 4, // Rejected
@@ -291,6 +301,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       quotationId: q.quotationId,
       deliveryCountryId: q.deliveryCountryId,
       deliveryZipCode: q.deliveryZipCode,
+      receiptCountryId: q.receiptCountryId,
       receiptZipCode: q.receiptZipCode,
       createDate: q.createDate,
       status: 3, // Approved -> wysłany

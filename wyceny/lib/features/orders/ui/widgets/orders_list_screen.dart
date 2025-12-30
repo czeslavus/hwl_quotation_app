@@ -33,11 +33,7 @@ class _OrdersListView extends StatelessWidget {
     final isPhone = width < 600;
 
     return Scaffold(
-      appBar: TopBarAppBar(
-        customerName: vm.customerName,
-        contractorName: vm.contractorName,
-        onLogout: () {/* TODO: logout */},
-      ),
+      appBar: TopBarAppBar(authState: vm.auth),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

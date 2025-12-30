@@ -413,8 +413,8 @@ abstract class AppLocalizations {
   /// Top bar title with customer and contractor
   ///
   /// In en, this message translates to:
-  /// **'{name} — {contractor}'**
-  String topbar_customer(Object contractor, Object name);
+  /// **'{name} — {branch} ({number})'**
+  String topbar_customer(Object branch, Object name, Object number);
 
   /// No description provided for @gen_quote_number.
   ///

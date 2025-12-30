@@ -182,8 +182,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get topbar_logout => 'Wyloguj';
 
   @override
-  String topbar_customer(Object contractor, Object name) {
-    return '$name — $contractor';
+  String topbar_customer(Object branch, Object name, Object number) {
+    return '$name — $branch ($number)';
   }
 
   @override
@@ -477,7 +477,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get action_calculate => 'Przelicz';
 
   @override
-  String get action_submit_order => 'ZATWIERDŹ ZLECENIE';
+  String get action_submit_order => 'Zatwierdź zlecenie';
 
   @override
   String get status_new => 'Nowe';

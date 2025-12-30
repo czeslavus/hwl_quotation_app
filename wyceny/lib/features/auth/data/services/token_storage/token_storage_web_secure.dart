@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'dart:js_interop';             // toJS / toDart + JS* typy
+// ignore_for_file: uri_does_not_exist
 import 'dart:js_util' as jsu;         // jsify, promiseToFuture
 import 'package:web/web.dart' as web; // Web APIs
 

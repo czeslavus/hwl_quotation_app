@@ -35,7 +35,7 @@ class QuotationItemsSummaryRow extends StatelessWidget {
       children: [
         item(t.sum_packages, vm.sumPackages.toString()),
         item(t.sum_weight, '${vm.sumWeight.toStringAsFixed(2)} kg'),
-        item(t.sum_volume, '${vm.sumVolume.toStringAsFixed(2)}'),
+        item(t.sum_volume, vm.sumVolume.toStringAsFixed(2)),
         item(t.sum_long_weight, '${vm.sumLongWeight.toStringAsFixed(2)} kg'),
       ],
     );

@@ -15,7 +15,6 @@ import 'package:wyceny/app/di/locator.dart';
 
 import 'package:wyceny/features/auth/ui/widgets/recover_set_password_screen.dart';
 import 'package:wyceny/features/logs/ui/widgets/logs_screen.dart';
-import 'package:wyceny/features/orders/ui/widgets/orders_screen.dart';
 import 'package:wyceny/features/preferences/ui/widgets/preferences_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -80,12 +79,17 @@ GoRouter buildRouter(AuthState auth) {
                   GoRoute(
                     path: ':quotationId',
                     builder: (context, state) {
-                    final quotationId = state.pathParameters['quotationId']!;
-                    return ChangeNotifierProvider(
-                      create: (_) => getIt<QuotationViewModel>()..init(),
-                      child: const QuotationScreen(),
-                    );
-                  },),
+                      final quotationIdStr = state.pathParameters['quotationId'];
+                      final quotationId = int.tryParse(quotationIdStr ?? '');
+
+                      debugPrint('ROUTE /quote/:quotationId -> quotationIdStr=$quotationIdStr, parsed=$quotationId');
+
+                      return ChangeNotifierProvider(
+                        create: (_) => getIt<QuotationViewModel>()..init(quotationId: quotationId),
+                        child: const QuotationScreen(),
+                      );
+                    },
+                  ),
                 ],
               ),
             ],

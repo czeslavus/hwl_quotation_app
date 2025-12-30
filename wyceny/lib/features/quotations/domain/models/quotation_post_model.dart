@@ -25,6 +25,9 @@ class QuotationPostModel {
   /// API: deliveryZipCode (required)
   final String deliveryZipCode;
 
+  /// API: receiptCountryId (required)
+  final int receiptCountryId;
+
   /// API: receiptZipCode (required)
   final String receiptZipCode;
 
@@ -67,6 +70,7 @@ class QuotationPostModel {
     this.ttTime,
     required this.deliveryCountryId,
     required this.deliveryZipCode,
+    required this.receiptCountryId,
     required this.receiptZipCode,
     this.userName,
     this.createDate,
@@ -100,6 +104,7 @@ class QuotationPostModel {
     'insuranceValue': insuranceValue,
     'deliveryCountryId': deliveryCountryId,
     'deliveryZipCode': deliveryZipCode,
+    'receiptCountryId': receiptCountryId,
     'receiptZipCode': receiptZipCode,
     'userName': userName,
     'quotationPositions': quotationPositions?.map((e) => e.toJson()).toList(),

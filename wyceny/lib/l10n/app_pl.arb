@@ -61,7 +61,7 @@
   "announcement_line": "Ogłoszenia / informacje o świętach / ograniczeniach",
   "overdue_info": "Informacje o zaległych płatnościach",
   "topbar_logout": "Wyloguj",
-  "topbar_customer": "{name} — {contractor}",
+  "topbar_customer": "{name} — {branch} ({number})",
 
   "gen_quote_number": "Nr wyceny",
   "gen_origin_country": "Kraj nadania",
@@ -224,7 +224,7 @@
     "action_calculate": "Przelicz",
     "@action_calculate": {"description": "Akcja przeliczenia / kalkulacji"},
 
-    "action_submit_order": "ZATWIERDŹ ZLECENIE",
+    "action_submit_order": "Zatwierdź zlecenie",
     "@action_submit_order": {"description": "Akcja zatwierdzenia zlecenia (wyróżniona)"},
 
     "status_new": "Nowe",

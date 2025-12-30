@@ -1,12 +1,16 @@
 import 'package:flutter/foundation.dart';
+import 'package:wyceny/app/auth.dart';
+import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_list_item.dart';
 
 class OrdersListViewModel extends ChangeNotifier {
-  // TopBar
-  String customerName = "";
-  String contractorName = "";
+  OrdersListViewModel({
+    AuthState? auth,
+  })  : auth = auth ?? getIt<AuthState>();
+
+  final AuthState auth;
 
   // Dane / status
   bool loading = false;

@@ -210,7 +210,7 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
       width: width,
       child: DropdownButtonFormField<int?>(
         isDense: true,
-        value: safeValue,
+        initialValue: safeValue,
         items: dropdownItems,
         decoration: _cellDeco(),
         onChanged: onChanged,

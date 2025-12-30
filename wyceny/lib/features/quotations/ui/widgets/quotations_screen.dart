@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotation_header_section.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_summary_row.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_map.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
@@ -9,6 +10,7 @@ import 'package:wyceny/l10n/country_localizer.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_table.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_quote_details_panel.dart';
 import 'package:wyceny/ui/widgets/common/danger_action_button.dart';
+import 'package:wyceny/ui/widgets/common/neutral_action_button.dart';
 import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
 
 class QuotationScreen extends StatelessWidget {
@@ -25,8 +27,7 @@ class QuotationScreen extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                // zostawiam jak było w Twoim screenie (zakładam, że VM to ma)
-                t.topbar_customer(vm.customerName, vm.contractorName),
+                t.topbar_customer(vm.auth.forename+' '+vm.auth.surname, vm.auth.contractorName, vm.auth.skyLogicNumber),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -51,7 +52,7 @@ class QuotationScreen extends StatelessWidget {
             return ListView(
               padding: EdgeInsets.zero,
               children: [
-                _HeaderSection(vm: vm, scrollable: false),
+                QuotationHeaderSection(vm: vm, scrollable: false),
                 const Divider(height: 1),
                 SizedBox(
                   height: 240,
@@ -77,7 +78,7 @@ class QuotationScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       flex: leftFlex,
-                      child: _HeaderSection(vm: vm, scrollable: true),
+                      child: QuotationHeaderSection(vm: vm, scrollable: true),
                     ),
                     const VerticalDivider(width: 1),
                     Expanded(
@@ -103,95 +104,6 @@ class QuotationScreen extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-class _HeaderSection extends StatelessWidget {
-  final QuotationViewModel vm;
-  final bool scrollable;
-  const _HeaderSection({required this.vm, required this.scrollable});
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-
-    final child = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            t.quotation_title,
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _CountryDropdown(
-                      label: t.gen_origin_country,
-                      countriesLoading: vm.countriesLoading,
-                      countriesError: vm.countriesError,
-                      countries: vm.countries,
-                      selectedId: vm.originCountryId,
-                      onChanged: vm.setOriginCountryId,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(labelText: t.gen_origin_zip),
-                      onChanged: vm.setOriginZip,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _CountryDropdown(
-                      label: t.gen_dest_country,
-                      countriesLoading: vm.countriesLoading,
-                      countriesError: vm.countriesError,
-                      countries: vm.countries,
-                      selectedId: vm.destinationCountryId,
-                      onChanged: vm.setDestinationCountryId,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(labelText: t.gen_dest_zip),
-                      onChanged: vm.setDestinationZip,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-
-    // W medium/wide: lewy panel może mieć scroll, ale mapa nadal bez scrolla.
-    if (scrollable) {
-      return ClipRect(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.zero,
-          child: child,
-        ),
-      );
-    }
-
-    // W phone: header jest w głównym ListView, więc tu NIE robimy scrolla.
-    return child;
   }
 }
 
@@ -229,6 +141,11 @@ class _BodySection extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
+                NeutralActionButton(
+                    onPressed: vm.canQuote ? () => vm.calculateQuote() : null,
+                    icon: Icons.qr_code,
+                    label: t.action_quote
+                ),
                 PositiveActionButton(
                   onPressed: vm.addEmptyItem,
                   icon: Icons.add,
@@ -260,28 +177,6 @@ class _BodySection extends StatelessWidget {
       ),
 
       const SizedBox(height: 16),
-
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            Expanded(
-              child: FilledButton(
-                onPressed: vm.canQuote ? () => vm.calculateQuote() : null,
-                child: vm.isQuoting
-                    ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-                    : Text(t.action_quote),
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      const SizedBox(height: 12),
 
       if (vm.hasQuote && vm.totalPrice != null)
         Padding(
@@ -316,12 +211,11 @@ class _BodySection extends StatelessWidget {
               },
               icon: Icons.send,
               label: t.action_submit,
-              tooltip: t.action_submit,
             ),
             DangerActionButton(
               icon: Icons.block,
               label: t.action_reject,
-              color: Colors.red.shade800,
+              backgroundColor: Colors.red.shade800,
               onPressed: () {
                 // TODO: rejection reasons
               },
@@ -347,72 +241,7 @@ class _BodySection extends StatelessWidget {
   }
 }
 
-// -------------------- Country dropdown --------------------
-
-class _CountryDropdown extends StatelessWidget {
-  final String label;
-  final bool countriesLoading;
-  final Object? countriesError;
-  final List<CountryDictionary> countries;
-  final int? selectedId;
-  final ValueChanged<int?> onChanged;
-
-  const _CountryDropdown({
-    required this.label,
-    required this.countriesLoading,
-    required this.countriesError,
-    required this.countries,
-    required this.selectedId,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-
-    if (countriesLoading) {
-      return InputDecorator(
-        decoration: InputDecoration(labelText: label),
-        child: const SizedBox(
-          height: 24,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      );
-    }
-
-    if (countriesError != null) {
-      return InputDecorator(
-        decoration: InputDecoration(labelText: label, errorText: countriesError.toString()),
-        child: TextButton.icon(
-          onPressed: () => context.read<QuotationViewModel>().init(),
-          icon: const Icon(Icons.refresh),
-          label: Text(t.common_retry),
-        ),
-      );
-    }
-
-    return DropdownButtonFormField<int>(
-      value: selectedId,
-      isExpanded: true,
-      decoration: InputDecoration(labelText: label),
-      items: countries
-          .map(
-            (c) => DropdownMenuItem<int>(
-          value: c.countryId,
-          child: Text(CountryLocalizer.localize(c.country, context)),
-        ),
-      )
-          .toList(),
-      onChanged: onChanged,
-    );
-  }
-}
-
 // -------------------- Helpers --------------------
-
 Future<bool?> _confirm(
     BuildContext context, {
       required String title,

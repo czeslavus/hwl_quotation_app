@@ -2,6 +2,12 @@
 abstract class AuthService {
 
   String get user;
+  String get firstName;
+  String get lastName;
+  String get branch;
+  String get skyLogicNumber;
+
+  String  getDisplayName();
 
   Future<bool> init();
 

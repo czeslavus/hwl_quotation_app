@@ -33,8 +33,8 @@ import 'package:wyceny/features/dictionaries/data/dictionaries_repository_mock.d
 import 'package:wyceny/features/dictionaries/data/dictionaries_repository_impl.dart';
 
 import 'package:wyceny/features/auth/data/services/token_storage/token_storage_secure.dart'
-//    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
     if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_web_secure.dart';
+//    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
 
 final getIt = GetIt.instance;
 

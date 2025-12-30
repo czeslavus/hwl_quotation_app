@@ -14,8 +14,21 @@ class AuthServiceImpl implements AuthService {
 
   @override
   String get user => _displayUserName;
+  @override
+  String get firstName => _firstName;
+  @override
+  String get lastName => _lastName;
+  @override
+  String get branch => _branch;
+  @override
+  String get skyLogicNumber => _slNumber;
 
   String _displayUserName = '';
+  String _firstName = '';
+  String _lastName = '';
+  String _branch = '';
+  String _slNumber = '';
+
 
   AuthServiceImpl({
     required AuthRepository repository,
@@ -31,11 +44,15 @@ class AuthServiceImpl implements AuthService {
 
   @override
   Future<bool> init() async {
-    // Jeśli tokeny istnieją — skonfiguruj timer
     final access = await _secureStorage.read(kAccessTokenKey);
     final refresh = await _secureStorage.read(kRefreshTokenKey);
     if (access != null && refresh != null) {
       _scheduleRefreshFromAccess(access);
+      _firstName = await _secureStorage.read('firstName') ?? 'Jan';
+      _lastName = await _secureStorage.read('lastName') ?? 'Nowak';
+      _slNumber = await _secureStorage.read('skyLogicNumber') ?? '007';
+      _branch = await _secureStorage.read('branch') ?? 'CD Projekt';
+
       return true;
     }
     return false;
@@ -44,11 +61,14 @@ class AuthServiceImpl implements AuthService {
   @override
   Future<bool> login(String username, String password) async {
     final res = await _repo.login(username: username, password: password);
-    // TODO: dopasuj do kształtu payloadu backendu
     final access = res['access_token'] as String?;
     final refresh = res['refresh_token'] as String?;
     final du = res['user']?['username'] as String?;
     _displayUserName = du ?? username;
+    _firstName = res['firstName'] ?? 'Jan';
+    _lastName = res['lastName'] ?? 'Nowak';
+    _slNumber = res['skyLogicNumber'] ?? '007';
+    _branch = res['branch'] ?? 'Kopalnia Bogdanka';
 
     if (access == null || refresh == null) {
       return false;
@@ -56,6 +76,10 @@ class AuthServiceImpl implements AuthService {
 
     await _secureStorage.write(kAccessTokenKey, access);
     await _secureStorage.write(kRefreshTokenKey, refresh);
+    await _secureStorage.write('firstName', _firstName);
+    await _secureStorage.write('lastName', _lastName);
+    await _secureStorage.write('skyLogicNumber', _slNumber);
+    await _secureStorage.write('branch', _branch);
     _scheduleRefreshFromAccess(access);
     return true;
   }
@@ -189,4 +213,9 @@ class AuthServiceImpl implements AuthService {
   }
 
   Future<String?> get accessToken async => _secureStorage.read(kAccessTokenKey);
+
+  @override
+  String getDisplayName() {
+    return firstName+' '+lastName+" ("+skyLogicNumber+", "+branch+")";
+  }
 }

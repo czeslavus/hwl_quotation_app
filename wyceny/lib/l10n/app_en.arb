@@ -65,7 +65,7 @@
     "announcement_line": "Announcements / info about public holidays / restrictions",
     "overdue_info": "Overdue payments information",
     "topbar_logout": "Log out",
-    "topbar_customer": "{name} — {contractor}",
+    "topbar_customer": "{name} — {branch} ({number})",
     "@topbar_customer": {
       "description": "Top bar title with customer and contractor"
     },

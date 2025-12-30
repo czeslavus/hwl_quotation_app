@@ -25,6 +25,9 @@ class Quotation {
   /// API: deliveryZipCode (required)
   final String deliveryZipCode;
 
+  /// API: receiptCountryId (required)
+  final int receiptCountryId;
+
   /// API: receiptZipCode (required)
   final String receiptZipCode;
 
@@ -86,6 +89,7 @@ class Quotation {
     this.insuranceValue,
     required this.deliveryCountryId,
     required this.deliveryZipCode,
+    required this.receiptCountryId,
     required this.receiptZipCode,
     this.userName,
     this.quotationPositions,
@@ -115,6 +119,7 @@ class Quotation {
     insuranceValue: (json['insuranceValue'] as num?)?.toDouble(),
     deliveryCountryId: json['deliveryCountryId'] as int,
     deliveryZipCode: json['deliveryZipCode'] as String,
+    receiptCountryId: json['receiptCountryId'] as int,
     receiptZipCode: json['receiptZipCode'] as String,
     userName: json['userName'] as String?,
     quotationPositions: (json['quotationPositions'] as List?)
@@ -148,6 +153,7 @@ class Quotation {
     'insuranceValue': insuranceValue,
     'deliveryCountryId': deliveryCountryId,
     'deliveryZipCode': deliveryZipCode,
+    'receiptCountryId': receiptCountryId,
     'receiptZipCode': receiptZipCode,
     'userName': userName,
     'quotationPositions': quotationPositions?.map((e) => e.toJson()).toList(),

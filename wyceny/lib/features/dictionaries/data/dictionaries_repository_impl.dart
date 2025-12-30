@@ -204,7 +204,7 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
     final data = res.data;
 
     if (data is Map) {
-      return Map<String, dynamic>.from(data as Map);
+      return Map<String, dynamic>.from(data);
     }
 
     throw DioException(

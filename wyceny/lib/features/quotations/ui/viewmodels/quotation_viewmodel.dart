@@ -14,13 +14,16 @@ class QuotationViewModel extends ChangeNotifier {
     AuthState? auth,
   })  : _repo = repo ?? getIt<QuotationsRepository>(),
         _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
-        _auth = auth ?? getIt<AuthState>();
+        auth = auth ?? getIt<AuthState>();
 
   final QuotationsRepository _repo;
   final DictionariesRepository _dictRepo;
-  final AuthState _auth;
+  final AuthState auth;
 
-  // ---------- Dictionaries ----------
+  bool quotationLoading = false;
+  Object? quotationError;
+  int? loadedQuotationId;
+
   bool countriesLoading = false;
   Object? countriesError;
   List<CountryDictionary> countries = const [];
@@ -32,9 +35,13 @@ class QuotationViewModel extends ChangeNotifier {
   /// bo model słownika może się różnić).
   List<dynamic> packagingUnits = const [];
 
-  Future<void> init() async {
+  Future<void> init({int? quotationId}) async {
+    debugPrint('QuotationViewModel.init(quotationId=$quotationId)');
     await _loadCountries();
     await _loadPackagingUnits();
+    if (quotationId != null) {
+      await loadQuotation(quotationId);
+    }
   }
 
   Future<void> _loadCountries() async {
@@ -42,7 +49,7 @@ class QuotationViewModel extends ChangeNotifier {
     countriesError = null;
     notifyListeners();
     try {
-      final data = await _dictRepo.countries;
+      final data = _dictRepo.countries;
       countries = data;
 
       // sensowne domyślne (jeśli słownik je zawiera)
@@ -58,13 +65,59 @@ class QuotationViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> loadQuotation(int quotationId) async {
+    quotationLoading = true;
+    quotationError = null;
+    loadedQuotationId = quotationId;
+    notifyListeners();
+
+    debugPrint('QuotationViewModel.loadQuotation -> id=$quotationId');
+
+    try {
+      final q = await _repo.getQuotation(quotationId);
+
+      // kraj nadania / receipt/origin
+      originCountryId = q.receiptCountryId;
+
+      // kraj dostawy / delivery/destination
+      destinationCountryId = q.deliveryCountryId;
+
+      // zipy
+      originZip = q.receiptZipCode;
+      destinationZip = q.deliveryZipCode;
+
+      // --- MAPOWANIE POZYCJI ---
+      // Jeśli już są to QuotationItem - przypisz wprost.
+      final dynamic positionsDyn =
+          q.quotationPositions;
+
+      items
+        ..clear()
+        ..addAll((positionsDyn as List).cast<QuotationItem>());
+
+      // Po wczytaniu danych wyczyść wynik wyceny (bo dane wejściowe się zmieniły)
+      resetQuote();
+
+      debugPrint(
+        'Quotation loaded: originCountryId=$originCountryId, destinationCountryId=$destinationCountryId, '
+            'originZip="$originZip", destinationZip="$destinationZip", items=${items.length}',
+      );
+    } catch (e, st) {
+      quotationError = e;
+      debugPrint('loadQuotation ERROR: $e\n$st');
+    } finally {
+      quotationLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> _loadPackagingUnits() async {
     packagingLoading = true;
     packagingError = null;
     notifyListeners();
     try {
       // Zgodnie z Twoją informacją: słownik opakowań = loadUnitDictionary
-      final data = await _dictRepo.loadUnits;
+      final data = _dictRepo.loadUnits;
       packagingUnits = List<dynamic>.from(data as List);
     } catch (e) {
       packagingError = e;
@@ -158,8 +211,6 @@ class QuotationViewModel extends ChangeNotifier {
         (acc, i) => acc + (i.weight.toDouble() * i.quantity.toDouble()),
   );
 
-  /// Objętość liczona jako iloczyn length*width*height * quantity
-  /// (jednostka zależy od danych wejściowych; UI może konwertować na m3).
   double get sumVolume => items.fold<double>(
     0,
         (acc, i) =>
@@ -174,10 +225,8 @@ class QuotationViewModel extends ChangeNotifier {
   // ---------- Quote state ----------
   bool isQuoting = false;
 
-  /// Flaga: wycena jest aktualna (po kliknięciu "Wycena")
   bool hasQuote = false;
 
-  /// Cena sumaryczna (placeholder – docelowo z API)
   double? totalPrice;
 
   /// Szczegóły (placeholder – lista pozycji wyceny)
@@ -191,11 +240,6 @@ class QuotationViewModel extends ChangeNotifier {
     return headerOk && items.isNotEmpty && !isQuoting;
   }
 
-  String get customerName => "Jan Kowalski";
-
-  String get contractorName => "Ubu the King";
-
-  /// Wołaj zawsze gdy zmieni się cokolwiek w quotation lub items.
   void markDirty() {
     resetQuote();
     notifyListeners();
@@ -208,8 +252,6 @@ class QuotationViewModel extends ChangeNotifier {
     isQuoting = false;
   }
 
-  /// Klik "Wycena" – na razie kalkulator placeholder.
-  /// Docelowo tu podepniemy request do API.
   Future<void> calculateQuote() async {
     if (!canQuote) return;
 
@@ -265,6 +307,7 @@ class QuotationViewModel extends ChangeNotifier {
       // required wg modelu:
       deliveryCountryId: destinationCountryId!,
       deliveryZipCode: destinationZip.trim(),
+      receiptCountryId: originCountryId!,
       receiptZipCode: originZip.trim(),
 
       // reszta (opcjonalne / jeśli backend przyjmuje):
