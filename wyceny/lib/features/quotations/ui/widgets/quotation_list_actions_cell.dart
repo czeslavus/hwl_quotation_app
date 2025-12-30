@@ -73,8 +73,12 @@ class QuotationListActionsCell extends StatelessWidget {
                   icon: Icons.edit_outlined,
                   showCaption: false,
                   onPressed: _isValidId && !_isRejected
-                      ? () => context.push('/quote/$quotationId')
-                      : null,
+                      ? () async {
+                        final changed = await context.push('/quote/$quotationId');
+                        if (changed == true) {
+                          await vm.init();
+                        }
+                      } : null,
                 ),
               ),
               _gap,

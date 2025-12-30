@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_header_section.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_summary_row.dart';
-import 'package:wyceny/features/quotations/ui/widgets/quotation_map.dart';
-import 'package:wyceny/l10n/app_localizations.dart';
-import 'package:wyceny/l10n/country_localizer.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_table.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotation_map.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_quote_details_panel.dart';
+import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/ui/widgets/common/danger_action_button.dart';
 import 'package:wyceny/ui/widgets/common/neutral_action_button.dart';
 import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
+import 'package:go_router/go_router.dart';
 
 class QuotationScreen extends StatelessWidget {
   const QuotationScreen({super.key});
@@ -21,240 +20,299 @@ class QuotationScreen extends StatelessWidget {
     final vm = context.watch<QuotationViewModel>();
     final t = AppLocalizations.of(context);
 
-    return Scaffold(
+    return PopScope<bool>(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop)
+          return;
+        context.pop(vm.hasAnyChangesStored);
+      },
+      child: Scaffold(
+
       appBar: AppBar(
         title: Row(
           children: [
             Expanded(
               child: Text(
-                t.topbar_customer(vm.auth.forename+' '+vm.auth.surname, vm.auth.contractorName, vm.auth.skyLogicNumber),
+                t.topbar_customer(
+                  vm.auth.forename + ' ' + vm.auth.surname,
+                  vm.auth.contractorName,
+                  vm.auth.skyLogicNumber,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
-            ),
-            FilledButton.tonalIcon(
-              onPressed: () {/* logout */},
-              icon: const Icon(Icons.logout),
-              label: Text(t.topbar_logout),
             ),
           ],
         ),
       ),
-      body: LayoutBuilder(
-        builder: (context, c) {
-          final w = c.maxWidth;
+      body: Stack(
+        children: [
+          AbsorbPointer(
+            absorbing: vm.isUiLocked,
+            child: Opacity(
+              opacity: vm.isUiLocked ? 0.6 : 1,
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  final w = c.maxWidth;
+                  final isWide = w >= 980;
+                  return isWide ? _WideLayout(vm: vm) : _NarrowLayout(vm: vm);
+                },
+              ),
+            ),
+          ),
 
-          final isPhone = w < 600;
-          final isMedium = w >= 600 && w < 1100;
-          final isWide = w >= 1100;
-
-          // PHONE: jedna kolumna, jeden scroll
-          if (isPhone) {
-            return ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                QuotationHeaderSection(vm: vm, scrollable: false),
-                const Divider(height: 1),
-                SizedBox(
-                  height: 240,
-                  child: const QuotationMap(),
-                ),
-                const Divider(height: 1),
-                _BodySection(vm: vm, embedded: true),
-              ],
-            );
-          }
-
-          // MEDIUM + WIDE: góra split bez scrolla w mapie, dół scrollowany
-          final leftFlex = isWide ? 2 : 3;
-          final rightFlex = 2;
-
-          return Column(
-            children: [
-              // TOP (split, mapa bez scrolla, przyklejona, min wysokość)
-              SizedBox(
-                height: 260, // <- możesz ustawić np. 280/320; to jest stała wysokość topu
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      flex: leftFlex,
-                      child: QuotationHeaderSection(vm: vm, scrollable: true),
-                    ),
-                    const VerticalDivider(width: 1),
-                    Expanded(
-                      flex: rightFlex,
-                      child: SizedBox.expand(
-                        child: ClipRect(
-                          child: const QuotationMap(),
-                        ),
+          // Globalny overlay w trakcie długiej wyceny / submitu (blokuje też "mentally")
+          if (vm.isSubmitting)
+            Center(
+              child: Card(
+                elevation: 8,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Text(t.action_quote),
+                    ],
+                  ),
                 ),
               ),
+            ),
+        ],
+      ),
+    )
+    );
+  }
+}
 
-              const Divider(height: 1),
+class _WideLayout extends StatelessWidget {
+  const _WideLayout({required this.vm});
 
-              // BOTTOM: pełna szerokość, jeden scroll
+  final QuotationViewModel vm;
+
+  @override
+  Widget build(BuildContext context) {
+    // dopasuj proporcje do gustu
+    const leftFlex = 5;
+    const rightFlex = 7;
+
+    return Column(
+      children: [
+        // TOP: header + mapa, bez scrolla
+        SizedBox(
+          height: 260,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               Expanded(
-                child: _BodySection(vm: vm),
+                flex: leftFlex,
+                child: QuotationHeaderSection(vm: vm, scrollable: true),
+              ),
+              const VerticalDivider(width: 1),
+              Expanded(
+                flex: rightFlex,
+                child: SizedBox.expand(
+                  child: ClipRect(
+                    child: const QuotationMap(),
+                  ),
+                ),
               ),
             ],
-          );
-        },
+          ),
+        ),
+        const Divider(height: 1),
+
+        // BOTTOM: jeden scroll
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: _BodyContent(vm: vm),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NarrowLayout extends StatelessWidget {
+  const _NarrowLayout({required this.vm});
+
+  final QuotationViewModel vm;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          QuotationHeaderSection(vm: vm, scrollable: false),
+          const SizedBox(height: 12),
+
+          SizedBox(
+            height: 220,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: const QuotationMap(),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          _BodyContent(vm: vm),
+        ],
       ),
     );
   }
 }
 
-class _BodySection extends StatelessWidget {
+class _BodyContent extends StatelessWidget {
+  const _BodyContent({required this.vm});
+
   final QuotationViewModel vm;
-  final bool embedded; // <— gdy true: bez własnego scrolla
-  const _BodySection({required this.vm, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
 
-    final children = <Widget>[
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Text(t.items_section, style: Theme.of(context).textTheme.titleLarge),
-      ),
-      const SizedBox(height: 8),
-
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: QuotationItemsTable(vm: vm),
-      ),
-
-      const SizedBox(height: 12),
-
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Wrap(
-          spacing: 24,
-          runSpacing: 12,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                NeutralActionButton(
-                    onPressed: vm.canQuote ? () => vm.calculateQuote() : null,
-                    icon: Icons.qr_code,
-                    label: t.action_quote
-                ),
-                PositiveActionButton(
-                  onPressed: vm.addEmptyItem,
-                  icon: Icons.add,
-                  label: t.add_item,
-                  tooltip: t.add_item,
-                ),
-                DangerActionButton(
-                  icon: Icons.delete_outline,
-                  label: t.action_clear,
-                  onPressed: () async {
-                    final ok = await _confirm(
-                      context,
-                      title: t.action_clear,
-                      message: t.confirm_clear_all,
-                    );
-                    if (ok != true) return;
-                    vm.clearAllData();
-                  },
-
-                ),
-              ],
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 320),
-              child: QuotationItemsSummaryRow(vm: vm),
-            ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          t.items_section,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-      ),
+        const SizedBox(height: 8),
 
-      const SizedBox(height: 16),
+        QuotationItemsTable(vm: vm),
+        const SizedBox(height: 8),
 
-      if (vm.hasQuote && vm.totalPrice != null)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: QuotationQuoteDetailsPanel(vm: vm),
-        ),
-
-      const SizedBox(height: 16),
-
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Wrap(
-          spacing: 12,
-          runSpacing: 12,
+        Row(
           children: [
+            Expanded(child: QuotationItemsSummaryRow(vm: vm)),
+            const SizedBox(width: 12),
             PositiveActionButton(
-              onPressed: () async {
-                try {
-                  await vm.submitOrder();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(t.submit_ok)),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${t.submit_error}: $e')),
-                    );
-                  }
-                }
-              },
-              icon: Icons.send,
-              label: t.action_submit,
-            ),
-            DangerActionButton(
-              icon: Icons.block,
-              label: t.action_reject,
-              backgroundColor: Colors.red.shade800,
-              onPressed: () {
-                // TODO: rejection reasons
-              },
+              onPressed: vm.isUiLocked ? null : vm.addEmptyItem,
+              icon: Icons.add,
+              label: t.add_item,
             ),
           ],
         ),
-      ),
-    ];
 
-    if (embedded) {
-      // brak własnego scrolla — rodzic (ListView) skroluje całość
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
-      );
-    }
+        const SizedBox(height: 12),
 
-    // standard (medium/wide): własny scroll
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: children,
+        // Panel wyceny – będzie sam sterował widocznością (vm.hasQuote itd.)
+        QuotationQuoteDetailsPanel(vm: vm),
+
+        const SizedBox(height: 12),
+
+        // Akcje
+        _ActionsRow(vm: vm),
+
+        // trochę miejsca na dole
+        const SizedBox(height: 8),
+      ],
     );
   }
 }
 
-// -------------------- Helpers --------------------
-Future<bool?> _confirm(
-    BuildContext context, {
-      required String title,
-      required String message,
-    }) {
+class _ActionsRow extends StatelessWidget {
+  const _ActionsRow({required this.vm});
+
+  final QuotationViewModel vm;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        PositiveActionButton(
+          icon: Icons.calculate,
+          label: t.action_quote,
+          onPressed: vm.canRequestQuote ? () async {
+            final ok = await vm.requestQuote();
+            if (!ok)
+              return;
+            if (!context.mounted) return;
+          } : null,
+        ),
+        NeutralActionButton(
+          icon: Icons.delete_outline,
+          label: t.action_clear,
+          onPressed: vm.isUiLocked
+              ? null
+              : () async {
+            final ok = await _confirmDialog(
+              context: context,
+              title: t.action_clear,
+              message: t.confirm_clear_all,
+            );
+            if (ok == true) {
+              vm.clearAllData();
+            }
+          },
+        ),
+
+
+        // Finalny przycisk aktywny tylko gdy wycena jest aktualna
+        PositiveActionButton(
+          icon: Icons.send,
+          label: t.action_submit,
+          onPressed: vm.canSubmitFinal
+              ? () async {
+            // Na razie tylko UI-gate i komunikat; docelowo podepniesz właściwy endpoint / flow.
+            // Zostawiamy to jako placeholder, bo API "final submit" nie było tu jeszcze doprecyzowane.
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(t.submit_ok)),
+            );
+          }
+              : null,
+        ),
+
+        // Odrzuć: niewidoczny dla nowego zlecenia (quotationId == null)
+        if (vm.canReject)
+          DangerActionButton(
+            icon: Icons.block,
+            label: t.action_reject,
+            backgroundColor: Colors.redAccent,
+            onPressed: vm.isUiLocked
+                ? null
+                : () {
+              // TODO: rejection reasons / dialog
+            },
+          ),
+      ],
+    );
+  }
+}
+
+Future<bool?> _confirmDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+}) {
   return showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(title),
       content: Text(message),
       actions: [
-        TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Nie')),
-        FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Tak')),
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: const Text('Nie'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(ctx).pop(true),
+          child: const Text('Tak'),
+        ),
       ],
     ),
   );

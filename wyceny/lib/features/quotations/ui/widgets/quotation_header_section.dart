@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
@@ -84,7 +85,15 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
           ),
         ),
         const SizedBox(height: 8),
-
+        // Ogłoszenia
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: AnnouncementsPanel(
+            header: Text("${t.announcement_line} • ${t.overdue_info}"),
+            body: Text("${t.announcement_line} • ${t.overdue_info}"),
+          ),
+        ),
+        const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(

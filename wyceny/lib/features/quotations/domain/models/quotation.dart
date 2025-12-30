@@ -176,3 +176,33 @@ class Quotation {
     'inflCorrection': inflCorrection,
   };
 }
+
+extension QuotationTotals on Quotation {
+  double get totalPrice {
+    double sum = 0.0;
+
+    void add(double? v) {
+      if (v != null) sum += v;
+    }
+
+    add(insurancePrice);
+    add(additionalServicePrice);
+    add(adrPrice);
+    add(shippingPrice);
+    add(baf);
+    add(taf);
+    add(inflCorrection);
+
+    return sum;
+  }
+
+  bool get hasAnyPriceComponent =>
+      (insurancePrice != null) ||
+          (additionalServicePrice != null) ||
+          (adrPrice != null) ||
+          (shippingPrice != null) ||
+          (baf != null) ||
+          (taf != null) ||
+          (inflCorrection != null);
+}
+

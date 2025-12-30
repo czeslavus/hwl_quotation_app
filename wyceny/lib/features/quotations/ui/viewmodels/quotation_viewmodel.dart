@@ -3,6 +3,7 @@ import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
+import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_item.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_post_model.dart';
 import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
@@ -20,146 +21,204 @@ class QuotationViewModel extends ChangeNotifier {
   final DictionariesRepository _dictRepo;
   final AuthState auth;
 
-  bool quotationLoading = false;
-  Object? quotationError;
-  int? loadedQuotationId;
+  Quotation? lastQuotation;
 
+  // ================== ID / TRYB ==================
+  int? quotationId; // null = nowe, != null = istniejące
+
+  bool get isNewQuotation => quotationId == null;
+  bool get canReject => quotationId != null;
+
+  // ================== BLOKADA UI ==================
+  bool quotationLoading = false;
   bool countriesLoading = false;
+  bool packagingLoading = false;
+  bool isSubmitting = false;
+  bool hasAnyChangesStored = false;
+
+  int quoteVersion = 0;
+
+  bool get isUiLocked =>
+      quotationLoading || countriesLoading || packagingLoading || isSubmitting;
+
+  // ================== SŁOWNIKI ==================
   Object? countriesError;
   List<CountryDictionary> countries = const [];
 
-  bool packagingLoading = false;
   Object? packagingError;
-
-  /// Słownik opakowań / loadUnitDictionary (typ celowo dynamic,
-  /// bo model słownika może się różnić).
   List<dynamic> packagingUnits = const [];
 
+  // ================== HEADER ==================
+  int? originCountryId;
+  int? destinationCountryId;
+  String originZip = '';
+  String destinationZip = '';
+
+  // ================== POZYCJE ==================
+  final List<QuotationItem> items = <QuotationItem>[];
+
+  void toggleAdr(int index) {
+    /// zostawione do uzupełnienia
+  }
+
+
+  // ================== WYCENA ==================
+  bool hasQuote = false;
+  bool quoteIsFresh = false;
+  bool quotePanelOpen = false;
+
+  double get insurancePrice => lastQuotation?.insurancePrice ?? 0.0;
+  double get additionalServicePrice => lastQuotation?.additionalServicePrice ?? 0.0;
+  double get adrPrice => lastQuotation?.adrPrice ?? 0.0;
+  double get shippingPrice => lastQuotation?.shippingPrice ?? 0.0;
+  double get baf => lastQuotation?.baf ?? 0.0;
+  double get taf => lastQuotation?.taf ?? 0.0;
+  double get inflCorrection => lastQuotation?.inflCorrection ?? 0.0;
+
+  double get totalPrice => lastQuotation?.totalPrice ?? 0.0;
+
+  // ================== INIT ==================
   Future<void> init({int? quotationId}) async {
-    debugPrint('QuotationViewModel.init(quotationId=$quotationId)');
     await _loadCountries();
     await _loadPackagingUnits();
+
     if (quotationId != null) {
       await loadQuotation(quotationId);
     }
   }
 
-  Future<void> _loadCountries() async {
-    countriesLoading = true;
-    countriesError = null;
-    notifyListeners();
-    try {
-      final data = _dictRepo.countries;
-      countries = data;
-
-      // sensowne domyślne (jeśli słownik je zawiera)
-      originCountryId ??=
-          countries.firstWhere((c) => c.country == "Poland", orElse: () => countries.first).countryId;
-      destinationCountryId ??=
-          countries.firstWhere((c) => c.country == "Germany", orElse: () => countries.first).countryId;
-    } catch (e) {
-      countriesError = e;
-    } finally {
-      countriesLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> loadQuotation(int quotationId) async {
+  // ================== LOAD ==================
+  Future<void> loadQuotation(int id) async {
     quotationLoading = true;
-    quotationError = null;
-    loadedQuotationId = quotationId;
     notifyListeners();
 
-    debugPrint('QuotationViewModel.loadQuotation -> id=$quotationId');
-
     try {
-      final q = await _repo.getQuotation(quotationId);
+      final q = await _repo.getQuotation(id);
+      quotationId = q.quotationId;
 
-      // kraj nadania / receipt/origin
-      originCountryId = q.receiptCountryId;
-
-      // kraj dostawy / delivery/destination
-      destinationCountryId = q.deliveryCountryId;
-
-      // zipy
-      originZip = q.receiptZipCode;
-      destinationZip = q.deliveryZipCode;
-
-      // --- MAPOWANIE POZYCJI ---
-      // Jeśli już są to QuotationItem - przypisz wprost.
-      final dynamic positionsDyn =
-          q.quotationPositions;
-
-      items
-        ..clear()
-        ..addAll((positionsDyn as List).cast<QuotationItem>());
-
-      // Po wczytaniu danych wyczyść wynik wyceny (bo dane wejściowe się zmieniły)
-      resetQuote();
-
-      debugPrint(
-        'Quotation loaded: originCountryId=$originCountryId, destinationCountryId=$destinationCountryId, '
-            'originZip="$originZip", destinationZip="$destinationZip", items=${items.length}',
-      );
-    } catch (e, st) {
-      quotationError = e;
-      debugPrint('loadQuotation ERROR: $e\n$st');
+      _mapQuotation(q);
+      quoteIsFresh = true;
+      quotePanelOpen = false;
     } finally {
       quotationLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> _loadPackagingUnits() async {
-    packagingLoading = true;
-    packagingError = null;
+  void _mapQuotation(Quotation q) {
+    lastQuotation = q;
+
+    quotationId = q.quotationId;
+
+    originCountryId = q.receiptCountryId;
+    destinationCountryId = q.deliveryCountryId;
+
+    originZip = q.receiptZipCode;
+    destinationZip = q.deliveryZipCode;
+
+    items
+      ..clear()
+      ..addAll(q.quotationPositions ?? const <QuotationItem>[]);
+
+    hasQuote = q.hasAnyPriceComponent;
+  }
+
+  Future<void> clearAllData() async {
+    // Jeśli ekran jest w trakcie wyceny / ładowania, to nie czyścimy.
+    if (isUiLocked) return;
+
+    // 1) Nowe zlecenie (brak ID) => "pusty ekran"
+    if (quotationId == null) {
+      originCountryId = null;
+      destinationCountryId = null;
+      originZip = '';
+      destinationZip = '';
+      items.clear();
+
+      // reset wyceny i stanu
+      lastQuotation = null;
+      hasQuote = false;
+      quoteIsFresh = false;
+      quotePanelOpen = false;
+
+      notifyListeners();
+
+      return;
+    }
+
+    // 2) Istniejące zlecenie => przywróć z repo (stan serwerowy)
+    final id = quotationId!;
+    quotationLoading = true;
+    notifyListeners();
+
+    try {
+      final q = await _repo.getQuotation(id);
+
+      // Uwaga: q.quotationId powinno być takie samo, ale zostawiamy defensywnie:
+      quotationId = q.quotationId ?? id;
+
+      _mapQuotation(q);
+
+      quoteIsFresh = true;
+      quotePanelOpen = true;
+    } finally {
+      quotationLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // ================== SŁOWNIKI ==================
+  Future<void> _loadCountries() async {
+    countriesLoading = true;
     notifyListeners();
     try {
-      // Zgodnie z Twoją informacją: słownik opakowań = loadUnitDictionary
-      final data = _dictRepo.loadUnits;
-      packagingUnits = List<dynamic>.from(data as List);
-    } catch (e) {
-      packagingError = e;
+      countries = _dictRepo.countries;
+    } finally {
+      countriesLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadPackagingUnits() async {
+    packagingLoading = true;
+    notifyListeners();
+    try {
+      packagingUnits = List<dynamic>.from(_dictRepo.loadUnits as List);
     } finally {
       packagingLoading = false;
       notifyListeners();
     }
   }
 
-  // ---------- Header / Quotation fields ----------
-  int? originCountryId;
-  int? destinationCountryId;
+  // ================== EDYCJA ==================
+  void markDirty() {
+    quoteIsFresh = false;
+    notifyListeners();
+  }
 
-  String originZip = '';
-  String destinationZip = '';
-
-  void setOriginCountryId(int? value) {
-    if (originCountryId == value) return;
-    originCountryId = value;
+  void setOriginCountryId(int? v) {
+    if (originCountryId == v) return;
+    originCountryId = v;
     markDirty();
   }
 
-  void setDestinationCountryId(int? value) {
-    if (destinationCountryId == value) return;
-    destinationCountryId = value;
+  void setDestinationCountryId(int? v) {
+    if (destinationCountryId == v) return;
+    destinationCountryId = v;
     markDirty();
   }
 
-  void setOriginZip(String value) {
-    if (originZip == value) return;
-    originZip = value;
+  void setOriginZip(String v) {
+    if (originZip == v) return;
+    originZip = v;
     markDirty();
   }
 
-  void setDestinationZip(String value) {
-    if (destinationZip == value) return;
-    destinationZip = value;
+  void setDestinationZip(String v) {
+    if (destinationZip == v) return;
+    destinationZip = v;
     markDirty();
   }
-
-  // ---------- Items ----------
-  final List<QuotationItem> items = <QuotationItem>[];
 
   void addEmptyItem() {
     items.add(const QuotationItem(
@@ -173,149 +232,59 @@ class QuotationViewModel extends ChangeNotifier {
     markDirty();
   }
 
-  void removeItemAt(int index) {
-    if (index < 0 || index >= items.length) return;
-    items.removeAt(index);
-    markDirty();
-  }
-
-  void clearAllData() {
-    originCountryId = null;
-    destinationCountryId = null;
-    originZip = '';
-    destinationZip = '';
-    items.clear();
-    resetQuote();
-    notifyListeners();
-  }
-
-  // --- Per-item updates (edytowalne pola) ---
   void updateItem(int index, QuotationItem item) {
     if (index < 0 || index >= items.length) return;
     items[index] = item;
     markDirty();
   }
 
-  void toggleAdr(int index) {
+  void removeItemAt(int index) {
     if (index < 0 || index >= items.length) return;
-    final current = items[index];
-    items[index] = current.copyWith(adr: !current.adr);
+    items.removeAt(index);
     markDirty();
   }
 
-  // ---------- Sums (auto) ----------
-  int get sumPackages => items.fold<int>(0, (acc, i) => acc + i.quantity);
+  // ================== WYCENA (CREATE / UPDATE) ==================
+  Future<bool> requestQuote() async {
+    if (isUiLocked) return false;
 
-  double get sumWeight => items.fold<double>(
-    0,
-        (acc, i) => acc + (i.weight.toDouble() * i.quantity.toDouble()),
-  );
-
-  double get sumVolume => items.fold<double>(
-    0,
-        (acc, i) =>
-    acc + (i.quantity.toDouble() * i.length.toDouble() * i.width.toDouble() * i.height.toDouble()),
-  );
-
-  double get sumLongWeight => items.fold<double>(
-    0,
-        (acc, i) => acc + (i.quantity.toDouble() * (i.longWeight ?? 0.0)),
-  );
-
-  // ---------- Quote state ----------
-  bool isQuoting = false;
-
-  bool hasQuote = false;
-
-  double? totalPrice;
-
-  /// Szczegóły (placeholder – lista pozycji wyceny)
-  List<Map<String, dynamic>> quoteLines = const [];
-
-  bool get canQuote {
-    final headerOk = (originCountryId != null) &&
-        (destinationCountryId != null) &&
-        originZip.trim().isNotEmpty &&
-        destinationZip.trim().isNotEmpty;
-    return headerOk && items.isNotEmpty && !isQuoting;
-  }
-
-  void markDirty() {
-    resetQuote();
-    notifyListeners();
-  }
-
-  void resetQuote() {
-    hasQuote = false;
-    totalPrice = null;
-    quoteLines = const [];
-    isQuoting = false;
-  }
-
-  Future<void> calculateQuote() async {
-    if (!canQuote) return;
-
-    isQuoting = true;
+    isSubmitting = true;
+    quotePanelOpen = true;
     notifyListeners();
 
     try {
-      // Placeholder: prosta kalkulacja żeby UI działało od razu
-      // (np. baza + masa + longWeight + ADR fee)
-      final base = 50.0;
-      final weightPart = 0.35 * sumWeight;
-      final longPart = 0.20 * sumLongWeight;
-      final adrFee = items.any((i) => i.adr) ? 120.0 : 0.0;
+      final model = QuotationPostModel(
+        quotationId: quotationId,
+        deliveryCountryId: destinationCountryId!,
+        deliveryZipCode: destinationZip.trim(),
+        receiptCountryId: originCountryId!,
+        receiptZipCode: originZip.trim(),
+        adr: items.any((i) => i.adr),
+        userName: auth.user ?? 'unknown',
+        quotationPositions:  List<QuotationItem>.from(items),
+      );
 
-      totalPrice = base + weightPart + longPart + adrFee;
+      final Quotation q = quotationId == null
+          ? await _repo.create(model)
+          : await _repo.update(model);
 
-      quoteLines = items.asMap().entries.map((e) {
-        final idx = e.key;
-        final it = e.value;
-        final line = (it.quantity * it.weight).toDouble() * 0.35 +
-            (it.quantity.toDouble() * (it.longWeight ?? 0.0)) * 0.20 +
-            (it.adr ? 120.0 / items.length : 0.0);
-        return <String, dynamic>{
-          'index': idx + 1,
-          'price': line,
-          'adr': it.adr,
-          'qty': it.quantity,
-        };
-      }).toList(growable: false);
-
-      hasQuote = true;
+      quotationId = q.quotationId;
+      _mapQuotation(q);
+      quoteIsFresh = true;
+      quotePanelOpen = true;
+      quoteVersion++;
+      hasAnyChangesStored = true;
+      return true;
     } finally {
-      isQuoting = false;
+      isSubmitting = false;
       notifyListeners();
     }
+    return false;
   }
 
-  // ---------- Submit (POST) ----------
-  Future<void> submitOrder() async {
-    // Wymaganie: "Zatwierdź" ma przygotować POST z quotation_post_model
-    // i spróbować wypełnić wszystkie pola.
-    if (destinationCountryId == null) {
-      throw StateError('Brak kraju dostawy (destinationCountryId).');
-    }
-    if (originZip.trim().isEmpty || destinationZip.trim().isEmpty) {
-      throw StateError('Brak kodów pocztowych.');
-    }
-    if (items.isEmpty) {
-      throw StateError('Brak pozycji.');
-    }
+  // ================== GETTERY UI ==================
+  bool get canRequestQuote => !isUiLocked && items.isNotEmpty && !quoteIsFresh;
 
-    final model = QuotationPostModel(
-      // required wg modelu:
-      deliveryCountryId: destinationCountryId!,
-      deliveryZipCode: destinationZip.trim(),
-      receiptCountryId: originCountryId!,
-      receiptZipCode: originZip.trim(),
-
-      // reszta (opcjonalne / jeśli backend przyjmuje):
-      adr: items.any((i) => i.adr),
-      userName: "none", // jeśli w AuthState nazywa się inaczej – podmienimy
-      quotationPositions: items,
-    );
-
-    await _repo.create(model);
-  }
+  bool get canSubmitFinal =>
+      quoteIsFresh && quotationId != null && !isUiLocked;
 }

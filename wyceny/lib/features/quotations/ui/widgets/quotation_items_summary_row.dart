@@ -13,31 +13,62 @@ class QuotationItemsSummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
-    final textStyle = Theme.of(context).textTheme.bodyMedium;
+    final baseStyle = Theme.of(context).textTheme.bodyMedium;
+
+    // ---- SUMY liczone lokalnie z items ----
+    final sumPackages = vm.items.fold<int>(
+      0,
+          (acc, i) => acc + i.quantity,
+    );
+
+    final sumWeight = vm.items.fold<double>(
+      0.0,
+          (acc, i) => acc + i.quantity * i.weight.toDouble(),
+    );
+
+    final sumVolume = vm.items.fold<double>(
+      0.0,
+          (acc, i) =>
+      acc +
+          i.quantity *
+              i.length.toDouble() *
+              i.width.toDouble() *
+              i.height.toDouble(),
+    );
+
+    final sumLongWeight = vm.items.fold<double>(
+      0.0,
+          (acc, i) =>
+      acc + i.quantity * (i.longWeight ?? 0.0),
+    );
 
     Widget item(String label, String value) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('$label: ', style: textStyle),
+          Text('$label: ', style: baseStyle),
           Text(
             value,
-            style: textStyle?.copyWith(fontWeight: FontWeight.w600),
+            style: baseStyle?.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       );
     }
 
-    return Wrap(
-      spacing: 24,
-      runSpacing: 8,
-      alignment: WrapAlignment.start,
-      children: [
-        item(t.sum_packages, vm.sumPackages.toString()),
-        item(t.sum_weight, '${vm.sumWeight.toStringAsFixed(2)} kg'),
-        item(t.sum_volume, vm.sumVolume.toStringAsFixed(2)),
-        item(t.sum_long_weight, '${vm.sumLongWeight.toStringAsFixed(2)} kg'),
-      ],
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 150),
+      opacity: vm.isUiLocked ? 0.6 : 1.0,
+      child: Wrap(
+        spacing: 24,
+        runSpacing: 8,
+        alignment: WrapAlignment.start,
+        children: [
+          item(t.sum_packages, sumPackages.toString()),
+          item(t.sum_weight, '${sumWeight.toStringAsFixed(2)} kg'),
+          item(t.sum_volume, sumVolume.toStringAsFixed(2)),
+          item(t.sum_long_weight, '${sumLongWeight.toStringAsFixed(2)} kg'),
+        ],
+      ),
     );
   }
 }

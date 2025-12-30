@@ -90,12 +90,20 @@ class MockQuotationsRepository implements QuotationsRepository {
   Future<Quotation> create(QuotationPostModel model) async {
     final id = _idSeq++;
 
+    final random = Random();
+    final double? ninsPrice = (model.insuranceValue != null && model.insuranceValue! > 0) ? model.insuranceValue!*0.1 : null;
+    final double? nadrPrice = (model.adr != null && model.adr!) ? random.nextDouble()*10 : null;
+    final double nShippingPrice = random.nextDouble()*125;
+    final double? nbaf = model.baf ?? random.nextDouble()*20;
+    final double? ntaf = model.taf ?? random.nextDouble()*5;
+    final double nInflCorr = nShippingPrice *0.05;
+
     final q = Quotation(
       quotationId: id,
       additionalServiceId: model.additionalServiceId,
       adr: model.adr,
       insuranceCurrency: model.insuranceCurrency,
-      insurancePrice: model.insurancePrice,
+      insurancePrice: ninsPrice,
       insuranceValue: model.insuranceValue,
       deliveryCountryId: model.deliveryCountryId,
       deliveryZipCode: model.deliveryZipCode,
@@ -108,18 +116,18 @@ class MockQuotationsRepository implements QuotationsRepository {
       createDate: model.createDate ?? DateTime.now(),
       status: model.status ?? 1,
       additionalServicePrice: model.additionalServicePrice,
-      adrPrice: model.adrPrice,
+      adrPrice: nadrPrice,
       allIn: model.allIn,
       comments: model.comments,
       insurance: model.insurance,
-      shippingPrice: model.shippingPrice,
+      shippingPrice: nShippingPrice,
       ttTime: model.ttTime,
       weightChgw: model.weightChgw,
       orderNrSl: model.orderNrSl,
       orderDateSl: model.orderDateSl,
-      baf: model.baf,
-      taf: model.taf,
-      inflCorrection: model.inflCorrection,
+      baf: nbaf,
+      taf: ntaf,
+      inflCorrection: nInflCorr,
     );
 
     await Future.delayed(const Duration(seconds: 2));
@@ -136,9 +144,16 @@ class MockQuotationsRepository implements QuotationsRepository {
 
     final existing = await getQuotation(id);
 
+    final random = Random();
+    final double? ninsPrice = (model.insuranceValue != null && model.insuranceValue! > 0) ? model.insuranceValue!*0.1 : null;
+    final double? nadrPrice = (model.adr != null && model.adr!) ? random.nextDouble()*10 : null;
+    final double nShippingPrice = random.nextDouble()*125;
+    final double? nbaf = model.baf ?? random.nextDouble()*20;
+    final double? ntaf = model.taf ?? random.nextDouble()*5;
+    final double nInflCorr = nShippingPrice *0.05;
+
     final updated = Quotation(
       quotationId: existing.quotationId,
-
       // request fields
       deliveryCountryId: model.deliveryCountryId,
       deliveryZipCode: model.deliveryZipCode,
@@ -147,7 +162,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       additionalServiceId: model.additionalServiceId ?? existing.additionalServiceId,
       adr: model.adr ?? existing.adr,
       insuranceCurrency: model.insuranceCurrency ?? existing.insuranceCurrency,
-      insurancePrice: model.insurancePrice ?? existing.insurancePrice,
+      insurancePrice: ninsPrice,
       insuranceValue: model.insuranceValue ?? existing.insuranceValue,
       userName: model.userName ?? existing.userName,
       quotationPositions: model.quotationPositions ?? existing.quotationPositions,
@@ -156,18 +171,18 @@ class MockQuotationsRepository implements QuotationsRepository {
       createDate: model.createDate ?? existing.createDate,
       status: model.status ?? existing.status,
       additionalServicePrice: model.additionalServicePrice ?? existing.additionalServicePrice,
-      adrPrice: model.adrPrice ?? existing.adrPrice,
+      adrPrice: nadrPrice,
       allIn: model.allIn ?? existing.allIn,
       comments: model.comments ?? existing.comments,
       insurance: model.insurance ?? existing.insurance,
-      shippingPrice: model.shippingPrice ?? existing.shippingPrice,
+      shippingPrice: nShippingPrice,
       ttTime: model.ttTime ?? existing.ttTime,
       weightChgw: model.weightChgw ?? existing.weightChgw,
       orderNrSl: model.orderNrSl ?? existing.orderNrSl,
       orderDateSl: model.orderDateSl ?? existing.orderDateSl,
-      baf: model.baf ?? existing.baf,
-      taf: model.taf ?? existing.taf,
-      inflCorrection: model.inflCorrection ?? existing.inflCorrection,
+      baf: nbaf,
+      taf: ntaf,
+      inflCorrection: nInflCorr
     );
 
     await Future.delayed(const Duration(seconds: 2));

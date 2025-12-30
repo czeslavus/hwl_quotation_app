@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/common/top_bar_appbar.dart';
+import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_list_actions_cell.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
@@ -324,7 +325,9 @@ class _QuotationsTable extends StatelessWidget {
 
                     rows: vm.items.map((q) {
                       final mp = (q.quotationPositions ?? [])
-                          .fold<double>(0, (s, it) => s + (it.ldm ?? 0));
+                          .fold<double>(0, (s, it) => s + (it.quantity ?? 0));
+                      final wgh = (q.quotationPositions ?? [])
+                          .fold<double>(0, (s, it) => s + (it.weight ?? 0));
 
                       return DataRow(cells: [
                         DataCell(_twoLines(
@@ -332,14 +335,14 @@ class _QuotationsTable extends StatelessWidget {
                           q.quotationId?.toString() ?? '—',
                         )),
                         DataCell(_twoLines(
-                          'PL ${q.receiptZipCode}',
+                          '${vm.countryCodeForId(q.receiptCountryId)} ${q.receiptZipCode}',
                           '${vm.countryCodeForId(q.deliveryCountryId)} ${q.deliveryZipCode}',
                         )),
                         DataCell(_twoLines(
-                          'MP: ${mp.toStringAsFixed(2)}',
-                          'W: ${(q.weightChgw ?? 0).toStringAsFixed(0)}',
+                          'MP: ${mp.toStringAsFixed(0)}',
+                          'W: ${wgh.toStringAsFixed(2)}',
                         )),
-                        DataCell(Text((q.allIn ?? q.shippingPrice ?? 0).toStringAsFixed(2))),
+                        DataCell(Text(q.totalPrice.toStringAsFixed(2))),
                         DataCell(Text(vm.statusLabel(q.status))),
                         DataCell(
                           Align(

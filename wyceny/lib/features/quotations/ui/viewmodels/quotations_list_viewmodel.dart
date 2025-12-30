@@ -69,7 +69,6 @@ class QuotationsListViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Nadanie jest zawsze PL -> nie filtrujemy originCountryId
       final result = await _repo.getArchive(
         page: page,
         pageSize: pageSize,
@@ -133,8 +132,6 @@ class QuotationsListViewModel extends ChangeNotifier {
     }
   }
 
-  /// Nowe API wymaga rejectCauseId.
-  /// [rejectCause] jest opcjonalnym opisem (nullable).
   Future<void> reject(
       int quotationId, {
         int? rejectCauseId,
