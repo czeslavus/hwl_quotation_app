@@ -36,21 +36,60 @@ class _QuotationRouteMapBody extends StatefulWidget {
 class _QuotationRouteMapBodyState extends State<_QuotationRouteMapBody> {
   final MapController _mapController = MapController();
 
+  String? _lastOrigin;
+  String? _lastDest;
+  int? _lastOriginCountryId;
+  int? _lastDestCountryId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Pierwsze odpalenie po wyrenderowaniu (bezpieczne)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _scheduleFromQuotationVm();
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Kiedy VM od wyceny się zmienia (zipy/cokolwiek), odpalamy routing
-    final qvm = context.watch<QuotationViewModel>();
+    // Każda zmiana zależności: też planujemy po klatce, nie w trakcie przebudowy
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _scheduleFromQuotationVm();
+    });
+  }
+
+  void _scheduleFromQuotationVm() {
+    final qvm = context.read<QuotationViewModel>(); // read, nie watch
     final rvm = context.read<RouteByPostcodeViewModel>();
 
-    // Jeśli kiedyś chcesz używać kraju z dropdownów:
-    // - ORS chce ISO-2 (np. "PL", "DE").
-    // - Ty masz originCountryId/destinationCountryId, więc musisz mieć mapę id -> iso2.
-    // Na POC zostawiamy "PL".
+    final origin = qvm.originZip;
+    final dest = qvm.destinationZip;
+
+    // (opcjonalnie) śledzimy kraj — na razie i tak nie mapujemy na ISO2
+    final oc = qvm.originCountryId;
+    final dc = qvm.destinationCountryId;
+
+    final changed = origin != _lastOrigin ||
+        dest != _lastDest ||
+        oc != _lastOriginCountryId ||
+        dc != _lastDestCountryId;
+
+    if (!changed) return;
+
+    _lastOrigin = origin;
+    _lastDest = dest;
+    _lastOriginCountryId = oc;
+    _lastDestCountryId = dc;
+
+    // POC: kraj na sztywno
     rvm.scheduleBuildRoute(
-      originZip: qvm.originZip,
-      destinationZip: qvm.destinationZip,
+      originZip: origin,
+      destinationZip: dest,
       countryCode: 'PL',
     );
   }
@@ -58,11 +97,12 @@ class _QuotationRouteMapBodyState extends State<_QuotationRouteMapBody> {
   @override
   Widget build(BuildContext context) {
     final rvm = context.watch<RouteByPostcodeViewModel>();
-
-    // Auto-dopasowanie kamery do trasy (po pobraniu)
     final points = rvm.route?.points ?? const <LatLng>[];
+
+    // Dopasowanie kamery po dostaniu trasy — to też musi iść po klatce
     if (points.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         final bounds = LatLngBounds.fromPoints(points);
         _mapController.fitCamera(
           CameraFit.bounds(
@@ -81,8 +121,6 @@ class _QuotationRouteMapBodyState extends State<_QuotationRouteMapBody> {
           end: rvm.end,
           routePoints: points,
         ),
-
-        // lekki overlay statusu
         Positioned(
           left: 8,
           top: 8,

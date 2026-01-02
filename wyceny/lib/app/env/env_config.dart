@@ -2,7 +2,7 @@ import 'package:wyceny/app/env/app_environment.dart';
 
 class EnvLoader {
   static const apiHost = 'https://ekierowca-testowy.hwl.pl/api';
-  static const orsKeyDef = 'xyx';
+  static const orsKeyDef = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImNiMGViMDcyMGQ4NTRhZjM4YjUyZDM1YTkyNzMzNTgzIiwiaCI6Im11cm11cjY0In0=';
 
   static EnvConfig fromDartDefine() {
     const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
