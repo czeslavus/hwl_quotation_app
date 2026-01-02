@@ -5,6 +5,7 @@ import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dar
 import 'package:wyceny/features/quotations/ui/widgets/quotation_header_section.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_summary_row.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_map.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotation_route_map.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_table.dart';
@@ -56,7 +57,7 @@ class QuotationScreen extends StatelessWidget {
                 const Divider(height: 1),
                 SizedBox(
                   height: 240,
-                  child: const QuotationMap(),
+                  child: const QuotationRouteMap(),
                 ),
                 const Divider(height: 1),
                 _BodySection(vm: vm, embedded: true),
@@ -85,7 +86,7 @@ class QuotationScreen extends StatelessWidget {
                       flex: rightFlex,
                       child: SizedBox.expand(
                         child: ClipRect(
-                          child: const QuotationMap(),
+                          child: const QuotationRouteMap(),
                         ),
                       ),
                     ),

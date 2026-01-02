@@ -34,6 +34,9 @@ import 'package:wyceny/features/dictionaries/data/dictionaries_repository_impl.d
 
 import 'package:wyceny/features/auth/data/services/token_storage/token_storage_secure.dart'
     if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_web_secure.dart';
+import 'package:wyceny/features/route_by_postcode/data/ors_api.dart';
+import 'package:wyceny/features/route_by_postcode/data/route_repository_ors.dart';
+import 'package:wyceny/features/route_by_postcode/domain/route_repository.dart';
 //    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
 
 final getIt = GetIt.instance;
@@ -108,6 +111,30 @@ Future<void> setupDI() async {
 
   getIt.registerLazySingleton<QuotationsRepository>(() => MockQuotationsRepository());
 
+
+  getIt.registerLazySingleton<Dio>(() {
+    final dio = Dio(BaseOptions(
+      baseUrl: 'https://api.openrouteservice.org',
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      headers: {
+        'Accept': 'application/json',
+        // Authorization dodamy w OrsApi albo tu – jak wolisz
+      },
+    ));
+    return dio;
+  }, instanceName: 'orsDio');
+
+  final orsKey = envConfig.orsKey;
+
+  getIt.registerLazySingleton<OrsApi>(() => OrsApi(
+    apiKey: orsKey,
+    dio: getIt<Dio>(instanceName: 'orsDio'),
+  ));
+
+  getIt.registerLazySingleton<RouteRepository>(
+        () => OrsRouteRepository(getIt<OrsApi>()),
+  );
 
   // if (USE_MOCK_API) {
   //   getIt.registerLazySingleton<LineRidesService>(
