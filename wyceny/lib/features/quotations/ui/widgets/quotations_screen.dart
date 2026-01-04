@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_header_section.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_summary_row.dart';
-import 'package:wyceny/features/quotations/ui/widgets/quotation_route_map.dart';
-import 'package:wyceny/l10n/app_localizations.dart';
-import 'package:wyceny/l10n/country_localizer.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_table.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_quote_details_panel.dart';
+import 'package:wyceny/features/quotations/ui/widgets/quotation_route_map.dart';
+import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/ui/widgets/common/danger_action_button.dart';
 import 'package:wyceny/ui/widgets/common/neutral_action_button.dart';
 import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
-import 'package:go_router/go_router.dart';
 
 class QuotationScreen extends StatelessWidget {
   const QuotationScreen({super.key});
@@ -24,99 +24,58 @@ class QuotationScreen extends StatelessWidget {
     return PopScope<bool>(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop)
-          return;
+        if (didPop) return;
         context.pop(vm.hasAnyChangesStored);
       },
       child: Scaffold(
-
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                t.topbar_customer(
-                  vm.auth.forename + ' ' + vm.auth.surname,
-                  vm.auth.contractorName,
-                  vm.auth.skyLogicNumber,
+        appBar: AppBar(
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  t.topbar_customer(
+                    '${vm.auth.forename} ${vm.auth.surname}',
+                    vm.auth.contractorName,
+                    vm.auth.skyLogicNumber,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
+              ),
+              // Jeśli chcesz przycisk logout – możesz go dodać z powrotem
+              // FilledButton.tonalIcon(
+              //   onPressed: () {/* logout */},
+              //   icon: const Icon(Icons.logout),
+              //   label: Text(t.topbar_logout),
+              // ),
+            ],
+          ),
+        ),
+        body: Stack(
+          children: [
+            AbsorbPointer(
+              absorbing: vm.isUiLocked,
+              child: Opacity(
+                opacity: vm.isUiLocked ? 0.6 : 1.0,
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    final w = c.maxWidth;
+                    final isWide = w >= 980;
+                    return isWide ? _WideLayout(vm: vm) : _NarrowLayout(vm: vm);
+                  },
+                ),
               ),
             ),
+
+            // Jeśli kiedyś chcesz overlay typu loader na blokadzie UI:
+            if (vm.isUiLocked)
+              const Positioned.fill(
+                child: IgnorePointer(
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              ),
           ],
         ),
       ),
-      body: Stack(
-        children: [
-          AbsorbPointer(
-            absorbing: vm.isUiLocked,
-            child: Opacity(
-              opacity: vm.isUiLocked ? 0.6 : 1,
-              child: LayoutBuilder(
-                builder: (context, c) {
-                  final w = c.maxWidth;
-                  final isWide = w >= 980;
-                  return isWide ? _WideLayout(vm: vm) : _NarrowLayout(vm: vm);
-                },
-              ),
-            ),
-          ),
-
-          final isPhone = w < 600;
-          final isMedium = w >= 600 && w < 1100;
-          final isWide = w >= 1100;
-
-          // PHONE: jedna kolumna, jeden scroll
-          if (isPhone) {
-            return ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                QuotationHeaderSection(vm: vm, scrollable: false),
-                const Divider(height: 1),
-                SizedBox(
-                  height: 240,
-                  child: const QuotationRouteMap(),
-                ),
-                const Divider(height: 1),
-                _BodySection(vm: vm, embedded: true),
-              ],
-            );
-          }
-
-          // MEDIUM + WIDE: góra split bez scrolla w mapie, dół scrollowany
-          final leftFlex = isWide ? 2 : 3;
-          final rightFlex = 2;
-
-          return Column(
-            children: [
-              // TOP (split, mapa bez scrolla, przyklejona, min wysokość)
-              SizedBox(
-                height: 260, // <- możesz ustawić np. 280/320; to jest stała wysokość topu
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      flex: leftFlex,
-                      child: QuotationHeaderSection(vm: vm, scrollable: true),
-                    ),
-                    const VerticalDivider(width: 1),
-                    Expanded(
-                      flex: rightFlex,
-                      child: SizedBox.expand(
-                        child: ClipRect(
-                          child: const QuotationRouteMap(),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(t.action_quote),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    )
     );
   }
 }
@@ -236,15 +195,13 @@ class _BodyContent extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        // Panel wyceny – będzie sam sterował widocznością (vm.hasQuote itd.)
+        // Panel wyceny – sam steruje widocznością (vm.hasQuote itd.)
         QuotationQuoteDetailsPanel(vm: vm),
 
         const SizedBox(height: 12),
 
-        // Akcje
         _ActionsRow(vm: vm),
 
-        // trochę miejsca na dole
         const SizedBox(height: 8),
       ],
     );
@@ -267,12 +224,13 @@ class _ActionsRow extends StatelessWidget {
         PositiveActionButton(
           icon: Icons.calculate,
           label: t.action_quote,
-          onPressed: vm.canRequestQuote ? () async {
+          onPressed: vm.canRequestQuote
+              ? () async {
             final ok = await vm.requestQuote();
-            if (!ok)
-              return;
+            if (!ok) return;
             if (!context.mounted) return;
-          } : null,
+          }
+              : null,
         ),
         NeutralActionButton(
           icon: Icons.delete_outline,
@@ -291,15 +249,12 @@ class _ActionsRow extends StatelessWidget {
           },
         ),
 
-
         // Finalny przycisk aktywny tylko gdy wycena jest aktualna
         PositiveActionButton(
           icon: Icons.send,
           label: t.action_submit,
           onPressed: vm.canSubmitFinal
               ? () async {
-            // Na razie tylko UI-gate i komunikat; docelowo podepniesz właściwy endpoint / flow.
-            // Zostawiamy to jako placeholder, bo API "final submit" nie było tu jeszcze doprecyzowane.
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(t.submit_ok)),
@@ -308,7 +263,6 @@ class _ActionsRow extends StatelessWidget {
               : null,
         ),
 
-        // Odrzuć: niewidoczny dla nowego zlecenia (quotationId == null)
         if (vm.canReject)
           DangerActionButton(
             icon: Icons.block,
