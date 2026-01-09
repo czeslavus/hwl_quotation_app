@@ -1,0 +1,3085 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "HwlPortal.WebApi",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "Authenticates a user and returns a JWT token along with a refresh token.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "Logs out the currently authenticated user by invalidating their refresh token.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/refresh-token": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "Refreshes the JWT token using a valid refresh token.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/change-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "Allows an authenticated user to change their password.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/text": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/recover/request": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "Sends a password recovery code to the user's registered phone number.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoverRequestModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoverRequestModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoverRequestModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/countries": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of countries for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountriesDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/countries-delivery": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of countries for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountriesDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/countries-receipt": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of countries for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountriesDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/additions": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of additions for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdditionsDictionary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/additions-v2": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of countries for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdditionsDictionaryClassic"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/services": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of services for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServicesDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/statuses": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of statuses for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StatusesDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/reject-causes": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of reject causes for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RejectCausesDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/adr-names": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of ADR names for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ADRNameDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/adr-package-units": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of ADR package unit types for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ADRPackageUnitTypeDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/stagett-statuses": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of ADR package unit types for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StageTTDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/load-units": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of load unit types for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LoadUnitDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dictionaries/instruction-codes": {
+      "get": {
+        "tags": [
+          "Dictionaries"
+        ],
+        "description": "Get list of instruction codes for dictionaries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InstructionCodeDictionary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "description": "Get last active quotation for the logged in user",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "orderCustomerNr",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "deliveryStartDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "deliveryEndDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "receiptStartDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "receiptEndDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "statusNr",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "deliveryCountry",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "deliveryZipCode",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "receiptZipCode",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SlOrderResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SlOrderResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/sendorder/quotation/{id}": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "description": "Get order model for the existing approved pricing by ID for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlOrderRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "description": "Send order for the existing approved pricing for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlOrderRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlOrderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/sendorder": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "description": "Send order for the logged in user - no quotation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlOrderRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlOrderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pricings": {
+      "get": {
+        "tags": [
+          "Pricings"
+        ],
+        "description": "Get current active pricing for the logged in user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pricings"
+        ],
+        "description": "Save new pricing for the logged in user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Pricings"
+        ],
+        "description": "Update existing pricing for the logged in user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PricingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pricings/{id}": {
+      "get": {
+        "tags": [
+          "Pricings"
+        ],
+        "description": "Get pricing by ID for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pricings/archive": {
+      "get": {
+        "tags": [
+          "Pricings"
+        ],
+        "description": "Get pricing archive for the logged in user",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PricingResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pricings/copy/{id}": {
+      "post": {
+        "tags": [
+          "Pricings"
+        ],
+        "description": "Copy existing pricing by ID for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pricings/approve/{id}": {
+      "post": {
+        "tags": [
+          "Pricings"
+        ],
+        "description": "Approve existing pricing by ID for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pricings/reject": {
+      "post": {
+        "tags": [
+          "Pricings"
+        ],
+        "description": "Reject existing pricing by ID for the logged in user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotations": {
+      "get": {
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Get last active quotation for the logged in user",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "statusId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "deliveryCountryId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Save new quotation for the logged in user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotations/{id}": {
+      "get": {
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Get quotation for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Update existing Quotation for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotations/last-entered": {
+      "get": {
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Get quotation for the logged in user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotations/{id}/approve": {
+      "post": {
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Approve existing quotation bi ID for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/quotations/{id}/reject": {
+      "post": {
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Reject existing quotation by ID for the logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRejectModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRejectModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuotationRejectModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuotationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ADR": {
+        "type": "object",
+        "properties": {
+          "adrun": {
+            "type": "string",
+            "nullable": true
+          },
+          "adrName": {
+            "type": "string",
+            "nullable": true
+          },
+          "adrClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "packingGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "tremcard": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ADRNameDictionary": {
+        "type": "object",
+        "properties": {
+          "un": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "class": {
+            "type": "string",
+            "nullable": true
+          },
+          "packingGroup": {
+            "type": "string",
+            "nullable": true
+          },
+          "tremcard": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ADRPackageUnitTypeDictionary": {
+        "type": "object",
+        "properties": {
+          "packageUnitTypeNR": {
+            "type": "string",
+            "nullable": true
+          },
+          "packageUnitTypeName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdditionsDictionary": {
+        "type": "object",
+        "properties": {
+          "bafValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "tafValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "inflCorrectionValue": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdditionsDictionaryClassic": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Address": {
+        "required": [
+          "city",
+          "country",
+          "name",
+          "street",
+          "zipCode"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "city": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "street": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "zipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "country": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "phoneNr": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangePasswordModel": {
+        "required": [
+          "newPassword",
+          "oldPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "oldPassword": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "newPassword": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Contacts": {
+        "type": "object",
+        "properties": {
+          "employees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerServiceEmployees"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CountriesDictionary": {
+        "type": "object",
+        "properties": {
+          "countryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerServiceEmployees": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InstructionCode": {
+        "required": [
+          "instructionCodeNr"
+        ],
+        "type": "object",
+        "properties": {
+          "instructionCodeNr": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string"
+          },
+          "instructionCodeInfo": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InstructionCodeDictionary": {
+        "type": "object",
+        "properties": {
+          "instructionCodeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instructionCodeNr": {
+            "type": "string",
+            "nullable": true
+          },
+          "instructionCodeName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Load": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "volume": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "lenght": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "width": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "height": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "unitType": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitQuantity": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "loadADRs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoadADR"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoadADR": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "packageUnitQuantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "packageUnitType": {
+            "type": "string",
+            "nullable": true
+          },
+          "adrFull": {
+            "$ref": "#/components/schemas/ADR"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoadUnitDictionary": {
+        "type": "object",
+        "properties": {
+          "loadUnitTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "loadUnitTypeNr": {
+            "type": "string",
+            "nullable": true
+          },
+          "loadUnitTypeName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginRequest": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "password": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "refreshToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiration": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "regulationsApproved": {
+            "type": "boolean"
+          },
+          "skyLogicNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "branch": {
+            "type": "string",
+            "nullable": true
+          },
+          "contacts": {
+            "$ref": "#/components/schemas/Contacts"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PricingItemsNew": {
+        "required": [
+          "height",
+          "length",
+          "quantity",
+          "weight",
+          "width"
+        ],
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "length": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "packaging": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "packagingWeight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "cbm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ldm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ldmCbm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "longWeight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PricingRequest": {
+        "required": [
+          "deliveryCountryId",
+          "deliveryZipCode",
+          "receiptZipCode"
+        ],
+        "type": "object",
+        "properties": {
+          "pricingId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "additionalServiceId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "adr": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "insuranceCurrency": {
+            "maxLength": 4,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "insurancePrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "insuranceValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "deliveryCountryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryZipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "receiptZipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricingPositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingItemsNew"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PricingResponse": {
+        "required": [
+          "deliveryCountryId",
+          "deliveryZipCode",
+          "receiptZipCode"
+        ],
+        "type": "object",
+        "properties": {
+          "pricingId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "additionalServiceId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "adr": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "insuranceCurrency": {
+            "maxLength": 4,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "insurancePrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "insuranceValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "deliveryCountryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryZipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "receiptZipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricingPositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingItemsNew"
+            },
+            "nullable": true
+          },
+          "additionalServicePrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "adrPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "allIn": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          },
+          "insurance": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "shippingPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ttTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "weightChgw": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "orderNrSl": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderDateSl": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "baf": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "taf": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "inflCorrection": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
+      "QuotationItems": {
+        "required": [
+          "height",
+          "length",
+          "quantity",
+          "weight",
+          "width"
+        ],
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "length": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "packaging": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "packagingWeight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "cbm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ldm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ldmCbm": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "longWeight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "QuotationRejectModel": {
+        "required": [
+          "quotationId",
+          "rejectCauseId"
+        ],
+        "type": "object",
+        "properties": {
+          "quotationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectCauseId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectCause": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "QuotationRequest": {
+        "required": [
+          "deliveryCountryId",
+          "deliveryZipCode",
+          "receiptZipCode"
+        ],
+        "type": "object",
+        "properties": {
+          "quotationId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "additionalServiceId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "adr": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "insuranceCurrency": {
+            "maxLength": 4,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "insurancePrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "insuranceValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "deliveryCountryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryZipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "receiptZipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "quotationPositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuotationItems"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "QuotationResponse": {
+        "required": [
+          "deliveryCountryId",
+          "deliveryZipCode",
+          "receiptZipCode"
+        ],
+        "type": "object",
+        "properties": {
+          "quotationId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "additionalServiceId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "adr": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "insuranceCurrency": {
+            "maxLength": 4,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "insurancePrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "insuranceValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "deliveryCountryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deliveryZipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "receiptZipCode": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "quotationPositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuotationItems"
+            },
+            "nullable": true
+          },
+          "additionalServicePrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "adrPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "allIn": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          },
+          "insurance": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "shippingPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ttTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "weightChgw": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "orderNrSl": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderDateSl": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "baf": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "taf": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "inflCorrection": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecoverRequestModel": {
+        "required": [
+          "userName"
+        ],
+        "type": "object",
+        "properties": {
+          "userName": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RejectCausesDictionary": {
+        "type": "object",
+        "properties": {
+          "rejectCauseId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectCauseName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RejectModel": {
+        "required": [
+          "pricingId",
+          "rejectCause"
+        ],
+        "type": "object",
+        "properties": {
+          "pricingId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectCause": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ServicesDictionary": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SlOrderRequest": {
+        "required": [
+          "deliveryPoint",
+          "receiptPoint"
+        ],
+        "type": "object",
+        "properties": {
+          "quotationId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "receiptPoint": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "deliveryPoint": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "loads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Load"
+            },
+            "nullable": true
+          },
+          "receiptDateBegin": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "receiptDateEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deliveryDateBegin": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deliveryDateEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "orderCustomerNR": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "orderValueCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "notificationEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "notificationSms": {
+            "type": "string",
+            "nullable": true
+          },
+          "instructionCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstructionCode"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SlOrderResponse": {
+        "required": [
+          "deliveryPoint",
+          "receiptPoint"
+        ],
+        "type": "object",
+        "properties": {
+          "quotationId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "receiptPoint": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "deliveryPoint": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "loads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Load"
+            },
+            "nullable": true
+          },
+          "receiptDateBegin": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "receiptDateEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deliveryDateBegin": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deliveryDateEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "orderCustomerNR": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderValue": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "orderValueCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "notificationEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "notificationSms": {
+            "type": "string",
+            "nullable": true
+          },
+          "instructionCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstructionCode"
+            },
+            "nullable": true
+          },
+          "orderID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "orderNR": {
+            "type": "string",
+            "nullable": true
+          },
+          "stageTTNR": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StageTTDictionary": {
+        "type": "object",
+        "properties": {
+          "ttStateNr": {
+            "type": "string",
+            "nullable": true
+          },
+          "tsStateName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StatusesDictionary": {
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TokenModel": {
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "refreshToken": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "refreshToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiration": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
