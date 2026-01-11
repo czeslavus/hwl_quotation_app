@@ -255,8 +255,11 @@ class CountryDropdown extends StatelessWidget {
       );
     }
 
+    final safeValue = countries.any((c) => c.countryId == selectedId)
+        ? selectedId
+        : null;
     return DropdownButtonFormField<int>(
-      value: selectedId,
+      value: safeValue,
       decoration: InputDecoration(labelText: label),
       items: countries
           .map(
