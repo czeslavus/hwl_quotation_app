@@ -7,6 +7,7 @@ import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_item.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_post_model.dart';
 import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
+import 'package:wyceny/features/dictionaries/domain/models/services_dictionary.dart';
 
 class QuotationViewModel extends ChangeNotifier {
   QuotationViewModel({
@@ -32,6 +33,7 @@ class QuotationViewModel extends ChangeNotifier {
   // ================== BLOKADA UI ==================
   bool quotationLoading = false;
   bool countriesLoading = false;
+  bool servicesLoading = false;
   bool packagingLoading = false;
   bool isSubmitting = false;
   bool hasAnyChangesStored = false;
@@ -44,15 +46,24 @@ class QuotationViewModel extends ChangeNotifier {
   // ================== SŁOWNIKI ==================
   Object? countriesError;
   List<CountryDictionary> countries = const [];
+  List<CountryDictionary> deliveryCountries = const [];
+  List<CountryDictionary> receiptCountries = const [];
+  bool originCountryLocked = false;
 
   Object? packagingError;
   List<dynamic> packagingUnits = const [];
+
+  Object? servicesError;
+  List<ServicesDictionary> services = const [];
 
   // ================== HEADER ==================
   int? originCountryId;
   int? destinationCountryId;
   String originZip = '';
   String destinationZip = '';
+  bool adr = false;
+  double? insuranceValue;
+  int? additionalServiceId;
 
   // ================== POZYCJE ==================
   final List<QuotationItem> items = <QuotationItem>[];
@@ -86,6 +97,7 @@ class QuotationViewModel extends ChangeNotifier {
   // ================== INIT ==================
   Future<void> init({int? quotationId}) async {
     await _loadCountries();
+    await _loadServices();
     await _loadPackagingUnits();
 
     if (quotationId != null) {
@@ -123,6 +135,9 @@ class QuotationViewModel extends ChangeNotifier {
 
     originZip = q.receiptZipCode;
     destinationZip = q.deliveryZipCode;
+    adr = q.adr ?? false;
+    insuranceValue = q.insuranceValue;
+    additionalServiceId = q.additionalServiceId;
 
     items
       ..clear()
@@ -144,6 +159,9 @@ class QuotationViewModel extends ChangeNotifier {
       destinationCountryId = null;
       originZip = '';
       destinationZip = '';
+      adr = false;
+      insuranceValue = null;
+      additionalServiceId = null;
       items.clear();
       addEmptyItem(md: false);
 
@@ -185,8 +203,27 @@ class QuotationViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       countries = _dictRepo.countries;
+      deliveryCountries = _dictRepo.countriesDelivery;
+      receiptCountries = _dictRepo.countriesReceipt;
+      if (receiptCountries.length == 1) {
+        originCountryId = receiptCountries.first.countryId;
+        originCountryLocked = true;
+      } else {
+        originCountryLocked = false;
+      }
     } finally {
       countriesLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadServices() async {
+    servicesLoading = true;
+    notifyListeners();
+    try {
+      services = _dictRepo.services;
+    } finally {
+      servicesLoading = false;
       notifyListeners();
     }
   }
@@ -229,6 +266,24 @@ class QuotationViewModel extends ChangeNotifier {
   void setDestinationZip(String v) {
     if (destinationZip == v) return;
     destinationZip = v;
+    markDirty();
+  }
+
+  void setAdr(bool v) {
+    if (adr == v) return;
+    adr = v;
+    markDirty();
+  }
+
+  void setInsuranceValue(double? v) {
+    if (insuranceValue == v) return;
+    insuranceValue = v;
+    markDirty();
+  }
+
+  void setAdditionalServiceId(int? v) {
+    if (additionalServiceId == v) return;
+    additionalServiceId = v;
     markDirty();
   }
 
@@ -275,7 +330,9 @@ class QuotationViewModel extends ChangeNotifier {
         deliveryZipCode: destinationZip.trim(),
         receiptCountryId: originCountryId!,
         receiptZipCode: originZip.trim(),
-        adr: items.any((i) => i.adr),
+        additionalServiceId: additionalServiceId,
+        adr: adr,
+        insuranceValue: insuranceValue,
         userName: auth.user ?? 'unknown',
         quotationPositions:  List<QuotationItem>.from(items),
       );

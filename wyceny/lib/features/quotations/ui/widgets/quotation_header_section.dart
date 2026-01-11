@@ -3,6 +3,7 @@ import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget
 import 'package:wyceny/l10n/app_localizations.dart';
 
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
+import 'package:wyceny/features/dictionaries/domain/models/services_dictionary.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 
 class QuotationHeaderSection extends StatefulWidget {
@@ -25,12 +26,16 @@ class QuotationHeaderSection extends StatefulWidget {
 class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
   late final TextEditingController _originZipCtrl;
   late final TextEditingController _destZipCtrl;
+  late final TextEditingController _insuranceValueCtrl;
 
   @override
   void initState() {
     super.initState();
     _originZipCtrl = TextEditingController(text: widget.vm.originZip);
     _destZipCtrl = TextEditingController(text: widget.vm.destinationZip);
+    _insuranceValueCtrl = TextEditingController(
+      text: widget.vm.insuranceValue?.toString() ?? '',
+    );
 
     widget.vm.addListener(_syncFromVm);
   }
@@ -45,6 +50,7 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
       // podmień tekst na start po zmianie instancji VM
       _originZipCtrl.text = widget.vm.originZip;
       _destZipCtrl.text = widget.vm.destinationZip;
+      _insuranceValueCtrl.text = widget.vm.insuranceValue?.toString() ?? '';
     }
   }
 
@@ -59,6 +65,10 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     if (_destZipCtrl.text != vm.destinationZip) {
       _destZipCtrl.text = vm.destinationZip;
     }
+    final insuranceText = vm.insuranceValue?.toString() ?? '';
+    if (_insuranceValueCtrl.text != insuranceText) {
+      _insuranceValueCtrl.text = insuranceText;
+    }
   }
 
   @override
@@ -66,6 +76,7 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     widget.vm.removeListener(_syncFromVm);
     _originZipCtrl.dispose();
     _destZipCtrl.dispose();
+    _insuranceValueCtrl.dispose();
     super.dispose();
   }
 
@@ -105,9 +116,9 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
                       label: t.gen_origin_country,
                       countriesLoading: vm.countriesLoading,
                       countriesError: vm.countriesError,
-                      countries: vm.countries,
+                      countries: vm.receiptCountries,
                       selectedId: vm.originCountryId,
-                      onChanged: vm.setOriginCountryId,
+                      onChanged: vm.originCountryLocked ? null : vm.setOriginCountryId,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -128,7 +139,7 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
                       label: t.gen_dest_country,
                       countriesLoading: vm.countriesLoading,
                       countriesError: vm.countriesError,
-                      countries: vm.countries,
+                      countries: vm.deliveryCountries,
                       selectedId: vm.destinationCountryId,
                       onChanged: vm.setDestinationCountryId,
                     ),
@@ -139,6 +150,47 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
                       controller: _destZipCtrl,
                       decoration: InputDecoration(labelText: t.gen_dest_zip),
                       onChanged: vm.setDestinationZip,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _AdrField(
+                      value: vm.adr,
+                      onChanged: vm.setAdr,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _insuranceValueCtrl,
+                      decoration: const InputDecoration(labelText: 'Insurance value'),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (value) {
+                        final trimmed = value.trim();
+                        if (trimmed.isEmpty) {
+                          vm.setInsuranceValue(null);
+                          return;
+                        }
+                        final normalized = trimmed.replaceAll(',', '.');
+                        final parsed = double.tryParse(normalized);
+                        if (parsed != null) {
+                          vm.setInsuranceValue(parsed);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ServicesDropdown(
+                      servicesLoading: vm.servicesLoading,
+                      servicesError: vm.servicesError,
+                      services: vm.services,
+                      selectedId: vm.additionalServiceId,
+                      onChanged: vm.setAdditionalServiceId,
                     ),
                   ),
                 ],
@@ -172,7 +224,7 @@ class CountryDropdown extends StatelessWidget {
   final List<CountryDictionary> countries;
 
   final int? selectedId;
-  final ValueChanged<int?> onChanged;
+  final ValueChanged<int?>? onChanged;
 
   const CountryDropdown({
     super.key,
@@ -203,16 +255,90 @@ class CountryDropdown extends StatelessWidget {
       );
     }
 
+    final safeValue = countries.any((c) => c.countryId == selectedId)
+        ? selectedId
+        : null;
     return DropdownButtonFormField<int>(
-      value: selectedId,
+      value: safeValue,
       decoration: InputDecoration(labelText: label),
       items: countries
           .map(
             (c) => DropdownMenuItem<int>(
-          value: c.countryId,
-          child: Text(c.country!),
+              value: c.countryId,
+              child: Text(c.country!),
+            ),
+          )
+          .toList(growable: false),
+      onChanged: onChanged,
+    );
+  }
+}
+
+class _AdrField extends StatelessWidget {
+  const _AdrField({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return InputDecorator(
+      decoration: const InputDecoration(labelText: 'ADR'),
+      child: Checkbox(
+        value: value,
+        onChanged: (v) => onChanged(v ?? false),
+      ),
+    );
+  }
+}
+
+class _ServicesDropdown extends StatelessWidget {
+  const _ServicesDropdown({
+    required this.servicesLoading,
+    required this.servicesError,
+    required this.services,
+    required this.selectedId,
+    required this.onChanged,
+  });
+
+  final bool servicesLoading;
+  final Object? servicesError;
+  final List<ServicesDictionary> services;
+  final int? selectedId;
+  final ValueChanged<int?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    if (servicesLoading) {
+      return const InputDecorator(
+        decoration: InputDecoration(labelText: 'Additional service'),
+        child: LinearProgressIndicator(),
+      );
+    }
+
+    if (servicesError != null) {
+      return InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Additional service',
+          errorText: servicesError.toString(),
         ),
-      )
+        child: const SizedBox(height: 24),
+      );
+    }
+
+    return DropdownButtonFormField<int>(
+      value: selectedId,
+      decoration: const InputDecoration(labelText: 'Additional service'),
+      items: services
+          .map(
+            (s) => DropdownMenuItem<int>(
+              value: s.serviceId,
+              child: Text(s.name ?? ''),
+            ),
+          )
           .toList(growable: false),
       onChanged: onChanged,
     );

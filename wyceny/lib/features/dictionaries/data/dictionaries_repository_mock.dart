@@ -36,7 +36,9 @@ class DictionariesRepositoryMock implements DictionariesRepository {
 
     // w mocku kopiujemy, ale możesz różnicować
     _countriesDelivery = List.of(_countries);
-    _countriesReceipt = List.of(_countries);
+    _countriesReceipt = const [
+      CountryDictionary(countryId: 1, country: 'Poland', countryCode: 'PL'),
+    ];
 
     _additions = const AdditionsDictionary(
       bafValue: 12.5,
