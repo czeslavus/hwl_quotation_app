@@ -61,7 +61,6 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
                 horizontalMargin: 8,
                 columnSpacing: 10,
                 columns: [
-                  const DataColumn(label: Text('ADR')),
                   DataColumn(label: Text(t.item_qty)),
                   DataColumn(label: Text(t.item_len_cm)),
                   DataColumn(label: Text(t.item_wid_cm)),
@@ -87,21 +86,9 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
   DataRow _row(BuildContext context, int index, QuotationItem it) {
     final vm = widget.vm;
     final t = AppLocalizations.of(context);
-    final adrColor = it.adr ? Colors.red : Colors.grey;
 
     return DataRow(
       cells: [
-        DataCell(
-          IconButton(
-            tooltip: 'ADR',
-            visualDensity: VisualDensity.compact,
-            icon: Icon(Icons.warning_amber_rounded, color: adrColor),
-            onPressed: () {
-              // TODO: docelowo otwiera okno ADR; na razie toggle
-              vm.toggleAdr(index);
-            },
-          ),
-        ),
         DataCell(_intField(width: _wXS, value: it.quantity, onChanged: (v) => vm.updateItem(index, it.copyWith(quantity: v)))),
         DataCell(_intField(width: _wS, value: it.length, onChanged: (v) => vm.updateItem(index, it.copyWith(length: v)))),
         DataCell(_intField(width: _wS, value: it.width, onChanged: (v) => vm.updateItem(index, it.copyWith(width: v)))),
