@@ -292,16 +292,43 @@ class MockQuotationsRepository implements QuotationsRepository {
 
     // prosta projekcja pól (mock)
     return OrderModel(
-      quotationId: q.quotationId!,
-      receiptAddress: 'Receipt addr for quotationId=${q.quotationId}',
-      receiptCity: 'City R',
-      receiptStreet: 'Street R 1',
-      receiptCityZipCode: q.receiptZipCode,
-      deliveryAddress: 'Delivery addr for quotationId=${q.quotationId}',
-      deliveryCity: 'City D',
-      deliveryCountry: 'POL', // mock 3-chars
-      deliveryStreet: 'Street D 2',
-      deliveryCityZipCode: q.deliveryZipCode,
+      quotationId: q.quotationId,
+      receiptPoint: AddressModel(
+        name: 'Receipt addr for quotationId=${q.quotationId}',
+        city: 'City R',
+        street: 'Street R 1',
+        zipCode: q.receiptZipCode,
+        country: 'PL',
+        phoneNr: '+48 111 222 333',
+      ),
+      deliveryPoint: AddressModel(
+        name: 'Delivery addr for quotationId=${q.quotationId}',
+        city: 'City D',
+        street: 'Street D 2',
+        zipCode: q.deliveryZipCode,
+        country: 'DE',
+        phoneNr: '+49 222 333 444',
+      ),
+      loads: [
+        const LoadModel(weight: 120, volume: 1.2, length: 120, width: 80, height: 80, unitType: 'PAL', unitQuantity: 1),
+      ],
+      receiptDateBegin: DateTime.now().add(const Duration(days: 2)),
+      receiptDateEnd: DateTime.now().add(const Duration(days: 3)),
+      deliveryDateBegin: DateTime.now().add(const Duration(days: 4)),
+      deliveryDateEnd: DateTime.now().add(const Duration(days: 5)),
+      orderCustomerNr: 'CUST-${q.quotationId}',
+      orderValue: 1500.0,
+      orderValueCurrency: 'PLN',
+      notificationEmail: 'client@example.com',
+      notificationSms: '+48123123123',
+      instructionCodes: const [
+        InstructionCodeModel(instructionCodeNr: 'POD', instructionCodeInfo: 'Proof of delivery'),
+      ],
+      orderId: q.quotationId,
+      orderNr: 'ORD-${q.quotationId}',
+      stageTtNr: 'ST-${q.quotationId}',
+      status: 'NEW',
+      errors: const [],
     );
   }
 
@@ -309,7 +336,7 @@ class MockQuotationsRepository implements QuotationsRepository {
   Future<String> sendOrder(OrderModel model) async {
     _orders.add(model);
 
-    final q = await getQuotation(model.quotationId);
+    final q = await getQuotation(model.quotationId ?? 0);
 
     // symulacja: "wysłany" + numer zamówienia
     final updated = Quotation(

@@ -77,6 +77,12 @@ class QuotationViewModel extends ChangeNotifier {
 
   double get totalPrice => lastQuotation?.totalPrice ?? 0.0;
 
+  String? countryCodeForId(int? id) {
+    if (id == null) return null;
+    final c = countries.cast<CountryDictionary?>().firstWhere((x) => x?.countryId == id, orElse: () => null);
+    return c?.countryCode;
+  }
+
   // ================== INIT ==================
   Future<void> init({int? quotationId}) async {
     await _loadCountries();
