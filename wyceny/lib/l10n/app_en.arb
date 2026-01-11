@@ -82,6 +82,7 @@
   "item_wid_cm": "Width (cm)",
   "item_hei_cm": "Height (cm)",
   "item_w_unit": "Unit weight (kg)",
+  "item_pack_weight": "Packaging weight (kg)",
   "item_pack_type": "Package type",
   "item_dangerous": "Dangerous goods (ADR)",
   "item_delete_tt": "Remove item",

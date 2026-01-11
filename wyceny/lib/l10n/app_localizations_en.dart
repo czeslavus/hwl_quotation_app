@@ -220,6 +220,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get item_w_unit => 'Unit weight (kg)';
 
   @override
+  String get item_pack_weight => 'Packaging weight (kg)';
+
+  @override
   String get item_pack_type => 'Package type';
 
   @override
