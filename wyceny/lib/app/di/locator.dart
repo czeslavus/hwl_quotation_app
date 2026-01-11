@@ -21,6 +21,8 @@ import 'package:wyceny/features/auth/domain/repositories/auth_repository.dart';
 import 'package:wyceny/features/auth/data/repositories/auth_repository_impl.dart';
 
 import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmodel.dart';
+import 'package:wyceny/features/orders/data/orders_repository_mock.dart';
+import 'package:wyceny/features/orders/domain/orders_repository.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/orders_list_viewmodel.dart';
 import 'package:wyceny/features/quotations/data/quotation_repository_mock.dart';
@@ -109,7 +111,9 @@ Future<void> setupDI() async {
     getIt.registerLazySingleton<DictionariesRepository>(() => DictionariesRepositoryImpl(getIt<Dio>()));
   }
 
-  getIt.registerLazySingleton<QuotationsRepository>(() => MockQuotationsRepository());
+  getIt.registerLazySingleton<MockQuotationsRepository>(() => MockQuotationsRepository());
+  getIt.registerLazySingleton<QuotationsRepository>(() => getIt<MockQuotationsRepository>());
+  getIt.registerLazySingleton<OrdersRepository>(() => MockOrdersRepository(getIt<MockQuotationsRepository>()));
 
 
   getIt.registerLazySingleton<Dio>(() {

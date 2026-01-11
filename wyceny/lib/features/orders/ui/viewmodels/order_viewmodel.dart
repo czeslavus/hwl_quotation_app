@@ -1,65 +1,68 @@
 import 'package:flutter/foundation.dart';
+import 'package:wyceny/app/auth.dart';
+import 'package:wyceny/app/di/locator.dart';
+import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
-
 import 'package:wyceny/features/orders/ui/viewmodels/order_item.dart';
 
-/// Szkielet ViewModelu do ekranu nowego zlecenia.
-/// Podmień logikę cenową w _recalcPricing() pod swoje zasady.
 class OrderViewModel extends ChangeNotifier {
-  // ——— Kontekst klient/kontrahent (np. z sesji / auth) ———
-  String customerName = "";
-  String contractorName = "";
+  OrderViewModel({
+    DictionariesRepository? dictRepo,
+    AuthState? auth,
+  })  : _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
+        auth = auth ?? getIt<AuthState>();
 
-  // ——— Słowniki (kraje) ———
+  final DictionariesRepository _dictRepo;
+  final AuthState auth;
+
   bool countriesLoading = false;
   Object? countriesError;
   List<CountryDictionary> countries = const [];
 
-  // ——— Dane NADAWCY ———
-  int? originCountryId;
-  String originZip = "";
-  String senderName = "";
-  String senderCity = "";
-  String senderStreet = "";
-  String senderPhone = "";
+  int? receiptCountryId;
+  int? deliveryCountryId;
+  String receiptZipCode = '';
+  String deliveryZipCode = '';
+  String receiptName = '';
+  String receiptCity = '';
+  String receiptStreet = '';
+  String receiptPhone = '';
+  String deliveryName = '';
+  String deliveryCity = '';
+  String deliveryStreet = '';
+  String deliveryPhone = '';
 
-  // ——— Dane ODBIORCY ———
-  int? destinationCountryId;
-  String destZip = "";
-  String recipientName = "";
-  String recipientCity = "";
-  String recipientStreet = "";
-  String recipientPhone = "";
+  DateTime? receiptDateBegin;
+  DateTime? receiptDateEnd;
+  DateTime? deliveryDateBegin;
+  DateTime? deliveryDateEnd;
 
-  // ——— Usługi/ubezpieczenie ———
-  bool services = false;     // „Serwisy”
-  bool preAdvice = false;    // „Awizacja”
-  double insuranceValue = 0; // wartość cargo do ubezpieczenia
+  String? orderCustomerNr;
+  double orderValue = 0;
+  String? notificationEmail;
+  String? notificationSms;
 
-  // ——— Pozycje towarowe ———
+  bool services = false;
+  bool preAdvice = false;
+  double insuranceValue = 0;
+
   final List<OrderItem> items = [];
 
-  // ——— Wyliczenia / podsumowanie ———
-  double cbmTotal = 0;       // suma CBM
-  double chargeableWeight = 0; // waga przeliczeniowa (kg)
-  double freight = 0;        // fracht bazowy
+  double cbmTotal = 0;
+  double chargeableWeight = 0;
+  double freight = 0;
   double adrFee = 0;
   double serviceFee = 0;
   double insuranceFee = 0;
-  double totalPrice = 0;     // ALL-IN
+  double totalPrice = 0;
 
-  // ——— Public API ———
-
-  /// Pierwsze pobrania (np. kraje).
   Future<void> init() async {
     countriesLoading = true;
     countriesError = null;
     notifyListeners();
 
     try {
-      // TODO: podłącz realny fetch słowników (DI/repo).
-      // Tymczasowo: pusta lista lub mock.
-      countries = countries; // zostawiamy to jak jest
+      countries = _dictRepo.countries;
     } catch (e) {
       countriesError = e;
     } finally {
@@ -68,13 +71,23 @@ class OrderViewModel extends ChangeNotifier {
     }
   }
 
-  void setOriginCountry(int? id) {
-    originCountryId = id;
+  void setReceiptCountryId(int? id) {
+    receiptCountryId = id;
     notifyListeners();
   }
 
-  void setDestinationCountry(int? id) {
-    destinationCountryId = id;
+  void setDeliveryCountryId(int? id) {
+    deliveryCountryId = id;
+    notifyListeners();
+  }
+
+  void setReceiptZip(String value) {
+    receiptZipCode = value;
+    notifyListeners();
+  }
+
+  void setDeliveryZip(String value) {
+    deliveryZipCode = value;
     notifyListeners();
   }
 
@@ -96,18 +109,30 @@ class OrderViewModel extends ChangeNotifier {
   }
 
   void clear() {
-    originCountryId = null;
-    destinationCountryId = null;
-    originZip = destZip = "";
-    senderName = senderCity = senderStreet = senderPhone = "";
-    recipientName = recipientCity = recipientStreet = recipientPhone = "";
-
+    receiptCountryId = null;
+    deliveryCountryId = null;
+    receiptZipCode = '';
+    deliveryZipCode = '';
+    receiptName = '';
+    receiptCity = '';
+    receiptStreet = '';
+    receiptPhone = '';
+    deliveryName = '';
+    deliveryCity = '';
+    deliveryStreet = '';
+    deliveryPhone = '';
+    receiptDateBegin = null;
+    receiptDateEnd = null;
+    deliveryDateBegin = null;
+    deliveryDateEnd = null;
+    orderCustomerNr = null;
+    orderValue = 0;
+    notificationEmail = null;
+    notificationSms = null;
     services = false;
     preAdvice = false;
     insuranceValue = 0;
-
     items.clear();
-
     cbmTotal = 0;
     chargeableWeight = 0;
     freight = 0;
@@ -115,47 +140,42 @@ class OrderViewModel extends ChangeNotifier {
     serviceFee = 0;
     insuranceFee = 0;
     totalPrice = 0;
-
     notifyListeners();
   }
 
-  /// Przelicz – możesz podmienić na wywołanie API kalkulatora.
   Future<void> calculate() async {
-    // TODO: opcjonalnie validacja / call do API.
     _recalcPricing();
   }
 
-  /// Zatwierdź zlecenie – wyślij na backend i obsłuż wynik.
   Future<void> submit() async {
     // TODO: walidacja + submit do backendu
   }
 
-  // ——— Logika przeliczeń (przykładowa) ———
+  String? countryCodeForId(int? id) {
+    if (id == null) return null;
+    final c = countries.cast<CountryDictionary?>().firstWhere((x) => x?.countryId == id, orElse: () => null);
+    return c?.countryCode;
+  }
 
   void _recalcPricing() {
-    // Suma CBM
     cbmTotal = items.fold<double>(0, (s, it) => s + it.cbm);
 
-    // Waga przeliczeniowa (1 CBM = 167 kg – popularny mnożnik drogowy)
     final volumetricKg = cbmTotal * 167.0;
     final realKg = items.fold<double>(0, (s, it) => s + (it.weightKg ?? 0) * (it.qty ?? 0));
     chargeableWeight = realKg > volumetricKg ? realKg : volumetricKg;
 
-    // Prosty cennik przykładowy (podmień na swój)
-    final basePerKg = _baseRatePerKgForRelation(originCountryId, destinationCountryId);
+    final basePerKg = _baseRatePerKgForRelation(receiptCountryId, deliveryCountryId);
     freight = chargeableWeight * basePerKg;
 
-    // ADR – dopłata, jeśli którakolwiek pozycja ma ADR
     final hasAdr = items.any((it) => it.adr == true);
     adrFee = hasAdr ? 35.0 : 0.0;
 
-    // Serwisy – ryczałt
     serviceFee = services ? 25.0 : 0.0;
 
-    // Ubezpieczenie cargo: 0.15% wartości + min 10
-    insuranceFee = (insuranceValue > 0) ? (insuranceValue * 0.0015).clamp(10.0, double.infinity) : 0.0;
+    insuranceFee = (insuranceValue > 0)
+        ? (insuranceValue * 0.0015).clamp(10.0, double.infinity)
+        : 0.0;
 
-    // Awizacja – przykładowo 5
     final preAdviceFee = preAdvice ? 5.0 : 0.0;
 
     totalPrice = freight + adrFee + serviceFee + insuranceFee + preAdviceFee;
@@ -164,9 +184,8 @@ class OrderViewModel extends ChangeNotifier {
   }
 
   double _baseRatePerKgForRelation(int? fromId, int? toId) {
-    // Przykład: inne stawki dla krajowych / międzynarodowych
     if (fromId == null || toId == null) return 0.0;
     final same = fromId == toId;
-    return same ? 0.22 : 0.45; // PLN/kg (przykład)
+    return same ? 0.22 : 0.45;
   }
 }

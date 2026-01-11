@@ -3,11 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/common/top_bar_appbar.dart';
-import 'package:wyceny/l10n/app_localizations.dart';
-import 'package:wyceny/l10n/country_localizer.dart';
-
 import 'package:wyceny/features/orders/ui/viewmodels/orders_list_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
+import 'package:wyceny/l10n/app_localizations.dart';
+import 'package:wyceny/l10n/country_localizer.dart';
+import 'package:wyceny/ui/widgets/common/neutral_action_button.dart';
+import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
+import 'package:wyceny/ui/widgets/common/secondary_action_button.dart';
 
 class OrdersListScreen extends StatelessWidget {
   const OrdersListScreen({super.key});
@@ -37,41 +39,44 @@ class _OrdersListView extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Nagłówek + „Nowe zamówienie”
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: isPhone
                 ? Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    t.orders_title, // dodaj w l10n (np. „Zamówienia”)
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                _NewOrderCompactButton(
-                  tooltip: t.action_new_order, // dodaj w l10n
-                  onPressed: () => context.push('/order/new'),
-                ),
-              ],
-            )
+                    children: [
+                      Expanded(
+                        child: Text(
+                          t.orders_title,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      PositiveActionButton(
+                        tooltip: t.action_new_order,
+                        label: t.action_new_order,
+                        icon: Icons.add,
+                        showCaption: false,
+                        onPressed: () => context.push('/order/new'),
+                      ),
+                    ],
+                  )
                 : Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    t.orders_title,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          t.orders_title,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                      ),
+                      PositiveActionButton(
+                        onPressed: () => context.push('/order/new'),
+                        icon: Icons.add,
+                        label: t.action_new_order,
+                        tooltip: t.action_new_order,
+                      ),
+                    ],
                   ),
-                ),
-                _NewOrderButton(
-                  onPressed: () => context.push('/order/new'),
-                ),
-              ],
-            ),
           ),
-
-          // Ogłoszenia
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: AnnouncementsPanel(
@@ -79,28 +84,21 @@ class _OrdersListView extends StatelessWidget {
               body: Text("${t.announcement_line} • ${t.overdue_info}"),
             ),
           ),
-
           const Divider(height: 1),
-
-          // Filtry
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: _ResponsiveFiltersBar(vm: vm),
           ),
-
           const Divider(height: 1),
-
-          // Lista
           Expanded(
             child: vm.loading
                 ? const Center(child: CircularProgressIndicator())
                 : vm.error != null
-                ? Center(child: Text(t.error_generic(vm.error.toString())))
-                : vm.items.isEmpty
-                ? Center(child: Text(t.list_empty))
-                : _OrdersTable(vm: vm),
+                    ? Center(child: Text(t.error_generic(vm.error.toString())))
+                    : vm.items.isEmpty
+                        ? Center(child: Text(t.list_empty))
+                        : _OrdersTable(vm: vm),
           ),
-
           const Divider(height: 1),
           _PaginationBar(vm: vm),
         ],
@@ -108,52 +106,6 @@ class _OrdersListView extends StatelessWidget {
     );
   }
 }
-
-// ————— Akcje nagłówka —————
-
-class _NewOrderCompactButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final String? tooltip;
-  const _NewOrderCompactButton({required this.onPressed, this.tooltip});
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip ?? '',
-      child: IconButton(
-        onPressed: onPressed,
-        icon: const Icon(Icons.add, size: 28),
-        style: IconButton.styleFrom(
-          backgroundColor: Colors.green,
-          foregroundColor: Colors.white,
-          minimumSize: const Size(52, 52),
-          shape: const CircleBorder(),
-        ),
-      ),
-    );
-  }
-}
-
-class _NewOrderButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  const _NewOrderButton({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    return FilledButton.icon(
-      onPressed: onPressed,
-      icon: const Icon(Icons.add),
-      label: Text(t.action_new_order),
-      style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(Colors.green),
-        foregroundColor: WidgetStateProperty.all(Colors.white),
-      ),
-    );
-  }
-}
-
-// ————— Pasek filtrów —————
 
 class _ResponsiveFiltersBar extends StatefulWidget {
   final OrdersListViewModel vm;
@@ -164,14 +116,32 @@ class _ResponsiveFiltersBar extends StatefulWidget {
 }
 
 class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
-  DateTime? _from;
-  DateTime? _to;
+  DateTime? _deliveryFrom;
+  DateTime? _deliveryTo;
+  DateTime? _receiptFrom;
+  DateTime? _receiptTo;
+  final TextEditingController _customerNrCtrl = TextEditingController();
+  final TextEditingController _deliveryZipCtrl = TextEditingController();
+  final TextEditingController _receiptZipCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _from = widget.vm.dateFrom;
-    _to = widget.vm.dateTo;
+    _deliveryFrom = widget.vm.deliveryStartDate;
+    _deliveryTo = widget.vm.deliveryEndDate;
+    _receiptFrom = widget.vm.receiptStartDate;
+    _receiptTo = widget.vm.receiptEndDate;
+    _customerNrCtrl.text = widget.vm.orderCustomerNr ?? '';
+    _deliveryZipCtrl.text = widget.vm.deliveryZipCode ?? '';
+    _receiptZipCtrl.text = widget.vm.receiptZipCode ?? '';
+  }
+
+  @override
+  void dispose() {
+    _customerNrCtrl.dispose();
+    _deliveryZipCtrl.dispose();
+    _receiptZipCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -183,65 +153,107 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     final isPhone = width < 600;
 
     final fields = <Widget>[
-      Row(mainAxisSize: MainAxisSize.min, children: [
-        _dateField(context: context, label: t.filter_date_from, value: _from, onPick: (d) => setState(() => _from = d)),
-        const SizedBox(width: 8),
-        _dateField(context: context, label: t.filter_date_to, value: _to, onPick: (d) => setState(() => _to = d)),
-      ]),
-      SizedBox(
-        width: 220,
-        child: DropdownButtonFormField<int>(
-          isExpanded: true,
-          initialValue: vm.originCountryId,
-          decoration: InputDecoration(labelText: t.gen_origin_country),
-          items: vm.countries
-              .map((c) => DropdownMenuItem(
-            value: c.countryId,
-            child: Text(CountryLocalizer.localize(c.country, context)),
-          ))
-              .toList(),
-          onChanged: (id) => setState(() => vm.originCountryId = id),
-        ),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _dateField(context: context, label: 'Odbiór od', value: _receiptFrom, onPick: (d) => setState(() => _receiptFrom = d)),
+          const SizedBox(width: 8),
+          _dateField(context: context, label: 'Odbiór do', value: _receiptTo, onPick: (d) => setState(() => _receiptTo = d)),
+        ],
+      ),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _dateField(context: context, label: 'Dostawa od', value: _deliveryFrom, onPick: (d) => setState(() => _deliveryFrom = d)),
+          const SizedBox(width: 8),
+          _dateField(context: context, label: 'Dostawa do', value: _deliveryTo, onPick: (d) => setState(() => _deliveryTo = d)),
+        ],
       ),
       SizedBox(
-        width: 220,
-        child: DropdownButtonFormField<int>(
-          isExpanded: true,
-          initialValue: vm.destCountryId,
-          decoration: InputDecoration(labelText: t.gen_dest_country),
-          items: vm.countries
-              .map((c) => DropdownMenuItem(
-            value: c.countryId,
-            child: Text(CountryLocalizer.localize(c.country, context)),
-          ))
-              .toList(),
-          onChanged: (id) => setState(() => vm.destCountryId = id),
+        width: 200,
+        child: TextField(
+          controller: _customerNrCtrl,
+          decoration: const InputDecoration(labelText: 'Nr klienta'),
         ),
       ),
       SizedBox(
         width: 200,
         child: DropdownButtonFormField<String>(
           isExpanded: true,
-          initialValue: vm.status,
+          initialValue: vm.deliveryCountry,
+          decoration: InputDecoration(labelText: t.gen_dest_country),
+          items: vm.countries
+              .map((c) => DropdownMenuItem(
+                    value: c.countryCode,
+                    child: Text(CountryLocalizer.localize(c.country, context)),
+                  ))
+              .toList(),
+          onChanged: (code) => setState(() => vm.deliveryCountry = code),
+        ),
+      ),
+      SizedBox(
+        width: 160,
+        child: TextField(
+          controller: _deliveryZipCtrl,
+          decoration: const InputDecoration(labelText: 'Kod dostawy'),
+        ),
+      ),
+      SizedBox(
+        width: 160,
+        child: TextField(
+          controller: _receiptZipCtrl,
+          decoration: const InputDecoration(labelText: 'Kod odbioru'),
+        ),
+      ),
+      SizedBox(
+        width: 200,
+        child: DropdownButtonFormField<String>(
+          isExpanded: true,
+          initialValue: vm.statusNr,
           decoration: InputDecoration(labelText: t.col_status),
           items: vm.statusOptions
               .map((s) => DropdownMenuItem(value: s, child: Text(vm.statusLabel(s))))
               .toList(),
-          onChanged: (s) => setState(() => vm.status = s),
+          onChanged: (s) => setState(() => vm.statusNr = s),
         ),
       ),
     ];
 
-    void onApply() => vm.applyFilters(from: _from, to: _to, originId: vm.originCountryId, destId: vm.destCountryId, status: vm.status);
+    void onApply() => vm.applyFilters(
+          orderCustomerNr: _customerNrCtrl.text,
+          deliveryStart: _deliveryFrom,
+          deliveryEnd: _deliveryTo,
+          receiptStart: _receiptFrom,
+          receiptEnd: _receiptTo,
+          status: vm.statusNr,
+          deliveryCountry: vm.deliveryCountry,
+          deliveryZip: _deliveryZipCtrl.text,
+          receiptZip: _receiptZipCtrl.text,
+        );
+
     void onClear() {
       setState(() {
-        _from = null;
-        _to = null;
-        vm.originCountryId = null;
-        vm.destCountryId = null;
-        vm.status = null;
+        _deliveryFrom = null;
+        _deliveryTo = null;
+        _receiptFrom = null;
+        _receiptTo = null;
+        _customerNrCtrl.clear();
+        _deliveryZipCtrl.clear();
+        _receiptZipCtrl.clear();
+        vm.statusNr = null;
+        vm.deliveryCountry = null;
       });
-      vm.applyFilters(from: null, to: null, originId: null, destId: null, status: null);
+      vm.applyFilters(
+        orderCustomerNr: null,
+        deliveryStart: null,
+        deliveryEnd: null,
+        receiptStart: null,
+        receiptEnd: null,
+        status: null,
+        deliveryCountry: null,
+        deliveryZip: null,
+        receiptZip: null,
+      );
     }
 
     if (isPhone) {
@@ -263,7 +275,6 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
       );
     }
 
-    // szeroko: przyciski po prawej, tylko gdy jest miejsce na pola
     return LayoutBuilder(
       builder: (context, constraints) {
         return Wrap(
@@ -284,16 +295,16 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                FilledButton.icon(
+                NeutralActionButton(
                   onPressed: onApply,
-                  icon: const Icon(Icons.filter_alt),
-                  label: Text(t.filter_apply),
+                  icon: Icons.filter_alt,
+                  label: t.filter_apply,
                 ),
                 const SizedBox(width: 8),
-                OutlinedButton.icon(
+                SecondaryActionButton(
                   onPressed: onClear,
-                  icon: const Icon(Icons.filter_alt_off),
-                  label: Text(t.filter_clear),
+                  icon: Icons.filter_alt_off,
+                  label: t.filter_clear,
                 ),
               ],
             ),
@@ -310,7 +321,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     required ValueChanged<DateTime?> onPick,
   }) {
     return SizedBox(
-      width: 190,
+      width: 160,
       child: InkWell(
         onTap: () async {
           final now = DateTime.now();
@@ -331,8 +342,6 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
   }
 }
 
-// ————— Tabela —————
-
 class _OrdersTable extends StatelessWidget {
   final OrdersListViewModel vm;
   const _OrdersTable({required this.vm});
@@ -340,73 +349,80 @@ class _OrdersTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
-    const double kMinTableWidth = 1400;
-
-    Widget h(String s, {double? w}) =>
-        SizedBox(width: w, child: Text(s, overflow: TextOverflow.ellipsis));
-    Widget c(Widget w, {double? width}) =>
-        width == null ? w : SizedBox(width: width, child: w);
 
     final hCtrl = ScrollController();
     final vCtrl = ScrollController();
 
-    final table = ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: kMinTableWidth),
-      child: DataTable(
-        columnSpacing: 16,
-        headingRowHeight: 48,
-        dataRowMinHeight: 44,
-        dataRowMaxHeight: 64,
-        columns: [
-          DataColumn(label: h(t.col_order_nr,       w: 140)),
-          DataColumn(label: h(t.col_status,         w: 140)),
-          DataColumn(label: h(t.col_created,        w: 140)),
-          DataColumn(label: h(t.col_origin_country, w: 160)),
-          DataColumn(label: h(t.col_origin_zip,     w: 120)),
-          DataColumn(label: h(t.col_dest_country,   w: 180)),
-          DataColumn(label: h(t.col_dest_zip,       w: 120)),
-          DataColumn(label: h(t.col_items_count,    w: 120)),
-          DataColumn(label: h(t.col_weight,         w: 120)),
-          DataColumn(label: h(t.col_price,          w: 140)),
-          DataColumn(label: h(t.col_actions,        w: 220)),
-        ],
-        rows: vm.items.map<DataRow>((o) => DataRow(cells: [
-          DataCell(c(Text(o.orderNr ?? o.id ?? "—"),                    width: 140)),
-          DataCell(c(Text(vm.statusLabel(o.status)),                     width: 140)),
-          DataCell(c(Text(o.createdAt?.toLocal().toString().split(' ').first ?? "—"), width: 140)),
-          DataCell(c(Text(vm.localizeCountryName(o.originCountry, context)),          width: 160)),
-          DataCell(c(Text(o.originZip ?? "—"),                           width: 120)),
-          DataCell(c(Text(vm.localizeCountryName(o.destCountry, context)),            width: 180)),
-          DataCell(c(Text(o.destZip ?? "—"),                             width: 120)),
-          DataCell(c(Text("${o.itemsCount}"),                            width: 120)),
-          DataCell(c(Text(o.weightChg?.toStringAsFixed(2) ?? "0.00"),    width: 120)),
-          DataCell(c(Text(o.total?.toStringAsFixed(2) ?? "0.00"),        width: 140)),
-          DataCell(_ActionsCell(vm: vm, orderId: o.id!)),
-        ])).toList(),
-      ),
-    );
-
-    return Scrollbar(
-      controller: hCtrl,
-      thumbVisibility: true,
-      notificationPredicate: (n) => n.metrics.axis == Axis.horizontal,
-      child: Scrollbar(
-        controller: vCtrl,
-        thumbVisibility: true,
-        notificationPredicate: (n) => n.metrics.axis == Axis.vertical,
-        child: SingleChildScrollView(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scrollbar(
           controller: hCtrl,
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 1400),
+          thumbVisibility: true,
+          notificationPredicate: (n) => n.metrics.axis == Axis.horizontal,
+          child: Scrollbar(
+            controller: vCtrl,
+            thumbVisibility: true,
+            notificationPredicate: (n) => n.metrics.axis == Axis.vertical,
             child: SingleChildScrollView(
-              controller: vCtrl,
-              padding: const EdgeInsets.only(bottom: 80), // miejsce na paginację
-              child: table,
+              controller: hCtrl,
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: SingleChildScrollView(
+                  controller: vCtrl,
+                  child: DataTable(
+                    columnSpacing: 24,
+                    headingRowHeight: 48,
+                    dataRowMinHeight: 56,
+                    dataRowMaxHeight: 72,
+                    columns: [
+                      DataColumn(label: Text(t.col_order_nr)),
+                      const DataColumn(label: Text('Trasa')),
+                      const DataColumn(label: Text('Daty')),
+                      const DataColumn(label: Text('Ładunki')),
+                      DataColumn(label: Text(t.col_price)),
+                      DataColumn(label: Text(t.col_status)),
+                      DataColumn(label: Text(t.col_actions)),
+                    ],
+                    rows: vm.items.map((o) {
+                      final receipt = '${o.receiptPoint.country} ${o.receiptPoint.zipCode}';
+                      final delivery = '${o.deliveryPoint.country} ${o.deliveryPoint.zipCode}';
+                      final receiptDate = o.receiptDateBegin?.toLocal().toString().split(' ').first ?? '—';
+                      final deliveryDate = o.deliveryDateBegin?.toLocal().toString().split(' ').first ?? '—';
+
+                      return DataRow(cells: [
+                        DataCell(_twoLines(o.orderNr ?? '—', o.orderCustomerNr ?? '—')),
+                        DataCell(_twoLines(receipt, delivery)),
+                        DataCell(_twoLines(receiptDate, deliveryDate)),
+                        DataCell(_twoLines('MP: ${o.itemsCount}', 'W: ${o.totalWeight.toStringAsFixed(1)} kg')),
+                        DataCell(Text('${o.orderValue?.toStringAsFixed(2) ?? '0.00'} ${o.orderValueCurrency ?? ''}'.trim())),
+                        DataCell(Text(vm.statusLabel(o.status))),
+                        DataCell(_ActionsCell(vm: vm, orderId: o.orderId?.toString() ?? '')),
+                      ]);
+                    }).toList(),
+                  ),
+                ),
+              ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  Widget _twoLines(String top, String bottom) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(top, maxLines: 1, overflow: TextOverflow.ellipsis),
+        Text(
+          bottom,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
-      ),
+      ],
     );
   }
 }
@@ -453,8 +469,6 @@ class _ActionsCell extends StatelessWidget {
     );
   }
 }
-
-// ————— Paginacja —————
 
 class _PaginationBar extends StatelessWidget {
   final OrdersListViewModel vm;

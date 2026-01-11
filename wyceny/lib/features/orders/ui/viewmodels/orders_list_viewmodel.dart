@@ -1,18 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
+import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
+import 'package:wyceny/features/orders/domain/models/order_model.dart';
+import 'package:wyceny/features/orders/domain/orders_repository.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
-import 'package:wyceny/features/orders/ui/viewmodels/order_list_item.dart';
 
 class OrdersListViewModel extends ChangeNotifier {
   OrdersListViewModel({
+    OrdersRepository? repo,
+    DictionariesRepository? dictRepo,
     AuthState? auth,
-  })  : auth = auth ?? getIt<AuthState>();
+  })  : _repo = repo ?? getIt<OrdersRepository>(),
+        _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
+        auth = auth ?? getIt<AuthState>();
 
+  final OrdersRepository _repo;
+  final DictionariesRepository _dictRepo;
   final AuthState auth;
 
-  // Dane / status
   bool loading = false;
   Object? error;
 
@@ -22,29 +29,32 @@ class OrdersListViewModel extends ChangeNotifier {
   final List<int> pageSizeOptions = const [10, 20, 50, 100];
   bool isLastPage = false;
 
-  // Filtry
-  DateTime? dateFrom;
-  DateTime? dateTo;
-  int? originCountryId;
-  int? destCountryId;
-  String? status;
-  final List<String> statusOptions = const ["new", "in_progress", "done", "canceled"];
+  // Filtry zgodne z API
+  String? orderCustomerNr;
+  DateTime? deliveryStartDate;
+  DateTime? deliveryEndDate;
+  DateTime? receiptStartDate;
+  DateTime? receiptEndDate;
+  String? statusNr;
+  String? deliveryCountry;
+  String? deliveryZipCode;
+  String? receiptZipCode;
+
+  final List<String> statusOptions = const ['NEW', 'IN_PROGRESS', 'DONE', 'CANCELED'];
 
   // Słowniki
   List<CountryDictionary> countries = const [];
 
   // Lista
-  List<OrderListItem> items = const [];
+  List<OrderModel> items = const [];
 
-  // ——— API ———
   Future<void> init() async {
     loading = true;
     error = null;
     notifyListeners();
 
     try {
-      // TODO: fetch countries + first page
-      countries = countries; // podmień na realny fetch
+      countries = _dictRepo.countries;
       await _loadPage();
     } catch (e) {
       error = e;
@@ -55,35 +65,43 @@ class OrdersListViewModel extends ChangeNotifier {
   }
 
   Future<void> _loadPage() async {
-    // TODO: wywołanie repo z filtrami i paginacją
-    // Poniżej mock:
-    await Future<void>.delayed(const Duration(milliseconds: 150));
-    final mock = List.generate(pageSize, (i) {
-      final idx = (page - 1) * pageSize + i + 1;
-      return OrderListItem(
-        id: "O$idx",
-        orderNr: "ORD-${idx.toString().padLeft(5, '0')}",
-        status: status ?? "new",
-        createdAt: DateTime.now().subtract(Duration(days: idx % 30)),
-        originCountry: CountryDictionary(countryId: 1, country: "Poland", countryCode: "PL"),
-        originZip: "00-00${idx % 10}",
-        destCountry: CountryDictionary(countryId: 2, country: "Germany", countryCode: "DE"),
-        destZip: "10-10${idx % 10}",
-        itemsCount: 1 + (idx % 4),
-        weightChg: 123.0 + idx,
-        total: 450.0 + idx * 3,
-      );
-    });
-    items = mock;
-    isLastPage = items.length < pageSize; // prosta heurystyka
+    final result = await _repo.getOrders(
+      page: page,
+      pageSize: pageSize,
+      orderCustomerNr: orderCustomerNr,
+      deliveryStartDate: deliveryStartDate,
+      deliveryEndDate: deliveryEndDate,
+      receiptStartDate: receiptStartDate,
+      receiptEndDate: receiptEndDate,
+      statusNr: statusNr,
+      deliveryCountry: deliveryCountry,
+      deliveryZipCode: deliveryZipCode,
+      receiptZipCode: receiptZipCode,
+    );
+    items = result;
+    isLastPage = result.length < pageSize;
   }
 
-  void applyFilters({DateTime? from, DateTime? to, int? originId, int? destId, String? status}) {
-    dateFrom = from;
-    dateTo = to;
-    originCountryId = originId;
-    destCountryId = destId;
-    this.status = status;
+  void applyFilters({
+    String? orderCustomerNr,
+    DateTime? deliveryStart,
+    DateTime? deliveryEnd,
+    DateTime? receiptStart,
+    DateTime? receiptEnd,
+    String? status,
+    String? deliveryCountry,
+    String? deliveryZip,
+    String? receiptZip,
+  }) {
+    this.orderCustomerNr = orderCustomerNr;
+    deliveryStartDate = deliveryStart;
+    deliveryEndDate = deliveryEnd;
+    receiptStartDate = receiptStart;
+    receiptEndDate = receiptEnd;
+    statusNr = status;
+    this.deliveryCountry = deliveryCountry;
+    deliveryZipCode = deliveryZip;
+    receiptZipCode = receiptZip;
     page = 1;
     refresh();
   }
@@ -96,7 +114,6 @@ class OrdersListViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Paginacja
   void nextPage() {
     if (isLastPage) return;
     page++;
@@ -115,34 +132,41 @@ class OrdersListViewModel extends ChangeNotifier {
     refresh();
   }
 
-  // Akcje wiersza
-  void view(String id) {
-    // TODO: nawigacja do szczegółu
-  }
+  void view(String id) {}
+  void edit(String id) {}
+  Future<void> copy(String id) async {}
+  Future<void> cancel(String id) async {}
 
-  void edit(String id) {
-    // TODO
-  }
-
-  Future<void> copy(String id) async {
-    // TODO: skopiuj zamówienie
-  }
-
-  Future<void> cancel(String id) async {
-    // TODO: anuluj zamówienie
-  }
-
-  // Pomocnicze
   String statusLabel(String? s) {
     switch (s) {
-      case "new": return "Nowe";
-      case "in_progress": return "W realizacji";
-      case "done": return "Zrealizowane";
-      case "canceled": return "Anulowane";
-      default: return "—";
+      case 'NEW':
+        return 'Nowe';
+      case 'IN_PROGRESS':
+        return 'W realizacji';
+      case 'DONE':
+        return 'Zrealizowane';
+      case 'CANCELED':
+        return 'Anulowane';
+      default:
+        return '—';
     }
   }
 
-  String localizeCountryName(CountryDictionary? c, context) =>
-      c == null ? "—" : CountryLocalizer.localize(c.country, context);
+  String localizeCountryName(String? countryCode, context) {
+    if (countryCode == null || countryCode.trim().isEmpty) return '—';
+    final c = countries.cast<CountryDictionary?>().firstWhere(
+          (x) => x?.countryCode.toLowerCase() == countryCode.toLowerCase(),
+      orElse: () => null,
+    );
+    return CountryLocalizer.localize(c?.country, context);
+  }
+
+  String? countryCodeForId(int? id) {
+    if (id == null) return null;
+    final c = countries.cast<CountryDictionary?>().firstWhere(
+          (x) => x?.countryId == id,
+      orElse: () => null,
+    );
+    return c?.countryCode;
+  }
 }
