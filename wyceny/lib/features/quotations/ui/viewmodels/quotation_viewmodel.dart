@@ -91,7 +91,7 @@ class QuotationViewModel extends ChangeNotifier {
     if (quotationId != null) {
       await loadQuotation(quotationId);
     } else if (items.isEmpty) {
-      addEmptyItem(markDirty: false);
+      addEmptyItem(md: false);
     }
   }
 
@@ -128,7 +128,7 @@ class QuotationViewModel extends ChangeNotifier {
       ..clear()
       ..addAll(q.quotationPositions ?? const <QuotationItem>[]);
     if (items.isEmpty) {
-      addEmptyItem(markDirty: false);
+      addEmptyItem(md: false);
     }
 
     hasQuote = q.hasAnyPriceComponent;
@@ -145,7 +145,7 @@ class QuotationViewModel extends ChangeNotifier {
       originZip = '';
       destinationZip = '';
       items.clear();
-      addEmptyItem(markDirty: false);
+      addEmptyItem(md: false);
 
       // reset wyceny i stanu
       lastQuotation = null;
@@ -232,7 +232,7 @@ class QuotationViewModel extends ChangeNotifier {
     markDirty();
   }
 
-  void addEmptyItem({bool markDirty = true}) {
+  void addEmptyItem({bool md = true}) {
     items.add(const QuotationItem(
       quantity: 1,
       length: 0,
@@ -241,7 +241,7 @@ class QuotationViewModel extends ChangeNotifier {
       weight: 0,
       adr: false,
     ));
-    if (markDirty) {
+    if (md) {
       markDirty();
     } else {
       notifyListeners();

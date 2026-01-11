@@ -217,7 +217,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get item_hei_cm => 'Wysokość (cm)';
 
   @override
-  String get item_w_unit => 'Waga 1 opak. (kg)';
+  String get item_w_unit => 'Waga 1 szt. (kg)';
 
   @override
   String get item_pack_weight => 'Waga opak. (kg)';
