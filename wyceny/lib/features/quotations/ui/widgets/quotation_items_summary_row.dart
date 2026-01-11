@@ -33,7 +33,8 @@ class QuotationItemsSummaryRow extends StatelessWidget {
           i.quantity *
               i.length.toDouble() *
               i.width.toDouble() *
-              i.height.toDouble(),
+              i.height.toDouble() /
+              1000000,
     );
 
     final sumLongWeight = vm.items.fold<double>(
@@ -65,7 +66,7 @@ class QuotationItemsSummaryRow extends StatelessWidget {
         children: [
           item(t.sum_packages, sumPackages.toString()),
           item(t.sum_weight, '${sumWeight.toStringAsFixed(2)} kg'),
-          item(t.sum_volume, sumVolume.toStringAsFixed(2)),
+          item(t.sum_volume, '${sumVolume.toStringAsFixed(2)} m³'),
           item(t.sum_long_weight, '${sumLongWeight.toStringAsFixed(2)} kg'),
         ],
       ),

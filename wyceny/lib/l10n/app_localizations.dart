@@ -482,6 +482,12 @@ abstract class AppLocalizations {
   /// **'Unit weight (kg)'**
   String get item_w_unit;
 
+  /// No description provided for @item_pack_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Packaging weight (kg)'**
+  String get item_pack_weight;
+
   /// No description provided for @item_pack_type.
   ///
   /// In en, this message translates to:

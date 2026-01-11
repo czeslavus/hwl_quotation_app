@@ -68,7 +68,7 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
                   DataColumn(label: Text(t.item_hei_cm)),
                   DataColumn(label: Text(t.item_w_unit)),
                   DataColumn(label: Text(t.item_pack_type)),
-                  DataColumn(label: Text(t.item_w_unit)),
+                  DataColumn(label: Text(t.item_pack_weight)),
                   DataColumn(label: Text(t.item_cbm)),
                   DataColumn(label: Text(t.item_lbm)),
                   DataColumn(label: Text(t.item_ldm_cbm)),
@@ -146,11 +146,11 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
   }) {
     return SizedBox(
       width: width,
-      child: TextFormField(
-        style: _cellStyle(context),
-        initialValue: value.toString(),
+      child: _SelectableNumberField(
+        value: value.toString(),
         keyboardType: TextInputType.number,
         decoration: _cellDeco(),
+        textStyle: _cellStyle(context),
         onChanged: (s) {
           final v = int.tryParse(s.trim());
           if (v == null) return;
@@ -167,11 +167,11 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
   }) {
     return SizedBox(
       width: width,
-      child: TextFormField(
-        style: _cellStyle(context),
-        initialValue: value?.toString() ?? '',
+      child: _SelectableNumberField(
+        value: value?.toString() ?? '',
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: _cellDeco(),
+        textStyle: _cellStyle(context),
         onChanged: (s) {
           final raw = s.trim();
           if (raw.isEmpty) return onChanged(null);
@@ -215,6 +215,76 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
         decoration: _cellDeco(),
         onChanged: onChanged,
       ),
+    );
+  }
+}
+
+class _SelectableNumberField extends StatefulWidget {
+  const _SelectableNumberField({
+    required this.value,
+    required this.keyboardType,
+    required this.decoration,
+    required this.textStyle,
+    required this.onChanged,
+  });
+
+  final String value;
+  final TextInputType keyboardType;
+  final InputDecoration decoration;
+  final TextStyle textStyle;
+  final ValueChanged<String> onChanged;
+
+  @override
+  State<_SelectableNumberField> createState() => _SelectableNumberFieldState();
+}
+
+class _SelectableNumberFieldState extends State<_SelectableNumberField> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value);
+    _focusNode = FocusNode();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant _SelectableNumberField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value && !_focusNode.hasFocus) {
+      _controller.text = widget.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode
+      ..removeListener(_handleFocusChange)
+      ..dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (!_focusNode.hasFocus) return;
+    _controller.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: _controller.text.length,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: _controller,
+      focusNode: _focusNode,
+      style: widget.textStyle,
+      keyboardType: widget.keyboardType,
+      decoration: widget.decoration,
+      onChanged: widget.onChanged,
+      onTap: _handleFocusChange,
     );
   }
 }
