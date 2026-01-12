@@ -27,6 +27,7 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
   late final TextEditingController _originZipCtrl;
   late final TextEditingController _destZipCtrl;
   late final TextEditingController _insuranceValueCtrl;
+  late final FocusNode _insuranceValueFocus;
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     _insuranceValueCtrl = TextEditingController(
       text: widget.vm.insuranceValue?.toString() ?? '',
     );
+    _insuranceValueFocus = FocusNode()..addListener(_handleInsuranceValueFocus);
 
     widget.vm.addListener(_syncFromVm);
   }
@@ -77,7 +79,29 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     _originZipCtrl.dispose();
     _destZipCtrl.dispose();
     _insuranceValueCtrl.dispose();
+    _insuranceValueFocus
+      ..removeListener(_handleInsuranceValueFocus)
+      ..dispose();
     super.dispose();
+  }
+
+  void _handleInsuranceValueFocus() {
+    if (!_insuranceValueFocus.hasFocus) {
+      _commitInsuranceValue();
+    }
+  }
+
+  void _commitInsuranceValue() {
+    final value = _insuranceValueCtrl.text.trim();
+    if (value.isEmpty) {
+      widget.vm.setInsuranceValue(null);
+      return;
+    }
+    final normalized = value.replaceAll(',', '.');
+    final parsed = double.tryParse(normalized);
+    if (parsed != null) {
+      widget.vm.setInsuranceValue(parsed);
+    }
   }
 
   @override
@@ -167,20 +191,10 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
                   Expanded(
                     child: TextField(
                       controller: _insuranceValueCtrl,
-                      decoration: const InputDecoration(labelText: 'Insurance value'),
+                      focusNode: _insuranceValueFocus,
+                      decoration: InputDecoration(labelText: t.insurance_value_label),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (value) {
-                        final trimmed = value.trim();
-                        if (trimmed.isEmpty) {
-                          vm.setInsuranceValue(null);
-                          return;
-                        }
-                        final normalized = trimmed.replaceAll(',', '.');
-                        final parsed = double.tryParse(normalized);
-                        if (parsed != null) {
-                          vm.setInsuranceValue(parsed);
-                        }
-                      },
+                      onEditingComplete: _commitInsuranceValue,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -312,9 +326,10 @@ class _ServicesDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     if (servicesLoading) {
-      return const InputDecorator(
-        decoration: InputDecoration(labelText: 'Additional service'),
+      return InputDecorator(
+        decoration: InputDecoration(labelText: t.additional_services_label),
         child: LinearProgressIndicator(),
       );
     }
@@ -322,7 +337,7 @@ class _ServicesDropdown extends StatelessWidget {
     if (servicesError != null) {
       return InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Additional service',
+          labelText: t.additional_services_label,
           errorText: servicesError.toString(),
         ),
         child: const SizedBox(height: 24),
@@ -331,7 +346,7 @@ class _ServicesDropdown extends StatelessWidget {
 
     return DropdownButtonFormField<int>(
       value: selectedId,
-      decoration: const InputDecoration(labelText: 'Additional service'),
+      decoration: InputDecoration(labelText: t.additional_services_label),
       items: services
           .map(
             (s) => DropdownMenuItem<int>(

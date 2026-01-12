@@ -518,6 +518,18 @@ abstract class AppLocalizations {
   /// **'Additional services'**
   String get extra_section;
 
+  /// No description provided for @insurance_value_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance value'**
+  String get insurance_value_label;
+
+  /// No description provided for @additional_services_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional services'**
+  String get additional_services_label;
+
   /// No description provided for @extra_pre_advice.
   ///
   /// In en, this message translates to:

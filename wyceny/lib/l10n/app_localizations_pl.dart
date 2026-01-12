@@ -238,6 +238,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get extra_section => 'Usługi dodatkowe';
 
   @override
+  String get insurance_value_label => 'Wartość ubezpieczenia';
+
+  @override
+  String get additional_services_label => 'Usługi dodatkowe';
+
+  @override
   String get extra_pre_advice => 'Awizacja';
 
   @override

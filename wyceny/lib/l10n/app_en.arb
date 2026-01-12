@@ -89,6 +89,8 @@
   "add_item": "Add item",
 
   "extra_section": "Additional services",
+  "insurance_value_label": "Insurance value",
+  "additional_services_label": "Additional services",
   "extra_pre_advice": "Pre-advice",
   "extra_insurance_value": "Goods value for insurance (PLN)",
 
