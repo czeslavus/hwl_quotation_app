@@ -95,7 +95,7 @@ class _WideLayout extends StatelessWidget {
       children: [
         // TOP: header + mapa, bez scrolla
         SizedBox(
-          height: 320,
+          height: 360,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
