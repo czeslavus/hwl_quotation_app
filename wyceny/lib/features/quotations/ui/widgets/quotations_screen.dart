@@ -95,13 +95,13 @@ class _WideLayout extends StatelessWidget {
       children: [
         // TOP: header + mapa, bez scrolla
         SizedBox(
-          height: 260,
+          height: 320,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 flex: leftFlex,
-                child: QuotationHeaderSection(vm: vm, scrollable: true),
+                child: QuotationHeaderSection(vm: vm, scrollable: false),
               ),
               const VerticalDivider(width: 1),
               Expanded(
