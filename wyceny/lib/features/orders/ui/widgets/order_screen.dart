@@ -6,7 +6,7 @@ import 'package:wyceny/features/orders/ui/widgets/order_header_section.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/ui/widgets/common/neutral_action_button.dart';
 import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
-import 'package:wyceny/ui/widgets/common/route_map_by_postcode.dart';
+import 'package:wyceny/features/route_by_postcode/ui/widgets/route_map_by_postcode.dart';
 
 class OrderScreen extends StatelessWidget {
   const OrderScreen({super.key});

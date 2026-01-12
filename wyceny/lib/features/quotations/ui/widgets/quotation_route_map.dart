@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
-import 'package:wyceny/ui/widgets/common/route_map_by_postcode.dart';
+import 'package:wyceny/features/route_by_postcode/ui/widgets/route_map_by_postcode.dart';
 
 class QuotationRouteMap extends StatelessWidget {
   const QuotationRouteMap({super.key});
