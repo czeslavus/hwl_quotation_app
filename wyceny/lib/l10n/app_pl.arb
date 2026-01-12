@@ -82,6 +82,8 @@
   "add_item": "Dodaj pozycję",
 
   "extra_section": "Usługi dodatkowe",
+  "insurance_value_label": "Wartość ubezpieczenia",
+  "additional_services_label": "Usługi dodatkowe",
   "extra_pre_advice": "Awizacja",
   "extra_insurance_value": "Wartość towaru do ubezpieczenia (PLN)",
 
