@@ -36,7 +36,9 @@ import 'package:wyceny/features/dictionaries/data/dictionaries_repository_impl.d
 
 import 'package:wyceny/features/auth/data/services/token_storage/token_storage_secure.dart'
     if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_web_secure.dart';
+import 'package:wyceny/features/route_by_postcode/data/here_api.dart';
 import 'package:wyceny/features/route_by_postcode/data/ors_api.dart';
+import 'package:wyceny/features/route_by_postcode/data/route_repository_here.dart';
 import 'package:wyceny/features/route_by_postcode/data/route_repository_ors.dart';
 import 'package:wyceny/features/route_by_postcode/domain/route_repository.dart';
 //    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
@@ -130,11 +132,17 @@ Future<void> setupDI() async {
   }, instanceName: 'orsDio');
 
   final orsKey = envConfig.orsKey;
+  final hereKey = envConfig.hereKey;
 
   getIt.registerLazySingleton<OrsApi>(() => OrsApi(
     apiKey: orsKey,
     dio: getIt<Dio>(instanceName: 'orsDio'),
   ));
+
+  getIt.registerLazySingleton<HereApi>(() => HereApi(apiKey: hereKey));
+  getIt.registerLazySingleton<HereRouteRepository>(
+    () => HereRouteRepository(getIt<HereApi>()),
+  );
 
   getIt.registerLazySingleton<RouteRepository>(
         () => OrsRouteRepository(getIt<OrsApi>()),
