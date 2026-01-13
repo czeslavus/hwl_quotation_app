@@ -23,25 +23,26 @@ int _decodeChar(String encoded, int index) {
 }
 
 int _decodeUnsignedVarint(String encoded, _DecodeState state) {
-  var result = 0;
+  var result = BigInt.zero;
   var shift = 0;
 
   while (true) {
     final byte = _decodeChar(encoded, state.index);
     state.index += 1;
-    result |= (byte & 0x1f) << shift;
+    final value = byte % 32;
+    result += BigInt.from(value) << shift;
 
     if (byte < 0x20) break;
     shift += 5;
   }
 
-  return result;
+  return result.toInt();
 }
 
 int _decodeSignedVarint(String encoded, _DecodeState state) {
   final unsigned = _decodeUnsignedVarint(encoded, state);
-  final signed = (unsigned >> 1) ^ (-(unsigned & 1));
-  return signed;
+  final value = unsigned ~/ 2;
+  return unsigned.isOdd ? -value - 1 : value;
 }
 
 class _DecodeState {
@@ -147,18 +148,21 @@ class _LegacyDecodeResult {
 }
 
 _LegacyDecodeResult? _decodeLegacyValue(String encoded, int startIndex) {
-  var result = 0;
+  var result = BigInt.zero;
   var shift = 0;
   var index = startIndex;
 
   while (index < encoded.length) {
     final byte = encoded.codeUnitAt(index) - 63;
     index += 1;
-    result |= (byte & 0x1f) << shift;
+    final value = byte % 32;
+    result += BigInt.from(value) << shift;
     shift += 5;
     if (byte < 0x20) {
-      final value = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-      return _LegacyDecodeResult(value, index);
+      final unsigned = result.toInt();
+      final shifted = unsigned ~/ 2;
+      final signed = unsigned.isOdd ? -shifted - 1 : shifted;
+      return _LegacyDecodeResult(signed, index);
     }
   }
 

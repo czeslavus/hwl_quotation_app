@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:wyceny/app/di/locator.dart' show getIt;
+import 'package:wyceny/features/logs/data/service/logger_service.dart';
 import '../../domain/route_models.dart';
 import '../../domain/route_repository.dart';
 
 class RouteByPostcodeViewModel extends ChangeNotifier {
   final RouteRepository repo;
+  final _logger = getIt<LogService>().logger;
 
   RouteByPostcodeViewModel({
     required this.repo,
@@ -44,6 +47,7 @@ class RouteByPostcodeViewModel extends ChangeNotifier {
 
     // Minimalna walidacja: oba muszą być
     if (oz.isEmpty || dz.isEmpty) {
+      _logger.w('[route] skip: empty origin or destination');
       clear(silent: false);
       return;
     }
@@ -55,6 +59,7 @@ class RouteByPostcodeViewModel extends ChangeNotifier {
 
     _lastKey = key;
     _debounce?.cancel();
+    _logger.i('[route] schedule: $key');
     _debounce = Timer(debounce, () {
       buildRoute(
         originZip: oz,
@@ -76,6 +81,7 @@ class RouteByPostcodeViewModel extends ChangeNotifier {
           ? countryCode!.trim()
           : defaultCountryCode;
 
+      _logger.i('[route] build: $originZip -> $destinationZip ($cc)');
       final s = await repo.geocodePostcode(postcode: originZip, countryCode: cc);
       final e = await repo.geocodePostcode(postcode: destinationZip, countryCode: cc);
       _start = s;
@@ -83,15 +89,20 @@ class RouteByPostcodeViewModel extends ChangeNotifier {
       try {
         final r = await repo.fetchRoute(start: s, end: e);
         _route = r;
+        _logger.i(
+          '[route] ok: points=${r.points.length} dist=${r.distanceMeters} dur=${r.durationSeconds}',
+        );
         _setState(loading: false, error: null);
-      } catch (e) {
+      } catch (e, stackTrace) {
         _route = const RouteResult(points: []);
+        _logger.e('[route] route fetch failed', error: e, stackTrace: stackTrace);
         _setState(loading: false, error: e.toString());
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       _route = null;
       _start = null;
       _end = null;
+      _logger.e('[route] geocode failed', error: e, stackTrace: stackTrace);
       _setState(loading: false, error: e.toString());
     }
   }

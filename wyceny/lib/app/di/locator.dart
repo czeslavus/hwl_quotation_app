@@ -41,6 +41,7 @@ import 'package:wyceny/features/route_by_postcode/data/ors_api.dart';
 import 'package:wyceny/features/route_by_postcode/data/route_repository_here.dart';
 import 'package:wyceny/features/route_by_postcode/data/route_repository_ors.dart';
 import 'package:wyceny/features/route_by_postcode/domain/route_repository.dart';
+import 'package:wyceny/features/logs/network/logging_interceptor.dart';
 //    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
 
 final getIt = GetIt.instance;
@@ -87,6 +88,8 @@ Future<void> setupDI() async {
       service: getIt<AuthService>()
   ));
 
+  final enableHttpLogging = envConfig.enableHttpLogging;
+
   getIt.registerLazySingleton<Dio>(() {
     final storage = getIt<TokenStorage>();
     final client = DioClient(
@@ -128,8 +131,25 @@ Future<void> setupDI() async {
         // Authorization dodamy w OrsApi albo tu – jak wolisz
       },
     ));
+    if (enableHttpLogging) {
+      dio.interceptors.add(LoggingInterceptor());
+    }
     return dio;
   }, instanceName: 'orsDio');
+
+  getIt.registerLazySingleton<Dio>(() {
+    final dio = Dio(BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      headers: const {
+        'Accept': 'application/json',
+      },
+    ));
+    if (enableHttpLogging) {
+      dio.interceptors.add(LoggingInterceptor());
+    }
+    return dio;
+  }, instanceName: 'hereDio');
 
   final orsKey = envConfig.orsKey;
   final hereKey = envConfig.hereKey;
@@ -139,7 +159,10 @@ Future<void> setupDI() async {
     dio: getIt<Dio>(instanceName: 'orsDio'),
   ));
 
-  getIt.registerLazySingleton<HereApi>(() => HereApi(apiKey: hereKey));
+  getIt.registerLazySingleton<HereApi>(() => HereApi(
+    apiKey: hereKey,
+    dio: getIt<Dio>(instanceName: 'hereDio'),
+  ));
 
   getIt.registerLazySingleton<RouteRepository>(
     () => HereRouteRepository(getIt<HereApi>()),

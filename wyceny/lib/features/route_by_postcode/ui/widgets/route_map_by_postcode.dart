@@ -67,6 +67,10 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
   String? _lastOrigin;
   String? _lastDest;
   String? _lastCountry;
+  String? _lastFitKey;
+  bool _mapReady = false;
+  BoxConstraints? _lastConstraints;
+  List<LatLng> _lastPoints = const [];
 
   @override
   void initState() {
@@ -125,19 +129,9 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (points.isNotEmpty) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            final bounds = LatLngBounds.fromPoints(points);
-            final padding = _routePadding(constraints);
-            _mapController.fitCamera(
-              CameraFit.bounds(
-                bounds: bounds,
-                padding: padding,
-              ),
-            );
-          });
-        }
+        _lastConstraints = constraints;
+        _lastPoints = points;
+        _maybeFitRoute();
 
         return Stack(
           children: [
@@ -147,6 +141,7 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
               end: rvm.end,
               routePoints: points,
               routeColor: routeColor,
+              onMapReady: _handleMapReady,
             ),
             Positioned(
               left: 8,
@@ -184,6 +179,42 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
     final vertical = constraints.maxHeight * 0.1;
     return EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical);
   }
+
+  void _handleMapReady() {
+    if (!mounted) return;
+    _mapReady = true;
+    _maybeFitRoute();
+  }
+
+  void _maybeFitRoute() {
+    if (!_mapReady || _lastConstraints == null || _lastPoints.isEmpty) {
+      return;
+    }
+
+    final key = _fitKey(_lastPoints);
+    if (key == _lastFitKey) return;
+    _lastFitKey = key;
+
+    final constraints = _lastConstraints!;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final bounds = LatLngBounds.fromPoints(_lastPoints);
+      final padding = _routePadding(constraints);
+      _mapController.fitCamera(
+        CameraFit.bounds(
+          bounds: bounds,
+          padding: padding,
+        ),
+      );
+    });
+  }
+
+  String _fitKey(List<LatLng> points) {
+    if (points.isEmpty) return '';
+    final first = points.first;
+    final last = points.last;
+    return '${points.length}:${first.latitude},${first.longitude}:${last.latitude},${last.longitude}';
+  }
 }
 
 class _RouteMap extends StatelessWidget {
@@ -192,6 +223,7 @@ class _RouteMap extends StatelessWidget {
   final LatLng? end;
   final List<LatLng> routePoints;
   final Color routeColor;
+  final VoidCallback onMapReady;
 
   const _RouteMap({
     required this.mapController,
@@ -199,6 +231,7 @@ class _RouteMap extends StatelessWidget {
     required this.end,
     required this.routePoints,
     required this.routeColor,
+    required this.onMapReady,
   });
 
   @override
@@ -230,6 +263,7 @@ class _RouteMap extends StatelessWidget {
           initialCenter: center,
           initialZoom: 10,
           interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
+          onMapReady: onMapReady,
         ),
         children: [
           TileLayer(
