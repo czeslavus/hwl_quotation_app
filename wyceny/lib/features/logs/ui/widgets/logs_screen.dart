@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:wyceny/features/logs/data/service/logger_service.dart';
+import 'package:wyceny/features/common/language_flag_toggle.dart';
 
 class LogsScreen extends StatefulWidget {
   final LogService logService;
@@ -47,7 +48,9 @@ class _LogsScreenState extends State<LogsScreen> {
           IconButton(
             onPressed: () => _open(selected!),
             icon: const Icon(Icons.refresh),
-          )
+          ),
+          const LanguageFlagToggle(),
+          const SizedBox(width: 8),
         ],
       ),
       body: Row(

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:wyceny/app/auth.dart';
+import 'package:wyceny/features/common/language_flag_toggle.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
 class _AppVersionText extends StatefulWidget {
@@ -182,6 +183,8 @@ class _AppScaffoldState extends State<AppScaffold> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            const LanguageFlagToggle(size: 18),
+            const SizedBox(width: 8),
             _UserMenu(
               onOpenSettings: () => widget.shell.goBranch(5, initialLocation: false),
               onLogoutDone: () { if (context.mounted) context.go('/login'); },

@@ -63,6 +63,10 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
   Widget build(BuildContext context) {
     final vm = widget.vm;
     final t = AppLocalizations.of(context);
+    String? requiredValidator(String? value) {
+      if (value == null || value.trim().isEmpty) return t.validation_required;
+      return null;
+    }
 
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -94,17 +98,19 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
                       label: t.gen_origin_country,
                       countriesLoading: vm.countriesLoading,
                       countriesError: vm.countriesError,
-                      countries: vm.countries,
+                      countries: vm.receiptCountries,
                       selectedId: vm.receiptCountryId,
-                      onChanged: vm.setReceiptCountryId,
+                      onChanged: vm.originCountryLocked ? null : vm.setReceiptCountryId,
+                      validator: (v) => v == null ? t.validation_required : null,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: TextField(
+                    child: TextFormField(
                       controller: _receiptZipCtrl,
                       decoration: InputDecoration(labelText: t.gen_origin_zip),
                       onChanged: vm.setReceiptZip,
+                      validator: requiredValidator,
                     ),
                   ),
                 ],
@@ -117,17 +123,19 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
                       label: t.gen_dest_country,
                       countriesLoading: vm.countriesLoading,
                       countriesError: vm.countriesError,
-                      countries: vm.countries,
+                      countries: vm.deliveryCountries,
                       selectedId: vm.deliveryCountryId,
                       onChanged: vm.setDeliveryCountryId,
+                      validator: (v) => v == null ? t.validation_required : null,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: TextField(
+                    child: TextFormField(
                       controller: _deliveryZipCtrl,
                       decoration: InputDecoration(labelText: t.gen_dest_zip),
                       onChanged: vm.setDeliveryZip,
+                      validator: requiredValidator,
                     ),
                   ),
                 ],

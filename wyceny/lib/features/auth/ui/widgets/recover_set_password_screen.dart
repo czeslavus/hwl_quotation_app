@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmodel.dart';
+import 'package:wyceny/features/common/language_flag_toggle.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
 class RecoverSetPasswordScreen extends StatefulWidget {
@@ -219,6 +220,13 @@ class _RecoverSetPasswordScreenState extends State<RecoverSetPasswordScreen> {
                   );
                 },
               ),
+            ),
+          ),
+          const Positioned(
+            top: 8,
+            right: 12,
+            child: SafeArea(
+              child: LanguageFlagToggle(),
             ),
           ),
         ],

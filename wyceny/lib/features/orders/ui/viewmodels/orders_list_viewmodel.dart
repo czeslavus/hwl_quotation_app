@@ -135,7 +135,10 @@ class OrdersListViewModel extends ChangeNotifier {
   void view(String id) {}
   void edit(String id) {}
   Future<void> copy(String id) async {}
-  Future<void> cancel(String id) async {}
+  Future<void> cancel(String id) async {
+    await _repo.cancelOrder(id);
+    await refresh();
+  }
 
   String statusLabel(String? s) {
     switch (s) {

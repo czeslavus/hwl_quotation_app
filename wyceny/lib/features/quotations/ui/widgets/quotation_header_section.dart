@@ -239,6 +239,7 @@ class CountryDropdown extends StatelessWidget {
 
   final int? selectedId;
   final ValueChanged<int?>? onChanged;
+  final String? Function(int?)? validator;
 
   const CountryDropdown({
     super.key,
@@ -248,6 +249,7 @@ class CountryDropdown extends StatelessWidget {
     required this.countries,
     required this.selectedId,
     required this.onChanged,
+    this.validator,
   });
 
   @override
@@ -284,6 +286,7 @@ class CountryDropdown extends StatelessWidget {
           )
           .toList(growable: false),
       onChanged: onChanged,
+      validator: validator,
     );
   }
 }

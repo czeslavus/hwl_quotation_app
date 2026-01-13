@@ -17,4 +17,5 @@ abstract class OrdersRepository {
   });
   Future<List<OrderModel>> getOrdersHistory();
   Future<List<Quotation>> getQuotationsConverted();
+  Future<void> cancelOrder(String id);
 }

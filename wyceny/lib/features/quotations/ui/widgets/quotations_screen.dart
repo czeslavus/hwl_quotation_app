@@ -8,6 +8,7 @@ import 'package:wyceny/features/quotations/ui/widgets/quotation_items_summary_ro
 import 'package:wyceny/features/quotations/ui/widgets/quotation_items_table.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_quote_details_panel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_route_map.dart';
+import 'package:wyceny/features/common/language_flag_toggle.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/ui/widgets/common/danger_action_button.dart';
 import 'package:wyceny/ui/widgets/common/neutral_action_button.dart';
@@ -49,6 +50,10 @@ class QuotationScreen extends StatelessWidget {
               // ),
             ],
           ),
+          actions: const [
+            LanguageFlagToggle(),
+            SizedBox(width: 8),
+          ],
         ),
         body: Stack(
           children: [
@@ -255,10 +260,10 @@ class _ActionsRow extends StatelessWidget {
           label: t.action_submit,
           onPressed: vm.canSubmitFinal
               ? () async {
+            final q = await vm.approve();
+            if (q == null) return;
             if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(t.submit_ok)),
-            );
+            context.go('/order/new', extra: q);
           }
               : null,
         ),

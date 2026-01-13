@@ -8,6 +8,7 @@ import 'package:wyceny/features/quotations/domain/models/reject_model.dart';
 import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
 
 class MockQuotationsRepository implements QuotationsRepository {
+  static const int _originCountryId = 1; // mock origin country always Poland
   final List<Quotation> _archive = [];
   final Map<int, Quotation> _byId = {};
   final List<OrderModel> _orders = []; // do śledzenia historii zamówień
@@ -23,7 +24,7 @@ class MockQuotationsRepository implements QuotationsRepository {
         quotationId: id,
         deliveryCountryId: isFirst ? 1 : random.nextInt(4) + 1,
         deliveryZipCode: isFirst ? '02-525' : '00-00${i % 10}',
-        receiptCountryId: isFirst ? 1 : random.nextInt(4) + 1,
+        receiptCountryId: _originCountryId,
         receiptZipCode: isFirst ? '26-900' : '11-11${i % 10}',
         createDate: DateTime.now().subtract(Duration(days: 30 - i)),
         status: (i % 4) + 1,
@@ -108,7 +109,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       insuranceValue: model.insuranceValue,
       deliveryCountryId: model.deliveryCountryId,
       deliveryZipCode: model.deliveryZipCode,
-      receiptCountryId: model.receiptCountryId,
+      receiptCountryId: _originCountryId,
       receiptZipCode: model.receiptZipCode,
       userName: model.userName,
       quotationPositions: model.quotationPositions,
@@ -158,7 +159,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       // request fields
       deliveryCountryId: model.deliveryCountryId,
       deliveryZipCode: model.deliveryZipCode,
-      receiptCountryId: model.receiptCountryId,
+      receiptCountryId: _originCountryId,
       receiptZipCode: model.receiptZipCode,
       additionalServiceId: model.additionalServiceId ?? existing.additionalServiceId,
       adr: model.adr ?? existing.adr,
@@ -206,7 +207,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       quotationId: newId,
       deliveryCountryId: src.deliveryCountryId,
       deliveryZipCode: src.deliveryZipCode,
-      receiptCountryId: src.receiptCountryId,
+      receiptCountryId: _originCountryId,
       receiptZipCode: src.receiptZipCode,
       createDate: DateTime.now(),
       status: 1,
@@ -234,7 +235,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       quotationId: q.quotationId,
       deliveryCountryId: q.deliveryCountryId,
       deliveryZipCode: q.deliveryZipCode,
-      receiptCountryId: q.receiptCountryId,
+      receiptCountryId: _originCountryId,
       receiptZipCode: q.receiptZipCode,
       createDate: q.createDate,
       status: 3, // Approved
@@ -264,7 +265,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       quotationId: q.quotationId,
       deliveryCountryId: q.deliveryCountryId,
       deliveryZipCode: q.deliveryZipCode,
-      receiptCountryId: q.receiptCountryId,
+      receiptCountryId: _originCountryId,
       receiptZipCode: q.receiptZipCode,
       createDate: q.createDate,
       status: 4, // Rejected
@@ -344,7 +345,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       quotationId: q.quotationId,
       deliveryCountryId: q.deliveryCountryId,
       deliveryZipCode: q.deliveryZipCode,
-      receiptCountryId: q.receiptCountryId,
+      receiptCountryId: _originCountryId,
       receiptZipCode: q.receiptZipCode,
       createDate: q.createDate,
       status: 3, // Approved -> wysłany

@@ -360,4 +360,23 @@ class QuotationViewModel extends ChangeNotifier {
 
   bool get canSubmitFinal =>
       quoteIsFresh && quotationId != null && !isUiLocked;
+
+  Future<Quotation?> approve() async {
+    final id = quotationId;
+    if (id == null || isUiLocked) return null;
+
+    isSubmitting = true;
+    notifyListeners();
+
+    try {
+      final q = await _repo.approve(id);
+      _mapQuotation(q);
+      quoteIsFresh = true;
+      hasAnyChangesStored = true;
+      return q;
+    } finally {
+      isSubmitting = false;
+      notifyListeners();
+    }
+  }
 }

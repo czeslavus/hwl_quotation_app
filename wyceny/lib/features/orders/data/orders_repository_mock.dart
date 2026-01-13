@@ -163,4 +163,45 @@ class MockOrdersRepository implements OrdersRepository {
   @override
   Future<List<Quotation>> getQuotationsConverted() async =>
       _pricingRepo.debugQuotations().where((p) => (p.orderNrSl ?? '').isNotEmpty).toList();
+
+  @override
+  Future<void> cancelOrder(String id) async {
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+
+    final byOrderId = int.tryParse(id);
+    final idx = _orders.indexWhere((o) {
+      if (byOrderId != null) return o.orderId == byOrderId;
+      final nr = (o.orderNr ?? '').trim();
+      return nr.isNotEmpty && nr == id;
+    });
+    if (idx < 0) {
+      throw Exception('Order not found');
+    }
+    final current = _orders[idx];
+    _orders[idx] = _copyWithStatus(current, 'CANCELED');
+  }
+
+  OrderModel _copyWithStatus(OrderModel o, String status) {
+    return OrderModel(
+      quotationId: o.quotationId,
+      receiptPoint: o.receiptPoint,
+      deliveryPoint: o.deliveryPoint,
+      loads: o.loads,
+      receiptDateBegin: o.receiptDateBegin,
+      receiptDateEnd: o.receiptDateEnd,
+      deliveryDateBegin: o.deliveryDateBegin,
+      deliveryDateEnd: o.deliveryDateEnd,
+      orderCustomerNr: o.orderCustomerNr,
+      orderValue: o.orderValue,
+      orderValueCurrency: o.orderValueCurrency,
+      notificationEmail: o.notificationEmail,
+      notificationSms: o.notificationSms,
+      instructionCodes: o.instructionCodes,
+      orderId: o.orderId,
+      orderNr: o.orderNr,
+      stageTtNr: o.stageTtNr,
+      status: status,
+      errors: o.errors,
+    );
+  }
 }

@@ -3,21 +3,30 @@ import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
+import 'package:wyceny/features/orders/domain/orders_repository.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_item.dart';
+import 'package:wyceny/features/quotations/domain/models/quotation.dart';
+import 'package:wyceny/features/quotations/domain/models/quotation_item.dart';
 
 class OrderViewModel extends ChangeNotifier {
   OrderViewModel({
     DictionariesRepository? dictRepo,
+    OrdersRepository? ordersRepo,
     AuthState? auth,
   })  : _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
+        _ordersRepo = ordersRepo ?? getIt<OrdersRepository>(),
         auth = auth ?? getIt<AuthState>();
 
   final DictionariesRepository _dictRepo;
+  final OrdersRepository _ordersRepo;
   final AuthState auth;
 
   bool countriesLoading = false;
   Object? countriesError;
   List<CountryDictionary> countries = const [];
+  List<CountryDictionary> deliveryCountries = const [];
+  List<CountryDictionary> receiptCountries = const [];
+  bool originCountryLocked = false;
 
   int? receiptCountryId;
   int? deliveryCountryId;
@@ -55,6 +64,7 @@ class OrderViewModel extends ChangeNotifier {
   double serviceFee = 0;
   double insuranceFee = 0;
   double totalPrice = 0;
+  bool hasChangesStored = false;
 
   Future<void> init() async {
     countriesLoading = true;
@@ -63,6 +73,14 @@ class OrderViewModel extends ChangeNotifier {
 
     try {
       countries = _dictRepo.countries;
+      deliveryCountries = _dictRepo.countriesDelivery;
+      receiptCountries = _dictRepo.countriesReceipt;
+      if (receiptCountries.length == 1) {
+        receiptCountryId = receiptCountries.first.countryId;
+        originCountryLocked = true;
+      } else {
+        originCountryLocked = false;
+      }
     } catch (e) {
       countriesError = e;
     } finally {
@@ -73,39 +91,39 @@ class OrderViewModel extends ChangeNotifier {
 
   void setReceiptCountryId(int? id) {
     receiptCountryId = id;
-    notifyListeners();
+    markDirty();
   }
 
   void setDeliveryCountryId(int? id) {
     deliveryCountryId = id;
-    notifyListeners();
+    markDirty();
   }
 
   void setReceiptZip(String value) {
     receiptZipCode = value;
-    notifyListeners();
+    markDirty();
   }
 
   void setDeliveryZip(String value) {
     deliveryZipCode = value;
-    notifyListeners();
+    markDirty();
   }
 
   void addItem() {
     items.add(OrderItem.example());
-    _recalcPricing();
+    markDirty();
   }
 
   void updateItem(int index, OrderItem it) {
     if (index < 0 || index >= items.length) return;
     items[index] = it;
-    _recalcPricing();
+    markDirty();
   }
 
   void removeItem(int index) {
     if (index < 0 || index >= items.length) return;
     items.removeAt(index);
-    _recalcPricing();
+    markDirty();
   }
 
   void clear() {
@@ -140,7 +158,22 @@ class OrderViewModel extends ChangeNotifier {
     serviceFee = 0;
     insuranceFee = 0;
     totalPrice = 0;
+    hasChangesStored = false;
     notifyListeners();
+  }
+
+  void prefillFromQuotation(Quotation quotation) {
+    clear();
+    receiptCountryId = quotation.receiptCountryId;
+    deliveryCountryId = quotation.deliveryCountryId;
+    receiptZipCode = quotation.receiptZipCode;
+    deliveryZipCode = quotation.deliveryZipCode;
+    insuranceValue = quotation.insuranceValue ?? 0;
+    items
+      ..clear()
+      ..addAll(_mapItemsFromQuotation(quotation.quotationPositions));
+    _recalcPricing();
+    hasChangesStored = false;
   }
 
   Future<void> calculate() async {
@@ -149,6 +182,10 @@ class OrderViewModel extends ChangeNotifier {
 
   Future<void> submit() async {
     // TODO: walidacja + submit do backendu
+  }
+
+  Future<void> rejectOrder(String orderId) async {
+    await _ordersRepo.cancelOrder(orderId);
   }
 
   String? countryCodeForId(int? id) {
@@ -179,13 +216,35 @@ class OrderViewModel extends ChangeNotifier {
     final preAdviceFee = preAdvice ? 5.0 : 0.0;
 
     totalPrice = freight + adrFee + serviceFee + insuranceFee + preAdviceFee;
-
     notifyListeners();
+  }
+
+  void markDirty() {
+    hasChangesStored = true;
+    _recalcPricing();
   }
 
   double _baseRatePerKgForRelation(int? fromId, int? toId) {
     if (fromId == null || toId == null) return 0.0;
     final same = fromId == toId;
     return same ? 0.22 : 0.45;
+  }
+
+  List<OrderItem> _mapItemsFromQuotation(List<QuotationItem>? quotationItems) {
+    if (quotationItems == null || quotationItems.isEmpty) {
+      return <OrderItem>[];
+    }
+    return quotationItems
+        .map(
+          (it) => OrderItem(
+            qty: it.quantity,
+            lengthCm: it.length.toDouble(),
+            widthCm: it.width.toDouble(),
+            heightCm: it.height.toDouble(),
+            weightKg: it.weight.toDouble(),
+            adr: it.adr,
+          ),
+        )
+        .toList();
   }
 }

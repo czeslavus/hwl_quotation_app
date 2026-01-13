@@ -878,6 +878,72 @@ abstract class AppLocalizations {
   /// **'New order'**
   String get order_title;
 
+  /// No description provided for @section_dates.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get section_dates;
+
+  /// No description provided for @field_pickup_from.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup from'**
+  String get field_pickup_from;
+
+  /// No description provided for @field_pickup_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup to'**
+  String get field_pickup_to;
+
+  /// No description provided for @field_delivery_from.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery from'**
+  String get field_delivery_from;
+
+  /// No description provided for @field_delivery_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery to'**
+  String get field_delivery_to;
+
+  /// No description provided for @section_order_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Order data'**
+  String get section_order_data;
+
+  /// No description provided for @field_customer_nr.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer number'**
+  String get field_customer_nr;
+
+  /// No description provided for @field_notification_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification email'**
+  String get field_notification_email;
+
+  /// No description provided for @field_notification_sms.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification SMS'**
+  String get field_notification_sms;
+
+  /// No description provided for @field_order_value_pln.
+  ///
+  /// In en, this message translates to:
+  /// **'Order value (PLN)'**
+  String get field_order_value_pln;
+
+  /// No description provided for @order_item_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Item {index}'**
+  String order_item_title(int index);
+
   /// No description provided for @section_sender.
   ///
   /// In en, this message translates to:
@@ -1009,6 +1075,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CONFIRM ORDER'**
   String get action_submit_order;
+
+  /// No description provided for @action_reject_order.
+  ///
+  /// In en, this message translates to:
+  /// **'REJECT ORDER'**
+  String get action_reject_order;
+
+  /// No description provided for @confirm_reject_order_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject order?'**
+  String get confirm_reject_order_title;
+
+  /// No description provided for @confirm_reject_order_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This will cancel the order.'**
+  String get confirm_reject_order_message;
+
+  /// No description provided for @validation_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get validation_required;
+
+  /// No description provided for @validation_invalid_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number'**
+  String get validation_invalid_number;
+
+  /// No description provided for @validation_positive_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Value must be greater than 0'**
+  String get validation_positive_number;
+
+  /// No description provided for @validation_invalid_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address'**
+  String get validation_invalid_email;
+
+  /// No description provided for @validation_invalid_phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number'**
+  String get validation_invalid_phone;
+
+  /// No description provided for @validation_date_in_past.
+  ///
+  /// In en, this message translates to:
+  /// **'Date cannot be in the past'**
+  String get validation_date_in_past;
+
+  /// No description provided for @validation_delivery_before_pickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery date cannot be before pickup date'**
+  String get validation_delivery_before_pickup;
+
+  /// No description provided for @validation_end_before_start.
+  ///
+  /// In en, this message translates to:
+  /// **'End date cannot be before start date'**
+  String get validation_end_before_start;
 
   /// No description provided for @status_new.
   ///

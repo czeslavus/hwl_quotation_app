@@ -422,6 +422,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get order_title => 'New order';
 
   @override
+  String get section_dates => 'Dates';
+
+  @override
+  String get field_pickup_from => 'Pickup from';
+
+  @override
+  String get field_pickup_to => 'Pickup to';
+
+  @override
+  String get field_delivery_from => 'Delivery from';
+
+  @override
+  String get field_delivery_to => 'Delivery to';
+
+  @override
+  String get section_order_data => 'Order data';
+
+  @override
+  String get field_customer_nr => 'Customer number';
+
+  @override
+  String get field_notification_email => 'Notification email';
+
+  @override
+  String get field_notification_sms => 'Notification SMS';
+
+  @override
+  String get field_order_value_pln => 'Order value (PLN)';
+
+  @override
+  String order_item_title(int index) {
+    return 'Item $index';
+  }
+
+  @override
   String get section_sender => 'Sender';
 
   @override
@@ -486,6 +521,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get action_submit_order => 'CONFIRM ORDER';
+
+  @override
+  String get action_reject_order => 'REJECT ORDER';
+
+  @override
+  String get confirm_reject_order_title => 'Reject order?';
+
+  @override
+  String get confirm_reject_order_message => 'This will cancel the order.';
+
+  @override
+  String get validation_required => 'Required';
+
+  @override
+  String get validation_invalid_number => 'Enter a valid number';
+
+  @override
+  String get validation_positive_number => 'Value must be greater than 0';
+
+  @override
+  String get validation_invalid_email => 'Enter a valid email address';
+
+  @override
+  String get validation_invalid_phone => 'Enter a valid phone number';
+
+  @override
+  String get validation_date_in_past => 'Date cannot be in the past';
+
+  @override
+  String get validation_delivery_before_pickup =>
+      'Delivery date cannot be before pickup date';
+
+  @override
+  String get validation_end_before_start =>
+      'End date cannot be before start date';
 
   @override
   String get status_new => 'New';

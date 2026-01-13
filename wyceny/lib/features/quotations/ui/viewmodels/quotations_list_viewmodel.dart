@@ -120,12 +120,13 @@ class QuotationsListViewModel extends ChangeNotifier {
   }
 
   // Akcje na rekordzie
-  Future<void> approve(int quotationId) async {
+  Future<Quotation?> approve(int quotationId) async {
     loading = true;
     notifyListeners();
     try {
-      await _repo.approve(quotationId);
+      final q = await _repo.approve(quotationId);
       await fetch();
+      return q;
     } finally {
       loading = false;
       notifyListeners();

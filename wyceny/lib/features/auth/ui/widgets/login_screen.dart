@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:wyceny/features/auth/ui/viewmodels/login_view_model.dart';
+import 'package:wyceny/features/common/language_flag_toggle.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -260,6 +261,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 },
               ),
+            ),
+          ),
+          const Positioned(
+            top: 8,
+            right: 12,
+            child: SafeArea(
+              child: LanguageFlagToggle(),
             ),
           ),
         ],

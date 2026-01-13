@@ -5,6 +5,7 @@ import 'package:wyceny/features/auth/ui/widgets/login_screen.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
 import 'package:wyceny/features/orders/ui/widgets/order_screen.dart';
 import 'package:wyceny/features/orders/ui/widgets/orders_list_screen.dart';
+import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotations_list_screen.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotations_screen.dart';
@@ -114,9 +115,17 @@ GoRouter buildRouter(AuthState auth) {
                     path: ':orderId',
                     builder: (context, state) {
                       final orderId = state.pathParameters['orderId']!;
+                      final extra = state.extra;
                       return ChangeNotifierProvider(
-                        create: (_) => getIt<OrderViewModel>()..init(),
-                        child: const OrderScreen(),
+                        create: (_) {
+                          final vm = getIt<OrderViewModel>();
+                          if (orderId == 'new' && extra is Quotation) {
+                            vm.prefillFromQuotation(extra);
+                          }
+                          vm.init();
+                          return vm;
+                        },
+                        child: OrderScreen(orderId: orderId),
                       );
                     },),
                 ],

@@ -422,6 +422,41 @@ class AppLocalizationsPl extends AppLocalizations {
   String get order_title => 'Nowe zlecenie';
 
   @override
+  String get section_dates => 'Terminy';
+
+  @override
+  String get field_pickup_from => 'Odbiór od';
+
+  @override
+  String get field_pickup_to => 'Odbiór do';
+
+  @override
+  String get field_delivery_from => 'Dostawa od';
+
+  @override
+  String get field_delivery_to => 'Dostawa do';
+
+  @override
+  String get section_order_data => 'Dane zamówienia';
+
+  @override
+  String get field_customer_nr => 'Nr klienta';
+
+  @override
+  String get field_notification_email => 'E-mail do powiadomień';
+
+  @override
+  String get field_notification_sms => 'SMS do powiadomień';
+
+  @override
+  String get field_order_value_pln => 'Wartość zlecenia (PLN)';
+
+  @override
+  String order_item_title(int index) {
+    return 'Pozycja $index';
+  }
+
+  @override
   String get section_sender => 'Nadawca';
 
   @override
@@ -487,6 +522,42 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get action_submit_order => 'Zatwierdź zlecenie';
+
+  @override
+  String get action_reject_order => 'Odrzuć zlecenie';
+
+  @override
+  String get confirm_reject_order_title => 'Odrzucić zlecenie?';
+
+  @override
+  String get confirm_reject_order_message =>
+      'To spowoduje anulowanie zlecenia.';
+
+  @override
+  String get validation_required => 'Wymagane';
+
+  @override
+  String get validation_invalid_number => 'Podaj poprawną liczbę';
+
+  @override
+  String get validation_positive_number => 'Wartość musi być większa od 0';
+
+  @override
+  String get validation_invalid_email => 'Podaj poprawny adres e-mail';
+
+  @override
+  String get validation_invalid_phone => 'Podaj poprawny numer telefonu';
+
+  @override
+  String get validation_date_in_past => 'Data nie może być w przeszłości';
+
+  @override
+  String get validation_delivery_before_pickup =>
+      'Data dostawy nie może być wcześniejsza niż data odbioru';
+
+  @override
+  String get validation_end_before_start =>
+      'Data końcowa nie może być wcześniejsza niż początkowa';
 
   @override
   String get status_new => 'Nowe';

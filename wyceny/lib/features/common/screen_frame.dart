@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wyceny/features/common/language_flag_toggle.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
 class ScreenFrame extends StatelessWidget {
@@ -22,6 +23,10 @@ class ScreenFrame extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
           overflow: TextOverflow.ellipsis,
         ),
+        actions: const [
+          LanguageFlagToggle(),
+          SizedBox(width: 8),
+        ],
       )
           : null,
       body: SafeArea(

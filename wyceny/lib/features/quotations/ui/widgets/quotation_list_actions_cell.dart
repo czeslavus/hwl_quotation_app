@@ -61,7 +61,14 @@ class QuotationListActionsCell extends StatelessWidget {
                   label: t.action_submit,
                   icon: Icons.check_circle_outline,
                   showCaption: false,
-                  onPressed: _isValidId ? () => vm.approve(quotationId) : null,
+                  onPressed: _isValidId
+                      ? () async {
+                    final q = await vm.approve(quotationId);
+                    if (q == null) return;
+                    if (!context.mounted) return;
+                    context.go('/order/new', extra: q);
+                  }
+                      : null,
                 ),
               ),
               _gap,
@@ -136,4 +143,3 @@ class QuotationListActionsCell extends StatelessWidget {
 }
 
 const _gap = SizedBox(width: 6);
-

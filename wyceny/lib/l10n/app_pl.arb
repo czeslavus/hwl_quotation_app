@@ -164,6 +164,39 @@
     "order_title": "Nowe zlecenie",
     "@order_title": {"description": "Nagłówek ekranu tworzenia zlecenia"},
 
+    "section_dates": "Terminy",
+    "@section_dates": {"description": "Sekcja formularza: terminy"},
+
+    "field_pickup_from": "Odbiór od",
+    "@field_pickup_from": {"description": "Pole daty odbioru od"},
+
+    "field_pickup_to": "Odbiór do",
+    "@field_pickup_to": {"description": "Pole daty odbioru do"},
+
+    "field_delivery_from": "Dostawa od",
+    "@field_delivery_from": {"description": "Pole daty dostawy od"},
+
+    "field_delivery_to": "Dostawa do",
+    "@field_delivery_to": {"description": "Pole daty dostawy do"},
+
+    "section_order_data": "Dane zamówienia",
+    "@section_order_data": {"description": "Sekcja formularza: dane zamówienia"},
+
+    "field_customer_nr": "Nr klienta",
+    "@field_customer_nr": {"description": "Pole numeru klienta"},
+
+    "field_notification_email": "E-mail do powiadomień",
+    "@field_notification_email": {"description": "Pole e-mail do powiadomień"},
+
+    "field_notification_sms": "SMS do powiadomień",
+    "@field_notification_sms": {"description": "Pole SMS do powiadomień"},
+
+    "field_order_value_pln": "Wartość zlecenia (PLN)",
+    "@field_order_value_pln": {"description": "Pole wartości zlecenia w PLN"},
+
+    "order_item_title": "Pozycja {index}",
+    "@order_item_title": {"placeholders": {"index": {"type": "int"}}},
+
     "section_sender": "Nadawca",
     "@section_sender": {"description": "Sekcja formularza: nadawca"},
 
@@ -229,6 +262,39 @@
 
     "action_submit_order": "Zatwierdź zlecenie",
     "@action_submit_order": {"description": "Akcja zatwierdzenia zlecenia (wyróżniona)"},
+
+    "action_reject_order": "Odrzuć zlecenie",
+    "@action_reject_order": {"description": "Akcja odrzucenia zlecenia"},
+
+    "confirm_reject_order_title": "Odrzucić zlecenie?",
+    "@confirm_reject_order_title": {"description": "Tytuł potwierdzenia odrzucenia zlecenia"},
+
+    "confirm_reject_order_message": "To spowoduje anulowanie zlecenia.",
+    "@confirm_reject_order_message": {"description": "Opis potwierdzenia odrzucenia zlecenia"},
+
+    "validation_required": "Wymagane",
+    "@validation_required": {"description": "Komunikat walidacji: pole wymagane"},
+
+    "validation_invalid_number": "Podaj poprawną liczbę",
+    "@validation_invalid_number": {"description": "Komunikat walidacji: niepoprawna liczba"},
+
+    "validation_positive_number": "Wartość musi być większa od 0",
+    "@validation_positive_number": {"description": "Komunikat walidacji: liczba dodatnia"},
+
+    "validation_invalid_email": "Podaj poprawny adres e-mail",
+    "@validation_invalid_email": {"description": "Komunikat walidacji: niepoprawny e-mail"},
+
+    "validation_invalid_phone": "Podaj poprawny numer telefonu",
+    "@validation_invalid_phone": {"description": "Komunikat walidacji: niepoprawny telefon"},
+
+    "validation_date_in_past": "Data nie może być w przeszłości",
+    "@validation_date_in_past": {"description": "Komunikat walidacji: data w przeszłości"},
+
+    "validation_delivery_before_pickup": "Data dostawy nie może być wcześniejsza niż data odbioru",
+    "@validation_delivery_before_pickup": {"description": "Komunikat walidacji: dostawa przed odbiorem"},
+
+    "validation_end_before_start": "Data końcowa nie może być wcześniejsza niż początkowa",
+    "@validation_end_before_start": {"description": "Komunikat walidacji: koniec przed początkiem"},
 
     "status_new": "Nowe",
     "@status_new": {"description": "Status zamówienia: nowe"},

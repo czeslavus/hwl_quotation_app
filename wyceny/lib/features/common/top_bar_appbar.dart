@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wyceny/app/auth.dart';
+import 'package:wyceny/features/common/language_flag_toggle.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
 class TopBarAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -27,6 +28,10 @@ class TopBarAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
+      actions: const [
+        LanguageFlagToggle(),
+        SizedBox(width: 8),
+      ],
     );
   }
 }
