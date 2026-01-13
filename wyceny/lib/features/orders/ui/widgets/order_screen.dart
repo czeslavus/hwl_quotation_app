@@ -176,6 +176,7 @@ class _BodyContentState extends State<_BodyContent> {
   late final TextEditingController _notificationSmsCtrl;
   late final TextEditingController _orderValueCtrl;
   late final TextEditingController _insuranceValueCtrl;
+  late final FocusNode _orderValueFocus;
   bool _formValid = false;
 
   @override
@@ -195,6 +196,12 @@ class _BodyContentState extends State<_BodyContent> {
     _notificationSmsCtrl = TextEditingController(text: vm.notificationSms ?? '');
     _orderValueCtrl = TextEditingController(text: _formatDouble(vm.orderValue));
     _insuranceValueCtrl = TextEditingController(text: _formatDouble(vm.insuranceValue));
+    _orderValueFocus = FocusNode();
+    _orderValueFocus.addListener(() {
+      if (!_orderValueFocus.hasFocus) {
+        _updateFormValidity();
+      }
+    });
     vm.addListener(_syncFromVm);
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateFormValidity());
   }
@@ -225,6 +232,7 @@ class _BodyContentState extends State<_BodyContent> {
     _notificationSmsCtrl.dispose();
     _orderValueCtrl.dispose();
     _insuranceValueCtrl.dispose();
+    _orderValueFocus.dispose();
     super.dispose();
   }
 
@@ -248,6 +256,7 @@ class _BodyContentState extends State<_BodyContent> {
 
   void _updateFormValidity() {
     if (!mounted) return;
+    if (_orderValueFocus.hasFocus) return;
     final form = Form.of(context);
     if (form == null) return;
     final valid = form.validate();
@@ -600,9 +609,15 @@ class _BodyContentState extends State<_BodyContent> {
                       controller: _orderValueCtrl,
                       decoration: InputDecoration(labelText: t.field_order_value_pln),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      focusNode: _orderValueFocus,
+                      autovalidateMode: AutovalidateMode.disabled,
                       onChanged: (v) {
                         vm.orderValue = double.tryParse(v.replaceAll(',', '.')) ?? 0;
                         vm.markDirty();
+                      },
+                      onEditingComplete: () {
+                        FocusScope.of(context).unfocus();
+                        _updateFormValidity();
                       },
                       validator: _requiredNumber,
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
+import 'package:wyceny/l10n/country_localizer.dart';
 
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
 import 'package:wyceny/features/dictionaries/domain/models/services_dictionary.dart';
@@ -281,7 +282,7 @@ class CountryDropdown extends StatelessWidget {
           .map(
             (c) => DropdownMenuItem<int>(
               value: c.countryId,
-              child: Text(c.country!),
+              child: Text(CountryLocalizer.localize(c.country, context)),
             ),
           )
           .toList(growable: false),
