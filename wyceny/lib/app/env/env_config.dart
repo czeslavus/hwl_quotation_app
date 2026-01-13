@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:wyceny/app/env/app_environment.dart';
 
 class EnvLoader {
   static const apiHost = 'https://ekierowca-testowy.hwl.pl/api';
+  static const defaultRouteColor = Color(0xFF2196F3);
 
   static EnvConfig fromDartDefine() {
     const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
@@ -25,6 +28,7 @@ class EnvLoader {
       baseUrl: base,
       orsKey: orsApiKey,
       hereKey: hereApiKey,
+      routeColor: defaultRouteColor,
       enableHttpLogging: enableLog,
     );
   }

@@ -106,11 +106,12 @@ class HereApi {
     final res = await _dio.get<Map<String, dynamic>>(
       'https://router.hereapi.com/v8/routes',
       queryParameters: {
-        'transportMode': 'car',
+        'transportMode': 'truck',
         'origin': '${start.latitude},${start.longitude}',
         'destination': '${end.latitude},${end.longitude}',
         'routingMode': 'fast',
         'return': 'polyline,summary',
+        'polyline': 'flexible',
         'apiKey': _apiKey,
       },
     );

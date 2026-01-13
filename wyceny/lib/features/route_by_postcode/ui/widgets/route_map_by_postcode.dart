@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import 'package:wyceny/app/env/app_environment.dart';
 import 'package:wyceny/app/di/locator.dart' show getIt;
 import 'package:wyceny/features/route_by_postcode/domain/route_repository.dart';
 import 'package:wyceny/features/route_by_postcode/ui/viewmodels/route_by_postcode_viewmodel.dart';
@@ -119,40 +120,69 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
   Widget build(BuildContext context) {
     final rvm = context.watch<RouteByPostcodeViewModel>();
     final points = rvm.route?.points ?? const <LatLng>[];
+    final routeColor = getIt<EnvConfig>().routeColor;
+    final routeDistanceKm = _distanceKm(rvm.route?.distanceMeters);
 
-    if (points.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final bounds = LatLngBounds.fromPoints(points);
-        _mapController.fitCamera(
-          CameraFit.bounds(
-            bounds: bounds,
-            padding: const EdgeInsets.all(18),
-          ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (points.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final bounds = LatLngBounds.fromPoints(points);
+            final padding = _routePadding(constraints);
+            _mapController.fitCamera(
+              CameraFit.bounds(
+                bounds: bounds,
+                padding: padding,
+              ),
+            );
+          });
+        }
+
+        return Stack(
+          children: [
+            _RouteMap(
+              mapController: _mapController,
+              start: rvm.start,
+              end: rvm.end,
+              routePoints: points,
+              routeColor: routeColor,
+            ),
+            Positioned(
+              left: 8,
+              top: 8,
+              right: 8,
+              child: _StatusPill(
+                loading: rvm.loading,
+                error: rvm.error,
+              ),
+            ),
+            if (routeDistanceKm != null && points.isNotEmpty)
+              Positioned(
+                left: 8,
+                right: 8,
+                bottom: 8,
+                child: _DistancePill(distanceKm: routeDistanceKm),
+              ),
+          ],
         );
-      });
+      },
+    );
+  }
+
+  double? _distanceKm(double? meters) {
+    if (meters == null || meters <= 0) return null;
+    return meters / 1000.0;
+  }
+
+  EdgeInsets _routePadding(BoxConstraints constraints) {
+    if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
+      return const EdgeInsets.all(18);
     }
 
-    return Stack(
-      children: [
-        _RouteMap(
-          mapController: _mapController,
-          start: rvm.start,
-          end: rvm.end,
-          routePoints: points,
-        ),
-        Positioned(
-          left: 8,
-          top: 8,
-          right: 8,
-          child: _StatusPill(
-            loading: rvm.loading,
-            error: rvm.error,
-            hasRoute: points.isNotEmpty,
-          ),
-        ),
-      ],
-    );
+    final horizontal = constraints.maxWidth * 0.1;
+    final vertical = constraints.maxHeight * 0.1;
+    return EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical);
   }
 }
 
@@ -161,12 +191,14 @@ class _RouteMap extends StatelessWidget {
   final LatLng? start;
   final LatLng? end;
   final List<LatLng> routePoints;
+  final Color routeColor;
 
   const _RouteMap({
     required this.mapController,
     required this.start,
     required this.end,
     required this.routePoints,
+    required this.routeColor,
   });
 
   @override
@@ -207,7 +239,7 @@ class _RouteMap extends StatelessWidget {
           if (routePoints.isNotEmpty)
             PolylineLayer(
               polylines: [
-                Polyline(points: routePoints, strokeWidth: 4),
+                Polyline(points: routePoints, strokeWidth: 4, color: routeColor),
               ],
             ),
           if (markers.isNotEmpty) MarkerLayer(markers: markers),
@@ -220,23 +252,21 @@ class _RouteMap extends StatelessWidget {
 class _StatusPill extends StatelessWidget {
   final bool loading;
   final String? error;
-  final bool hasRoute;
 
   const _StatusPill({
     required this.loading,
     required this.error,
-    required this.hasRoute,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (!loading && error == null && !hasRoute) {
+    if (!loading && error == null) {
       return const SizedBox.shrink();
     }
 
     final theme = Theme.of(context);
 
-    Widget child;
+    final Widget child;
     if (loading) {
       child = const Row(
         mainAxisSize: MainAxisSize.min,
@@ -246,10 +276,8 @@ class _StatusPill extends StatelessWidget {
           Text('Wyznaczanie trasy...'),
         ],
       );
-    } else if (error != null) {
-      child = Text(error!, maxLines: 2, overflow: TextOverflow.ellipsis);
     } else {
-      child = const Text('Trasa gotowa');
+      child = Text(error ?? '', maxLines: 2, overflow: TextOverflow.ellipsis);
     }
 
     return Material(
@@ -263,6 +291,36 @@ class _StatusPill extends StatelessWidget {
             color: error != null ? theme.colorScheme.onErrorContainer : theme.colorScheme.onSurface,
           ),
           child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _DistancePill extends StatelessWidget {
+  final double distanceKm;
+
+  const _DistancePill({required this.distanceKm});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final text = 'Dystans: ${distanceKm.toStringAsFixed(1)} km';
+
+    return Align(
+      alignment: Alignment.center,
+      child: Material(
+        elevation: 2,
+        borderRadius: BorderRadius.circular(999),
+        color: theme.colorScheme.surface,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Text(
+            text,
+            style: theme.textTheme.bodyMedium!.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
         ),
       ),
     );

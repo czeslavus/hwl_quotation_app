@@ -78,15 +78,20 @@ class RouteByPostcodeViewModel extends ChangeNotifier {
 
       final s = await repo.geocodePostcode(postcode: originZip, countryCode: cc);
       final e = await repo.geocodePostcode(postcode: destinationZip, countryCode: cc);
-
-      final r = await repo.fetchRoute(start: s, end: e);
-
       _start = s;
       _end = e;
-      _route = r;
-
-      _setState(loading: false, error: null);
+      try {
+        final r = await repo.fetchRoute(start: s, end: e);
+        _route = r;
+        _setState(loading: false, error: null);
+      } catch (e) {
+        _route = const RouteResult(points: []);
+        _setState(loading: false, error: e.toString());
+      }
     } catch (e) {
+      _route = null;
+      _start = null;
+      _end = null;
       _setState(loading: false, error: e.toString());
     }
   }
