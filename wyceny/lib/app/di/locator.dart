@@ -140,13 +140,14 @@ Future<void> setupDI() async {
   ));
 
   getIt.registerLazySingleton<HereApi>(() => HereApi(apiKey: hereKey));
-  getIt.registerLazySingleton<HereRouteRepository>(
+
+  getIt.registerLazySingleton<RouteRepository>(
     () => HereRouteRepository(getIt<HereApi>()),
   );
 
-  getIt.registerLazySingleton<RouteRepository>(
-        () => OrsRouteRepository(getIt<OrsApi>()),
-  );
+  // getIt.registerLazySingleton<RouteRepository>(
+  //       () => OrsRouteRepository(getIt<OrsApi>()),
+  // );
 
   // if (USE_MOCK_API) {
   //   getIt.registerLazySingleton<LineRidesService>(

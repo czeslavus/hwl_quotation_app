@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wyceny/app/locale_controller.dart';
 import 'package:wyceny/app/auth.dart';
@@ -11,6 +12,7 @@ import 'package:wyceny/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: '.env', isOptional: true);
   await setupDI();
 
   final lc = getIt<LocaleController>();

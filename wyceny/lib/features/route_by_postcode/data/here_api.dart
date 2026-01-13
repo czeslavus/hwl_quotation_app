@@ -4,6 +4,55 @@ import 'package:latlong2/latlong.dart';
 class HereApi {
   final Dio _dio;
   final String _apiKey;
+  static const Map<String, String> _iso2ToIso3 = {
+    'AL': 'ALB',
+    'AD': 'AND',
+    'AT': 'AUT',
+    'BY': 'BLR',
+    'BE': 'BEL',
+    'BA': 'BIH',
+    'BG': 'BGR',
+    'HR': 'HRV',
+    'CY': 'CYP',
+    'CZ': 'CZE',
+    'DK': 'DNK',
+    'EE': 'EST',
+    'FI': 'FIN',
+    'FR': 'FRA',
+    'DE': 'DEU',
+    'GR': 'GRC',
+    'HU': 'HUN',
+    'IS': 'ISL',
+    'IE': 'IRL',
+    'IT': 'ITA',
+    'XK': 'XKX',
+    'LV': 'LVA',
+    'LI': 'LIE',
+    'LT': 'LTU',
+    'LU': 'LUX',
+    'MT': 'MLT',
+    'MD': 'MDA',
+    'MC': 'MCO',
+    'ME': 'MNE',
+    'NL': 'NLD',
+    'MK': 'MKD',
+    'NO': 'NOR',
+    'PL': 'POL',
+    'PT': 'PRT',
+    'RO': 'ROU',
+    'RU': 'RUS',
+    'SM': 'SMR',
+    'RS': 'SRB',
+    'SK': 'SVK',
+    'SI': 'SVN',
+    'ES': 'ESP',
+    'SE': 'SWE',
+    'CH': 'CHE',
+    'TR': 'TUR',
+    'UA': 'UKR',
+    'GB': 'GBR',
+    'VA': 'VAT',
+  };
 
   HereApi({
     required String apiKey,
@@ -22,11 +71,13 @@ class HereApi {
     required String postcode,
     required String countryCode,
   }) async {
+    final iso2 = countryCode.toUpperCase();
+    final iso3 = _iso2ToIso3[iso2] ?? iso2;
     final res = await _dio.get<Map<String, dynamic>>(
       'https://geocode.search.hereapi.com/v1/geocode',
       queryParameters: {
         'qq': 'postalCode=$postcode',
-        'in': 'countryCode:$countryCode',
+        'in': 'countryCode:$iso3',
         'limit': 1,
         'apiKey': _apiKey,
       },

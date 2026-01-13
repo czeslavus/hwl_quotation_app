@@ -18,12 +18,13 @@ class MockQuotationsRepository implements QuotationsRepository {
     final random = Random();
     for (var i = 0; i < 12; i++) {
       final id = _idSeq++;
+      final bool isFirst = i == 0;
       final q = Quotation(
         quotationId: id,
-        deliveryCountryId: random.nextInt(4)+1,
-        deliveryZipCode: '00-00${i % 10}',
-        receiptCountryId: random.nextInt(4)+1,
-        receiptZipCode: '11-11${i % 10}',
+        deliveryCountryId: isFirst ? 1 : random.nextInt(4) + 1,
+        deliveryZipCode: isFirst ? '02-525' : '00-00${i % 10}',
+        receiptCountryId: isFirst ? 1 : random.nextInt(4) + 1,
+        receiptZipCode: isFirst ? '26-900' : '11-11${i % 10}',
         createDate: DateTime.now().subtract(Duration(days: 30 - i)),
         status: (i % 4) + 1,
         shippingPrice: 120.0 + i,
