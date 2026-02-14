@@ -157,10 +157,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login_invalidCredentials => 'Invalid username or password.';
 
   @override
-  String get login_network => 'Connection error. Check your internet.';
+  String get login_network => 'No response from the API.';
 
   @override
-  String get login_unknown => 'An unexpected error occurred.';
+  String get login_unknown => 'No response from the API.';
 
   @override
   String get settings_language => 'App language';
@@ -588,10 +588,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get item_cbm => 'CBM';
 
   @override
-  String get item_lbm => 'LBM';
+  String get item_lbm => 'LDM';
 
   @override
-  String get item_ldm_cbm => 'LBM/CBM';
+  String get item_ldm_cbm => 'LDM/CBM';
 
   @override
   String get item_long_weight => 'Long weight';

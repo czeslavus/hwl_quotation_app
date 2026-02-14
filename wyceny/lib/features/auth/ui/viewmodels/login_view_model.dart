@@ -82,10 +82,24 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   LoginError _mapError(Object e) {
-    // Proste mapowanie — można rozszerzyć
-    if (e is DioException && e.type == DioExceptionType.connectionTimeout) {
-      return LoginError.network;
+    if (e is DioException) {
+      final status = e.response?.statusCode;
+      if (status == 401 || status == 403) {
+        return LoginError.invalidCredentials;
+      }
+      switch (e.type) {
+        case DioExceptionType.connectionTimeout:
+        case DioExceptionType.sendTimeout:
+        case DioExceptionType.receiveTimeout:
+        case DioExceptionType.connectionError:
+          return LoginError.network;
+        case DioExceptionType.badResponse:
+        case DioExceptionType.badCertificate:
+        case DioExceptionType.cancel:
+        case DioExceptionType.unknown:
+          return LoginError.network;
+      }
     }
-    return LoginError.unknown;
+    return LoginError.network;
   }
 }

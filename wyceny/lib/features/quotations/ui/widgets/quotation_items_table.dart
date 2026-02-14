@@ -101,9 +101,9 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
           units: vm.packagingUnits,
         )),
         DataCell(_doubleField(width: _wM, value: it.packagingWeight, onChanged: (v) => vm.updateItem(index, it.copyWith(packagingWeight: v)))),
-        DataCell(_doubleField(width: _wM, value: it.cbm, onChanged: (v) => vm.updateItem(index, it.copyWith(cbm: v)))),
+        DataCell(_displayNumber(width: _wM, value: it.cbm)),
         DataCell(_doubleField(width: _wM, value: it.ldm, onChanged: (v) => vm.updateItem(index, it.copyWith(ldm: v)))),
-        DataCell(_doubleField(width: _wM, value: it.ldmCbm, onChanged: (v) => vm.updateItem(index, it.copyWith(ldmCbm: v)))),
+        DataCell(_displayNumber(width: _wM, value: it.ldmCbm)),
         DataCell(_doubleField(width: _wM, value: it.longWeight, onChanged: (v) => vm.updateItem(index, it.copyWith(longWeight: v)))),
         DataCell(
           DangerActionButton(
@@ -166,6 +166,20 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
           if (v == null) return;
           onChanged(v);
         },
+      ),
+    );
+  }
+
+  Widget _displayNumber({
+    required double width,
+    required double? value,
+  }) {
+    final text = (value == null) ? '—' : value.toStringAsFixed(3);
+    return SizedBox(
+      width: width,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(text, style: _cellStyle(context)),
       ),
     );
   }

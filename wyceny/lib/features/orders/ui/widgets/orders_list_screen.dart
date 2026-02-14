@@ -7,6 +7,7 @@ import 'package:wyceny/features/orders/ui/viewmodels/orders_list_viewmodel.dart'
 import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
+import 'package:wyceny/ui/widgets/common/danger_action_button.dart';
 import 'package:wyceny/ui/widgets/common/neutral_action_button.dart';
 import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
 import 'package:wyceny/ui/widgets/common/secondary_action_button.dart';
@@ -120,9 +121,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
   DateTime? _deliveryTo;
   DateTime? _receiptFrom;
   DateTime? _receiptTo;
-  final TextEditingController _customerNrCtrl = TextEditingController();
   final TextEditingController _deliveryZipCtrl = TextEditingController();
-  final TextEditingController _receiptZipCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -131,16 +130,12 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     _deliveryTo = widget.vm.deliveryEndDate;
     _receiptFrom = widget.vm.receiptStartDate;
     _receiptTo = widget.vm.receiptEndDate;
-    _customerNrCtrl.text = widget.vm.orderCustomerNr ?? '';
     _deliveryZipCtrl.text = widget.vm.deliveryZipCode ?? '';
-    _receiptZipCtrl.text = widget.vm.receiptZipCode ?? '';
   }
 
   @override
   void dispose() {
-    _customerNrCtrl.dispose();
     _deliveryZipCtrl.dispose();
-    _receiptZipCtrl.dispose();
     super.dispose();
   }
 
@@ -153,29 +148,10 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     final isPhone = width < 600;
 
     final fields = <Widget>[
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _dateField(context: context, label: 'Odbiór od', value: _receiptFrom, onPick: (d) => setState(() => _receiptFrom = d)),
-          const SizedBox(width: 8),
-          _dateField(context: context, label: 'Odbiór do', value: _receiptTo, onPick: (d) => setState(() => _receiptTo = d)),
-        ],
-      ),
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _dateField(context: context, label: 'Dostawa od', value: _deliveryFrom, onPick: (d) => setState(() => _deliveryFrom = d)),
-          const SizedBox(width: 8),
-          _dateField(context: context, label: 'Dostawa do', value: _deliveryTo, onPick: (d) => setState(() => _deliveryTo = d)),
-        ],
-      ),
-      SizedBox(
-        width: 200,
-        child: TextField(
-          controller: _customerNrCtrl,
-          decoration: const InputDecoration(labelText: 'Nr klienta'),
-        ),
-      ),
+      _dateField(context: context, label: 'Odbiór od', value: _receiptFrom, onPick: (d) => setState(() => _receiptFrom = d)),
+      _dateField(context: context, label: 'Odbiór do', value: _receiptTo, onPick: (d) => setState(() => _receiptTo = d)),
+      _dateField(context: context, label: 'Dostawa od', value: _deliveryFrom, onPick: (d) => setState(() => _deliveryFrom = d)),
+      _dateField(context: context, label: 'Dostawa do', value: _deliveryTo, onPick: (d) => setState(() => _deliveryTo = d)),
       SizedBox(
         width: 200,
         child: DropdownButtonFormField<String>(
@@ -199,13 +175,6 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         ),
       ),
       SizedBox(
-        width: 160,
-        child: TextField(
-          controller: _receiptZipCtrl,
-          decoration: const InputDecoration(labelText: 'Kod odbioru'),
-        ),
-      ),
-      SizedBox(
         width: 200,
         child: DropdownButtonFormField<String>(
           isExpanded: true,
@@ -220,7 +189,6 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     ];
 
     void onApply() => vm.applyFilters(
-          orderCustomerNr: _customerNrCtrl.text,
           deliveryStart: _deliveryFrom,
           deliveryEnd: _deliveryTo,
           receiptStart: _receiptFrom,
@@ -228,7 +196,6 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
           status: vm.statusNr,
           deliveryCountry: vm.deliveryCountry,
           deliveryZip: _deliveryZipCtrl.text,
-          receiptZip: _receiptZipCtrl.text,
         );
 
     void onClear() {
@@ -237,14 +204,11 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         _deliveryTo = null;
         _receiptFrom = null;
         _receiptTo = null;
-        _customerNrCtrl.clear();
         _deliveryZipCtrl.clear();
-        _receiptZipCtrl.clear();
         vm.statusNr = null;
         vm.deliveryCountry = null;
       });
       vm.applyFilters(
-        orderCustomerNr: null,
         deliveryStart: null,
         deliveryEnd: null,
         receiptStart: null,
@@ -252,7 +216,6 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         status: null,
         deliveryCountry: null,
         deliveryZip: null,
-        receiptZip: null,
       );
     }
 
@@ -321,7 +284,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     required ValueChanged<DateTime?> onPick,
   }) {
     return SizedBox(
-      width: 160,
+      width: 190,
       child: InkWell(
         onTap: () async {
           final now = DateTime.now();
@@ -397,7 +360,12 @@ class _OrdersTable extends StatelessWidget {
                         DataCell(_twoLines('MP: ${o.itemsCount}', 'W: ${o.totalWeight.toStringAsFixed(1)} kg')),
                         DataCell(Text('${o.orderValue?.toStringAsFixed(2) ?? '0.00'} ${o.orderValueCurrency ?? ''}'.trim())),
                         DataCell(Text(vm.statusLabel(o.status))),
-                        DataCell(_ActionsCell(vm: vm, orderId: o.orderId?.toString() ?? '')),
+                        DataCell(
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: _ActionsCell(vm: vm, orderId: o.orderId?.toString() ?? ''),
+                          ),
+                        ),
                       ]);
                     }).toList(),
                   ),
@@ -436,31 +404,38 @@ class _ActionsCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return SizedBox(
-      width: 220,
+      width: 240,
       child: FittedBox(
         fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
+        alignment: Alignment.centerRight,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              tooltip: t.action_view,
-              icon: const Icon(Icons.visibility_outlined),
+            NeutralActionButton(
+              label: t.action_view,
+              icon: Icons.visibility_outlined,
+              showCaption: false,
               onPressed: () => vm.view(orderId),
             ),
-            IconButton(
-              tooltip: t.action_edit,
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () => vm.edit(orderId),
+            const SizedBox(width: 6),
+            NeutralActionButton(
+              label: t.action_edit,
+              icon: Icons.edit_outlined,
+              showCaption: false,
+              onPressed: () => context.go('/order/$orderId'),
             ),
-            IconButton(
-              tooltip: t.action_copy,
-              icon: const Icon(Icons.copy_outlined),
+            const SizedBox(width: 6),
+            SecondaryActionButton(
+              label: t.action_copy,
+              icon: Icons.copy_outlined,
+              showCaption: false,
               onPressed: () => vm.copy(orderId),
             ),
-            IconButton(
-              tooltip: t.action_cancel,
-              icon: const Icon(Icons.cancel_outlined),
+            const SizedBox(width: 6),
+            DangerActionButton(
+              label: t.action_cancel,
+              icon: Icons.cancel_outlined,
+              showCaption: false,
               onPressed: () => vm.cancel(orderId),
             ),
           ],

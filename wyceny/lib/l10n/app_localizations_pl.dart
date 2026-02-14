@@ -157,10 +157,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get login_invalidCredentials => 'Nieprawidłowe dane logowania.';
 
   @override
-  String get login_network => 'Błąd połączenia. Sprawdź internet.';
+  String get login_network => 'Brak odpowiedzi z API.';
 
   @override
-  String get login_unknown => 'Wystąpił nieoczekiwany błąd.';
+  String get login_unknown => 'Brak odpowiedzi z API.';
 
   @override
   String get settings_language => 'Język aplikacji';
@@ -591,10 +591,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get item_cbm => 'CBM';
 
   @override
-  String get item_lbm => 'LBM';
+  String get item_lbm => 'LDM';
 
   @override
-  String get item_ldm_cbm => 'LBM/CBM';
+  String get item_ldm_cbm => 'LDM/CBM';
 
   @override
   String get item_long_weight => 'Long weight';

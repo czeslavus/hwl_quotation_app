@@ -55,8 +55,8 @@
   "auth_hidePassword": "Hide password",
 
   "login_invalidCredentials": "Invalid username or password.",
-  "login_network": "Connection error. Check your internet.",
-  "login_unknown": "An unexpected error occurred.",
+  "login_network": "No response from the API.",
+  "login_unknown": "No response from the API.",
 
   "settings_language": "App language",
   "settings_lang_system": "System language",
@@ -215,8 +215,8 @@
   "submit_error": "Error",
   "items_empty_hint": "Add position",
   "item_cbm": "CBM",
-  "item_lbm": "LBM",
-  "item_ldm_cbm": "LBM/CBM",
+  "item_lbm": "LDM",
+  "item_ldm_cbm": "LDM/CBM",
   "item_long_weight": "Long weight",
   "sum_packages" : "Total packages",
   "sum_weight": "Total weight",

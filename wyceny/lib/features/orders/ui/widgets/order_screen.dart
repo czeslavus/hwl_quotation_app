@@ -1063,19 +1063,12 @@ class _OrderItemsTableState extends State<_OrderItemsTable> {
   }
 
   Widget _deleteButton(String tooltip, VoidCallback onPressed) {
-    return SizedBox(
-      width: 36,
-      height: 36,
-      child: Material(
-        color: Colors.redAccent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        child: IconButton(
-          icon: const Icon(Icons.delete_outline, color: Colors.white),
-          padding: EdgeInsets.zero,
-          tooltip: tooltip,
-          onPressed: onPressed,
-        ),
-      ),
+    return DangerActionButton(
+      icon: Icons.delete_outline,
+      label: tooltip,
+      tooltip: tooltip,
+      showCaption: false,
+      onPressed: onPressed,
     );
   }
 }

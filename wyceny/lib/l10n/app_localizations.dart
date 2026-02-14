@@ -365,13 +365,13 @@ abstract class AppLocalizations {
   /// No description provided for @login_network.
   ///
   /// In en, this message translates to:
-  /// **'Connection error. Check your internet.'**
+  /// **'No response from the API.'**
   String get login_network;
 
   /// No description provided for @login_unknown.
   ///
   /// In en, this message translates to:
-  /// **'An unexpected error occurred.'**
+  /// **'No response from the API.'**
   String get login_unknown;
 
   /// No description provided for @settings_language.
@@ -1205,13 +1205,13 @@ abstract class AppLocalizations {
   /// No description provided for @item_lbm.
   ///
   /// In en, this message translates to:
-  /// **'LBM'**
+  /// **'LDM'**
   String get item_lbm;
 
   /// No description provided for @item_ldm_cbm.
   ///
   /// In en, this message translates to:
-  /// **'LBM/CBM'**
+  /// **'LDM/CBM'**
   String get item_ldm_cbm;
 
   /// No description provided for @item_long_weight.

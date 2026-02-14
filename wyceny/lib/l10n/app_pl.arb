@@ -51,8 +51,8 @@
   "auth_hidePassword": "Ukryj hasło",
 
   "login_invalidCredentials": "Nieprawidłowe dane logowania.",
-  "login_network": "Błąd połączenia. Sprawdź internet.",
-  "login_unknown": "Wystąpił nieoczekiwany błąd.",
+  "login_network": "Brak odpowiedzi z API.",
+  "login_unknown": "Brak odpowiedzi z API.",
 
   "settings_language": "Język aplikacji",
   "settings_lang_system": "Język systemowy",
@@ -316,8 +316,8 @@
     "submit_error": "Błąd",
   "items_empty_hint": "Dodaj pozycję",
   "item_cbm": "CBM",
-  "item_lbm": "LBM",
-  "item_ldm_cbm": "LBM/CBM",
+  "item_lbm": "LDM",
+  "item_ldm_cbm": "LDM/CBM",
   "item_long_weight": "Long weight",
   "sum_packages" : "Razem opakowań",
   "sum_weight": "Sumaryczna masa",
