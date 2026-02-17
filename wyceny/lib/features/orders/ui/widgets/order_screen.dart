@@ -199,7 +199,7 @@ class _BodyContentState extends State<_BodyContent> {
     _orderValueFocus = FocusNode();
     _orderValueFocus.addListener(() {
       if (!_orderValueFocus.hasFocus) {
-        _updateFormValidity();
+        _commitOrderValueFromInput();
       }
     });
     vm.addListener(_syncFromVm);
@@ -263,6 +263,17 @@ class _BodyContentState extends State<_BodyContent> {
     if (valid != _formValid) {
       setState(() => _formValid = valid);
     }
+  }
+
+  void _commitOrderValueFromInput() {
+    final vm = widget.vm;
+    final parsed = double.tryParse(_orderValueCtrl.text.replaceAll(',', '.')) ?? 0;
+    if (vm.orderValue != parsed) {
+      vm.orderValue = parsed;
+      vm.markDirty();
+    }
+    _setControllerText(_orderValueCtrl, _formatDouble(parsed));
+    _updateFormValidity();
   }
 
   String _formatDouble(double value) {
@@ -610,14 +621,9 @@ class _BodyContentState extends State<_BodyContent> {
                       decoration: InputDecoration(labelText: t.field_order_value_pln),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       focusNode: _orderValueFocus,
-                      autovalidateMode: AutovalidateMode.disabled,
-                      onChanged: (v) {
-                        vm.orderValue = double.tryParse(v.replaceAll(',', '.')) ?? 0;
-                        vm.markDirty();
-                      },
+                      autovalidateMode: AutovalidateMode.onUnfocus,
                       onEditingComplete: () {
                         FocusScope.of(context).unfocus();
-                        _updateFormValidity();
                       },
                       validator: _requiredNumber,
                     ),
