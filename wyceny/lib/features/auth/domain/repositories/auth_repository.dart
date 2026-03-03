@@ -10,6 +10,7 @@ abstract class AuthRepository {
 
   /// Odświeża access token przy użyciu refresh tokena.
   Future<Map<String, dynamic>> refreshAccessToken({
+    required String accessToken,
     required String refreshToken,
     CancelToken? cancelToken,
   });

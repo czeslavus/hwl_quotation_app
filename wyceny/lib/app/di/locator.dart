@@ -26,6 +26,7 @@ import 'package:wyceny/features/orders/domain/orders_repository.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/orders_list_viewmodel.dart';
 import 'package:wyceny/features/quotations/data/quotation_repository_mock.dart';
+import 'package:wyceny/features/quotations/data/quotations_repository_impl.dart';
 import 'package:wyceny/features/quotations/domain/quotations_repository.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/viewmodels/quotations_list_viewmodel.dart';
@@ -117,7 +118,11 @@ Future<void> setupDI() async {
   }
 
   getIt.registerLazySingleton<MockQuotationsRepository>(() => MockQuotationsRepository());
-  getIt.registerLazySingleton<QuotationsRepository>(() => getIt<MockQuotationsRepository>());
+  if (USE_MOCK_API) {
+    getIt.registerLazySingleton<QuotationsRepository>(() => getIt<MockQuotationsRepository>());
+  } else {
+    getIt.registerLazySingleton<QuotationsRepository>(() => QuotationsRepositoryImpl(getIt<Dio>()));
+  }
   getIt.registerLazySingleton<OrdersRepository>(() => MockOrdersRepository(getIt<MockQuotationsRepository>()));
 
 

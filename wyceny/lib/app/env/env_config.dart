@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:wyceny/app/env/app_environment.dart';
 
 class EnvLoader {
-  static const apiHost = 'https://ekierowca-testowy.hwl.pl/api';
+  static const apiHost = 'https://ekierowca-testowy.hwl.pl/qapi';
   static const defaultRouteColor = Color(0xFF2196F3);
 
   static EnvConfig fromDartDefine() {

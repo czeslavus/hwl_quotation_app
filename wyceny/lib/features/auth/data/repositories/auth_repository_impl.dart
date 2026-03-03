@@ -9,7 +9,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._dio);
 
   static const String _loginPath = '/auth/login';
-  static const String _refreshPath = '/auth/refresh';
+  static const String _refreshPath = '/auth/refresh-token';
   static const String _recoverRequestPath = '/auth/recover/request';
   static const String _recoverSetPasswordPath = '/auth/recover/set';
 
@@ -40,13 +40,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Map<String, dynamic>> refreshAccessToken({
+    required String accessToken,
     required String refreshToken,
     CancelToken? cancelToken,
   }) async {
     final resp = await _dio.post(
       _refreshPath,
       data: {
-        'refresh_token': refreshToken,
+        'accessToken': accessToken,
+        'refreshToken': refreshToken,
       },
       cancelToken: cancelToken,
     );

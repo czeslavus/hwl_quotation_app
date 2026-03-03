@@ -41,7 +41,7 @@ class LoginViewModel extends ChangeNotifier {
       }
       return ok;
     } catch (e) {
-      _error = _mapError(e);
+      _error = _mapError(e, isLoginFlow: true);
       return false;
     } finally {
       _setLoading(false);
@@ -57,7 +57,7 @@ class LoginViewModel extends ChangeNotifier {
       await _auth.recoverRequest(username);
       return true;
     } catch (e) {
-      _error = _mapError(e);
+      _error = _mapError(e, isLoginFlow: false);
       return false;
     } finally {
       _setLoading(false);
@@ -81,10 +81,9 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  LoginError _mapError(Object e) {
+  LoginError _mapError(Object e, {required bool isLoginFlow}) {
     if (e is DioException) {
-      final status = e.response?.statusCode;
-      if (status == 401 || status == 403) {
+      if (isLoginFlow && _isInvalidCredentialsResponse(e)) {
         return LoginError.invalidCredentials;
       }
       switch (e.type) {
@@ -101,5 +100,33 @@ class LoginViewModel extends ChangeNotifier {
       }
     }
     return LoginError.network;
+  }
+
+  bool _isInvalidCredentialsResponse(DioException e) {
+    final status = e.response?.statusCode;
+    if (status == 401 || status == 403) return true;
+    if (status != 400) return false;
+
+    final data = e.response?.data;
+    if (data is String) {
+      return data.toLowerCase().contains('invalid username or password');
+    }
+    if (data is Map) {
+      for (final value in data.values) {
+        if (value is String &&
+            value.toLowerCase().contains('invalid username or password')) {
+          return true;
+        }
+        if (value is List) {
+          for (final item in value) {
+            if (item is String &&
+                item.toLowerCase().contains('invalid username or password')) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
   }
 }

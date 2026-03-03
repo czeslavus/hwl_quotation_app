@@ -61,14 +61,14 @@ class AuthServiceImpl implements AuthService {
   @override
   Future<bool> login(String username, String password) async {
     final res = await _repo.login(username: username, password: password);
-    final access = res['access_token'] as String?;
-    final refresh = res['refresh_token'] as String?;
-    final du = res['user']?['username'] as String?;
+    final access = _readString(res, 'accessToken', fallbackKey: 'access_token');
+    final refresh = _readString(res, 'refreshToken', fallbackKey: 'refresh_token');
+    final du = _readNestedString(res, ['user', 'username']);
     _displayUserName = du ?? username;
-    _firstName = res['firstName'] ?? 'Jan';
-    _lastName = res['lastName'] ?? 'Nowak';
-    _slNumber = res['skyLogicNumber'] ?? '007';
-    _branch = res['branch'] ?? 'Kopalnia Bogdanka';
+    _firstName = _readString(res, 'firstName') ?? 'Jan';
+    _lastName = _readString(res, 'lastName') ?? 'Nowak';
+    _slNumber = _readString(res, 'skyLogicNumber') ?? '007';
+    _branch = _readString(res, 'branch') ?? 'Kopalnia Bogdanka';
 
     if (access == null || refresh == null) {
       return false;
@@ -107,16 +107,23 @@ class AuthServiceImpl implements AuthService {
 
     try {
       final refresh = await _secureStorage.read(kRefreshTokenKey);
-      if (refresh == null) {
+      final access = await _secureStorage.read(kAccessTokenKey);
+      if (refresh == null || access == null) {
         _isRefreshing = false;
         _lastRefreshOk = false;
         await logout(); // Automatyczne wylogowanie przy braku refresh tokena
         return false;
       }
 
-      final res = await _repo.refreshAccessToken(refreshToken: refresh);
-      final newAccess = res['access_token'] as String?;
-      final newRefresh = res['refresh_token'] as String? ?? refresh;
+      final res = await _repo.refreshAccessToken(
+        accessToken: access,
+        refreshToken: refresh,
+      );
+      final newAccess =
+          _readString(res, 'accessToken', fallbackKey: 'access_token');
+      final newRefresh =
+          _readString(res, 'refreshToken', fallbackKey: 'refresh_token') ??
+              refresh;
 
       if (newAccess == null) {
         _isRefreshing = false;
@@ -210,6 +217,27 @@ class AuthServiceImpl implements AuthService {
     } catch (_) {
       return null;
     }
+  }
+
+  String? _readString(
+    Map<String, dynamic> source,
+    String key, {
+    String? fallbackKey,
+  }) {
+    final value = source[key] ?? (fallbackKey == null ? null : source[fallbackKey]);
+    if (value == null) return null;
+    if (value is String) return value;
+    return value.toString();
+  }
+
+  String? _readNestedString(Map<String, dynamic> source, List<String> path) {
+    dynamic current = source;
+    for (final segment in path) {
+      if (current is! Map) return null;
+      current = current[segment];
+    }
+    if (current is String) return current;
+    return null;
   }
 
   Future<String?> get accessToken async => _secureStorage.read(kAccessTokenKey);
