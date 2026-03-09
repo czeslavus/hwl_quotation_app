@@ -21,6 +21,7 @@ import 'package:wyceny/features/auth/domain/repositories/auth_repository.dart';
 import 'package:wyceny/features/auth/data/repositories/auth_repository_impl.dart';
 
 import 'package:wyceny/features/auth/ui/viewmodels/recover_set_password_viewmodel.dart';
+import 'package:wyceny/features/orders/data/orders_repository_impl.dart';
 import 'package:wyceny/features/orders/data/orders_repository_mock.dart';
 import 'package:wyceny/features/orders/domain/orders_repository.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
@@ -47,8 +48,8 @@ import 'package:wyceny/features/logs/network/logging_interceptor.dart';
 
 final getIt = GetIt.instance;
 
-// Przełącznik - zmień na 'false', aby używać prawdziwego API
-const bool USE_MOCK_API = true;
+// Przełącznik - zmień na 'true', aby używać danych mock.
+const bool USE_MOCK_API = false;
 
 Future<void> setupDI() async {
   // Konfiguracja środowiska
@@ -123,7 +124,11 @@ Future<void> setupDI() async {
   } else {
     getIt.registerLazySingleton<QuotationsRepository>(() => QuotationsRepositoryImpl(getIt<Dio>()));
   }
-  getIt.registerLazySingleton<OrdersRepository>(() => MockOrdersRepository(getIt<MockQuotationsRepository>()));
+  if (USE_MOCK_API) {
+    getIt.registerLazySingleton<OrdersRepository>(() => MockOrdersRepository(getIt<MockQuotationsRepository>()));
+  } else {
+    getIt.registerLazySingleton<OrdersRepository>(() => OrdersRepositoryImpl(getIt<Dio>()));
+  }
 
 
   getIt.registerLazySingleton<Dio>(() {
