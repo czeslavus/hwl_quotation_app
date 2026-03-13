@@ -101,7 +101,7 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
   // -------- loaders --------
 
   Future<void> _loadCountries() async {
-    final data = await _getList('/api/dictionaries/countries');
+    final data = await _getList('/dictionaries/countries');
     _countries = data
         .map((e) => CountryDictionary.fromJson(
       e,
@@ -111,7 +111,7 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
   }
 
   Future<void> _loadCountriesDelivery() async {
-    final data = await _getList('/api/dictionaries/countries-delivery');
+    final data = await _getList('/dictionaries/countries-delivery');
     _countriesDelivery = data
         .map((e) => CountryDictionary.fromJson(
       e,
@@ -121,7 +121,7 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
   }
 
   Future<void> _loadCountriesReceipt() async {
-    final data = await _getList('/api/dictionaries/countries-receipt');
+    final data = await _getList('/dictionaries/countries-receipt');
     _countriesReceipt = data
         .map((e) => CountryDictionary.fromJson(
       e,
@@ -131,53 +131,53 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
   }
 
   Future<void> _loadAdditions() async {
-    final json = await _getObject('/api/dictionaries/additions');
+    final json = await _getObject('/dictionaries/additions');
     _additions = AdditionsDictionary.fromJson(json);
   }
 
   Future<void> _loadAdditionsV2() async {
-    final data = await _getList('/api/dictionaries/additions-v2');
+    final data = await _getList('/dictionaries/additions-v2');
     _additionsV2 = data.map((e) => AdditionsDictionaryClassic.fromJson(e)).toList(growable: false);
   }
 
   Future<void> _loadServices() async {
-    final data = await _getList('/api/dictionaries/services');
+    final data = await _getList('/dictionaries/services');
     _services = data.map((e) => ServicesDictionary.fromJson(e)).toList(growable: false);
   }
 
   Future<void> _loadStatuses() async {
-    final data = await _getList('/api/dictionaries/statuses');
+    final data = await _getList('/dictionaries/statuses');
     _statuses = data.map((e) => StatusesDictionary.fromJson(e)).toList(growable: false);
   }
 
   Future<void> _loadRejectCauses() async {
-    final data = await _getList('/api/dictionaries/reject-causes');
+    final data = await _getList('/dictionaries/reject-causes');
     _rejectCauses = data.map((e) => RejectCausesDictionary.fromJson(e)).toList(growable: false);
   }
 
   Future<void> _loadAdrNames() async {
-    final data = await _getList('/api/dictionaries/adr-names');
+    final data = await _getList('/dictionaries/adr-names');
     _adrNames = data.map((e) => ADRNameDictionary.fromJson(e)).toList(growable: false);
   }
 
   Future<void> _loadAdrPackageUnits() async {
-    final data = await _getList('/api/dictionaries/adr-package-units');
+    final data = await _getList('/dictionaries/adr-package-units');
     _adrPackageUnits =
         data.map((e) => ADRPackageUnitTypeDictionary.fromJson(e)).toList(growable: false);
   }
 
   Future<void> _loadStageTtStatuses() async {
-    final data = await _getList('/api/dictionaries/stagett-statuses');
+    final data = await _getList('/dictionaries/stagett-statuses');
     _stageTt = data.map((e) => StageTTDictionary.fromJson(e)).toList(growable: false);
   }
 
   Future<void> _loadLoadUnits() async {
-    final data = await _getList('/api/dictionaries/load-units');
+    final data = await _getList('/dictionaries/load-units');
     _loadUnits = data.map((e) => LoadUnitDictionary.fromJson(e)).toList(growable: false);
   }
 
   Future<void> _loadInstructionCodes() async {
-    final data = await _getList('/api/dictionaries/instruction-codes');
+    final data = await _getList('/dictionaries/instruction-codes');
     _instructionCodes = data.map((e) => InstructionCodeDictionary.fromJson(e)).toList(growable: false);
   }
 

@@ -11,7 +11,7 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
 
   final Dio _dio;
 
-  static const String _quotationsPath = '/api/quotations';
+  static const String _quotationsPath = '/quotations';
 
   @override
   Future<Quotation> getQuotation(int id) async {
@@ -130,7 +130,7 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
 
   @override
   Future<OrderModel> buildOrderFromQuotation(int id) async {
-    final res = await _dio.get('/api/orders/sendorder/quotation/$id');
+    final res = await _dio.get('/orders/sendorder/quotation/$id');
     final data = res.data;
     if (data is Map) {
       return OrderModel.fromJson(Map<String, dynamic>.from(data));
@@ -139,7 +139,7 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
       requestOptions: res.requestOptions,
       response: res,
       type: DioExceptionType.badResponse,
-      error: 'Expected JSON object from /api/orders/sendorder/quotation/$id',
+      error: 'Expected JSON object from /orders/sendorder/quotation/$id',
     );
   }
 
@@ -151,7 +151,7 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
     }
 
     final res = await _dio.post(
-      '/api/orders/sendorder/quotation/$quotationId',
+      '/orders/sendorder/quotation/$quotationId',
       data: model.toJson(),
     );
     final data = res.data;
@@ -164,7 +164,7 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
       requestOptions: res.requestOptions,
       response: res,
       type: DioExceptionType.badResponse,
-      error: 'Expected JSON object/string from /api/orders/sendorder/quotation/$quotationId',
+      error: 'Expected JSON object/string from /orders/sendorder/quotation/$quotationId',
     );
   }
 

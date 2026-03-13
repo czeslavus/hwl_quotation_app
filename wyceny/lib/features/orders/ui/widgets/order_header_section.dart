@@ -3,16 +3,19 @@ import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_header_section.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
+import 'package:wyceny/l10n/country_localizer.dart';
 
 class OrderHeaderSection extends StatefulWidget {
   const OrderHeaderSection({
     super.key,
     required this.vm,
     required this.scrollable,
+    this.readOnly = false,
   });
 
   final OrderViewModel vm;
   final bool scrollable;
+  final bool readOnly;
 
   @override
   State<OrderHeaderSection> createState() => _OrderHeaderSectionState();
@@ -94,23 +97,32 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
               Row(
                 children: [
                   Expanded(
-                    child: CountryDropdown(
-                      label: t.gen_origin_country,
-                      countriesLoading: vm.countriesLoading,
-                      countriesError: vm.countriesError,
-                      countries: vm.receiptCountries,
-                      selectedId: vm.receiptCountryId,
-                      onChanged: vm.originCountryLocked ? null : vm.setReceiptCountryId,
-                      validator: (v) => v == null ? t.validation_required : null,
-                    ),
+                    child: widget.readOnly
+                        ? _ReadOnlyField(
+                            label: t.gen_origin_country,
+                            value: CountryLocalizer.localize(
+                              vm.receiptCountryDisplay,
+                              context,
+                            ),
+                          )
+                        : CountryDropdown(
+                            label: t.gen_origin_country,
+                            countriesLoading: vm.countriesLoading,
+                            countriesError: vm.countriesError,
+                            countries: vm.receiptCountries,
+                            selectedId: vm.receiptCountryId,
+                            onChanged: vm.originCountryLocked ? null : vm.setReceiptCountryId,
+                            validator: (v) => v == null ? t.validation_required : null,
+                          ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
                       controller: _receiptZipCtrl,
                       decoration: InputDecoration(labelText: t.gen_origin_zip),
-                      onChanged: vm.setReceiptZip,
-                      validator: requiredValidator,
+                      onChanged: widget.readOnly ? null : vm.setReceiptZip,
+                      validator: widget.readOnly ? null : requiredValidator,
+                      readOnly: widget.readOnly,
                     ),
                   ),
                 ],
@@ -119,23 +131,32 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
               Row(
                 children: [
                   Expanded(
-                    child: CountryDropdown(
-                      label: t.gen_dest_country,
-                      countriesLoading: vm.countriesLoading,
-                      countriesError: vm.countriesError,
-                      countries: vm.deliveryCountries,
-                      selectedId: vm.deliveryCountryId,
-                      onChanged: vm.setDeliveryCountryId,
-                      validator: (v) => v == null ? t.validation_required : null,
-                    ),
+                    child: widget.readOnly
+                        ? _ReadOnlyField(
+                            label: t.gen_dest_country,
+                            value: CountryLocalizer.localize(
+                              vm.deliveryCountryDisplay,
+                              context,
+                            ),
+                          )
+                        : CountryDropdown(
+                            label: t.gen_dest_country,
+                            countriesLoading: vm.countriesLoading,
+                            countriesError: vm.countriesError,
+                            countries: vm.deliveryCountries,
+                            selectedId: vm.deliveryCountryId,
+                            onChanged: vm.setDeliveryCountryId,
+                            validator: (v) => v == null ? t.validation_required : null,
+                          ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
                       controller: _deliveryZipCtrl,
                       decoration: InputDecoration(labelText: t.gen_dest_zip),
-                      onChanged: vm.setDeliveryZip,
-                      validator: requiredValidator,
+                      onChanged: widget.readOnly ? null : vm.setDeliveryZip,
+                      validator: widget.readOnly ? null : requiredValidator,
+                      readOnly: widget.readOnly,
                     ),
                   ),
                 ],
@@ -154,6 +175,24 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
         padding: EdgeInsets.zero,
         child: content,
       ),
+    );
+  }
+}
+
+class _ReadOnlyField extends StatelessWidget {
+  const _ReadOnlyField({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return InputDecorator(
+      decoration: InputDecoration(labelText: label),
+      child: Text(value),
     );
   }
 }

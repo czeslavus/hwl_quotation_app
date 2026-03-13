@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/features/auth/ui/widgets/login_screen.dart';
+import 'package:wyceny/features/orders/domain/models/order_model.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_viewmodel.dart';
 import 'package:wyceny/features/orders/ui/widgets/order_screen.dart';
 import 'package:wyceny/features/orders/ui/widgets/orders_list_screen.dart';
@@ -111,6 +112,24 @@ GoRouter buildRouter(AuthState auth) {
                   );
                 },
                 routes: [
+                  GoRoute(
+                    path: ':orderId/view',
+                    builder: (context, state) {
+                      final orderId = state.pathParameters['orderId']!;
+                      final extra = state.extra;
+                      return ChangeNotifierProvider(
+                        create: (_) {
+                          final vm = getIt<OrderViewModel>();
+                          if (extra is OrderModel) {
+                            vm.prefillFromOrder(extra);
+                          }
+                          vm.init();
+                          return vm;
+                        },
+                        child: OrderScreen(orderId: orderId, readOnly: true),
+                      );
+                    },
+                  ),
                   GoRoute(
                     path: ':orderId',
                     builder: (context, state) {

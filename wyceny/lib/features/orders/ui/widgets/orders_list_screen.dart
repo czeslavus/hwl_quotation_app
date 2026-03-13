@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/common/top_bar_appbar.dart';
+import 'package:wyceny/features/orders/domain/models/order_model.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/orders_list_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
@@ -143,6 +144,10 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final vm = widget.vm;
+    final countryItems = _countryItems(context, vm);
+    final selectedCountry = countryItems.any((item) => item.value == vm.deliveryCountry)
+        ? vm.deliveryCountry
+        : null;
 
     final width = MediaQuery.sizeOf(context).width;
     final isPhone = width < 600;
@@ -156,14 +161,9 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         width: 200,
         child: DropdownButtonFormField<String>(
           isExpanded: true,
-          initialValue: vm.deliveryCountry,
+          initialValue: selectedCountry,
           decoration: InputDecoration(labelText: t.gen_dest_country),
-          items: vm.countries
-              .map((c) => DropdownMenuItem(
-                    value: c.countryCode,
-                    child: Text(CountryLocalizer.localize(c.country, context)),
-                  ))
-              .toList(),
+          items: countryItems,
           onChanged: (code) => setState(() => vm.deliveryCountry = code),
         ),
       ),
@@ -277,6 +277,27 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     );
   }
 
+  List<DropdownMenuItem<String>> _countryItems(
+    BuildContext context,
+    OrdersListViewModel vm,
+  ) {
+    final seen = <String>{};
+    final items = <DropdownMenuItem<String>>[];
+
+    for (final country in vm.countries) {
+      final code = country.countryCode.trim();
+      if (code.isEmpty || code == '??' || !seen.add(code)) continue;
+      items.add(
+        DropdownMenuItem(
+          value: code,
+          child: Text(CountryLocalizer.localize(country.country, context)),
+        ),
+      );
+    }
+
+    return items;
+  }
+
   Widget _dateField({
     required BuildContext context,
     required String label,
@@ -363,7 +384,11 @@ class _OrdersTable extends StatelessWidget {
                         DataCell(
                           Align(
                             alignment: Alignment.centerRight,
-                            child: _ActionsCell(vm: vm, orderId: o.orderId?.toString() ?? ''),
+                            child: _ActionsCell(
+                              vm: vm,
+                              orderId: o.orderId?.toString() ?? '',
+                              order: o,
+                            ),
                           ),
                         ),
                       ]);
@@ -398,7 +423,12 @@ class _OrdersTable extends StatelessWidget {
 class _ActionsCell extends StatelessWidget {
   final OrdersListViewModel vm;
   final String orderId;
-  const _ActionsCell({required this.vm, required this.orderId});
+  final OrderModel order;
+  const _ActionsCell({
+    required this.vm,
+    required this.orderId,
+    required this.order,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -415,7 +445,7 @@ class _ActionsCell extends StatelessWidget {
               label: t.action_view,
               icon: Icons.visibility_outlined,
               showCaption: false,
-              onPressed: () => vm.view(orderId),
+              onPressed: () => context.go('/order/$orderId/view', extra: order),
             ),
             const SizedBox(width: 6),
             NeutralActionButton(

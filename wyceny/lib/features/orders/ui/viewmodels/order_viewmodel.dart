@@ -3,6 +3,7 @@ import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
+import 'package:wyceny/features/orders/domain/models/order_model.dart';
 import 'package:wyceny/features/orders/domain/orders_repository.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/order_item.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation.dart';
@@ -65,6 +66,8 @@ class OrderViewModel extends ChangeNotifier {
   double insuranceFee = 0;
   double totalPrice = 0;
   bool hasChangesStored = false;
+  String? _pendingReceiptCountryCode;
+  String? _pendingDeliveryCountryCode;
 
   Future<void> init() async {
     countriesLoading = true;
@@ -75,6 +78,7 @@ class OrderViewModel extends ChangeNotifier {
       countries = _dictRepo.countries;
       deliveryCountries = _dictRepo.countriesDelivery;
       receiptCountries = _dictRepo.countriesReceipt;
+      _resolvePendingCountryIds();
       if (receiptCountries.length == 1) {
         receiptCountryId = receiptCountries.first.countryId;
         originCountryLocked = true;
@@ -176,6 +180,40 @@ class OrderViewModel extends ChangeNotifier {
     hasChangesStored = false;
   }
 
+  void prefillFromOrder(OrderModel order) {
+    clear();
+    _pendingReceiptCountryCode = order.receiptPoint.country;
+    _pendingDeliveryCountryCode = order.deliveryPoint.country;
+    _resolvePendingCountryIds();
+
+    receiptZipCode = order.receiptPoint.zipCode;
+    deliveryZipCode = order.deliveryPoint.zipCode;
+    receiptName = order.receiptPoint.name;
+    receiptCity = order.receiptPoint.city;
+    receiptStreet = order.receiptPoint.street;
+    receiptPhone = order.receiptPoint.phoneNr ?? '';
+    deliveryName = order.deliveryPoint.name;
+    deliveryCity = order.deliveryPoint.city;
+    deliveryStreet = order.deliveryPoint.street;
+    deliveryPhone = order.deliveryPoint.phoneNr ?? '';
+    receiptDateBegin = order.receiptDateBegin;
+    receiptDateEnd = order.receiptDateEnd;
+    deliveryDateBegin = order.deliveryDateBegin;
+    deliveryDateEnd = order.deliveryDateEnd;
+    orderCustomerNr = order.orderCustomerNr;
+    orderValue = order.orderValue ?? 0;
+    notificationEmail = order.notificationEmail;
+    notificationSms = order.notificationSms;
+    items
+      ..clear()
+      ..addAll(_mapItemsFromOrder(order));
+    cbmTotal = order.loads?.fold<double>(0, (sum, load) => sum + (load.volume ?? 0)) ?? 0;
+    chargeableWeight = order.totalWeight;
+    totalPrice = order.orderValue ?? 0;
+    hasChangesStored = false;
+    notifyListeners();
+  }
+
   Future<void> calculate() async {
     _recalcPricing();
   }
@@ -193,6 +231,44 @@ class OrderViewModel extends ChangeNotifier {
     final c = countries.cast<CountryDictionary?>().firstWhere((x) => x?.countryId == id, orElse: () => null);
     return c?.countryCode;
   }
+
+  String countryNameForIdOrCode(
+    int? id,
+    String? fallbackCode,
+  ) {
+    CountryDictionary? match;
+    if (id != null) {
+      match = countries.cast<CountryDictionary?>().firstWhere(
+            (x) => x?.countryId == id,
+            orElse: () => null,
+          );
+    }
+    match ??= countries.cast<CountryDictionary?>().firstWhere(
+          (x) =>
+              fallbackCode != null &&
+              fallbackCode.isNotEmpty &&
+              x?.countryCode.toLowerCase() == fallbackCode.toLowerCase(),
+          orElse: () => null,
+        );
+
+    if (match?.country != null && match!.country!.trim().isNotEmpty) {
+      return match.country!;
+    }
+    if (fallbackCode != null && fallbackCode.trim().isNotEmpty) {
+      return fallbackCode;
+    }
+    return '—';
+  }
+
+  String get receiptCountryDisplay => countryNameForIdOrCode(
+        receiptCountryId,
+        _pendingReceiptCountryCode,
+      );
+
+  String get deliveryCountryDisplay => countryNameForIdOrCode(
+        deliveryCountryId,
+        _pendingDeliveryCountryCode,
+      );
 
   void _recalcPricing() {
     cbmTotal = items.fold<double>(0, (s, it) => s + it.cbm);
@@ -217,6 +293,21 @@ class OrderViewModel extends ChangeNotifier {
 
     totalPrice = freight + adrFee + serviceFee + insuranceFee + preAdviceFee;
     notifyListeners();
+  }
+
+  void _resolvePendingCountryIds() {
+    receiptCountryId ??= _findCountryIdByCode(_pendingReceiptCountryCode, receiptCountries);
+    deliveryCountryId ??= _findCountryIdByCode(_pendingDeliveryCountryCode, deliveryCountries);
+  }
+
+  int? _findCountryIdByCode(String? countryCode, List<CountryDictionary> source) {
+    if (countryCode == null || countryCode.isEmpty) return null;
+    for (final country in source) {
+      if (country.countryCode.toLowerCase() == countryCode.toLowerCase()) {
+        return country.countryId;
+      }
+    }
+    return null;
   }
 
   void markDirty() {
@@ -246,5 +337,47 @@ class OrderViewModel extends ChangeNotifier {
           ),
         )
         .toList();
+  }
+
+  List<OrderItem> _mapItemsFromOrder(OrderModel order) {
+    final loads = order.loads;
+    if (loads == null || loads.isEmpty) return <OrderItem>[];
+
+    return loads.map((load) {
+      final qty = load.unitQuantity ?? 1;
+      final lengthCm = (load.length ?? 0) * 100;
+      final widthCm = (load.width ?? 0) * 100;
+      final heightCm = _deriveHeightCm(load, qty, lengthCm, widthCm);
+
+      return OrderItem(
+        qty: qty,
+        packType: load.unitType,
+        lengthCm: lengthCm > 0 ? lengthCm : null,
+        widthCm: widthCm > 0 ? widthCm : null,
+        heightCm: (heightCm != null && heightCm > 0) ? heightCm : null,
+        weightKg: load.weight,
+        adr: (load.loadAdrs?.isNotEmpty ?? false),
+      );
+    }).toList(growable: false);
+  }
+
+  double? _deriveHeightCm(
+    LoadModel load,
+    int qty,
+    double lengthCm,
+    double widthCm,
+  ) {
+    if (load.height != null && load.height! > 0) {
+      return load.height! * 100;
+    }
+    // Orders API often omits height, so for preview we reconstruct it from volume
+    // to keep the existing editable table layout populated with meaningful values.
+    final volume = load.volume;
+    if (volume == null || volume <= 0 || qty <= 0 || lengthCm <= 0 || widthCm <= 0) {
+      return null;
+    }
+    final baseAreaM2 = (lengthCm / 100) * (widthCm / 100) * qty;
+    if (baseAreaM2 <= 0) return null;
+    return (volume / baseAreaM2) * 100;
   }
 }

@@ -12,9 +12,14 @@ import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
 import 'package:wyceny/features/route_by_postcode/ui/widgets/route_map_by_postcode.dart';
 
 class OrderScreen extends StatefulWidget {
-  const OrderScreen({super.key, required this.orderId});
+  const OrderScreen({
+    super.key,
+    required this.orderId,
+    this.readOnly = false,
+  });
 
   final String orderId;
+  final bool readOnly;
 
   @override
   State<OrderScreen> createState() => _OrderScreenState();
@@ -27,8 +32,6 @@ class _OrderScreenState extends State<OrderScreen> {
   Widget build(BuildContext context) {
     final vm = context.watch<OrderViewModel>();
     final t = AppLocalizations.of(context);
-
-    final canReject = widget.orderId != 'new';
 
     return Scaffold(
       appBar: AppBar(
@@ -53,15 +56,16 @@ class _OrderScreenState extends State<OrderScreen> {
       ),
       body: Form(
         key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+        autovalidateMode:
+            widget.readOnly ? AutovalidateMode.disabled : AutovalidateMode.onUserInteraction,
         child: LayoutBuilder(
           builder: (context, c) {
             final w = c.maxWidth;
             final isWide = w >= 980;
 
             return isWide
-                ? _WideLayout(vm: vm, orderId: widget.orderId)
-                : _NarrowLayout(vm: vm, orderId: widget.orderId);
+                ? _WideLayout(vm: vm, orderId: widget.orderId, readOnly: widget.readOnly)
+                : _NarrowLayout(vm: vm, orderId: widget.orderId, readOnly: widget.readOnly);
           },
         ),
       ),
@@ -70,10 +74,15 @@ class _OrderScreenState extends State<OrderScreen> {
 }
 
 class _WideLayout extends StatelessWidget {
-  const _WideLayout({required this.vm, required this.orderId});
+  const _WideLayout({
+    required this.vm,
+    required this.orderId,
+    required this.readOnly,
+  });
 
   final OrderViewModel vm;
   final String orderId;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +95,7 @@ class _WideLayout extends StatelessWidget {
             children: [
               Expanded(
                 flex: 5,
-                child: OrderHeaderSection(vm: vm, scrollable: true),
+                child: OrderHeaderSection(vm: vm, scrollable: true, readOnly: readOnly),
               ),
               const VerticalDivider(width: 1),
               Expanded(
@@ -109,7 +118,7 @@ class _WideLayout extends StatelessWidget {
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: _BodyContent(vm: vm, orderId: orderId),
+            child: _BodyContent(vm: vm, orderId: orderId, readOnly: readOnly),
           ),
         ),
       ],
@@ -118,10 +127,15 @@ class _WideLayout extends StatelessWidget {
 }
 
 class _NarrowLayout extends StatelessWidget {
-  const _NarrowLayout({required this.vm, required this.orderId});
+  const _NarrowLayout({
+    required this.vm,
+    required this.orderId,
+    required this.readOnly,
+  });
 
   final OrderViewModel vm;
   final String orderId;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +144,7 @@ class _NarrowLayout extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          OrderHeaderSection(vm: vm, scrollable: false),
+          OrderHeaderSection(vm: vm, scrollable: false, readOnly: readOnly),
           const SizedBox(height: 12),
           SizedBox(
             height: 220,
@@ -145,7 +159,7 @@ class _NarrowLayout extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _BodyContent(vm: vm, orderId: orderId),
+          _BodyContent(vm: vm, orderId: orderId, readOnly: readOnly),
         ],
       ),
     );
@@ -153,10 +167,15 @@ class _NarrowLayout extends StatelessWidget {
 }
 
 class _BodyContent extends StatefulWidget {
-  const _BodyContent({required this.vm, required this.orderId});
+  const _BodyContent({
+    required this.vm,
+    required this.orderId,
+    required this.readOnly,
+  });
 
   final OrderViewModel vm;
   final String orderId;
+  final bool readOnly;
 
   @override
   State<_BodyContent> createState() => _BodyContentState();
@@ -194,8 +213,12 @@ class _BodyContentState extends State<_BodyContent> {
     _orderCustomerNrCtrl = TextEditingController(text: vm.orderCustomerNr ?? '');
     _notificationEmailCtrl = TextEditingController(text: vm.notificationEmail ?? '');
     _notificationSmsCtrl = TextEditingController(text: vm.notificationSms ?? '');
-    _orderValueCtrl = TextEditingController(text: _formatDouble(vm.orderValue));
-    _insuranceValueCtrl = TextEditingController(text: _formatDouble(vm.insuranceValue));
+    _orderValueCtrl = TextEditingController(
+      text: _formatDouble(vm.orderValue, blankZero: !widget.readOnly),
+    );
+    _insuranceValueCtrl = TextEditingController(
+      text: _formatDouble(vm.insuranceValue, blankZero: !widget.readOnly),
+    );
     _orderValueFocus = FocusNode();
     _orderValueFocus.addListener(() {
       if (!_orderValueFocus.hasFocus) {
@@ -249,13 +272,25 @@ class _BodyContentState extends State<_BodyContent> {
     _setControllerText(_orderCustomerNrCtrl, vm.orderCustomerNr ?? '');
     _setControllerText(_notificationEmailCtrl, vm.notificationEmail ?? '');
     _setControllerText(_notificationSmsCtrl, vm.notificationSms ?? '');
-    _setControllerText(_orderValueCtrl, _formatDouble(vm.orderValue));
-    _setControllerText(_insuranceValueCtrl, _formatDouble(vm.insuranceValue));
+    _setControllerText(
+      _orderValueCtrl,
+      _formatDouble(vm.orderValue, blankZero: !widget.readOnly),
+    );
+    _setControllerText(
+      _insuranceValueCtrl,
+      _formatDouble(vm.insuranceValue, blankZero: !widget.readOnly),
+    );
     _updateFormValidity();
   }
 
   void _updateFormValidity() {
     if (!mounted) return;
+    if (widget.readOnly) {
+      if (!_formValid) {
+        setState(() => _formValid = true);
+      }
+      return;
+    }
     if (_orderValueFocus.hasFocus) return;
     final form = Form.of(context);
     if (form == null) return;
@@ -276,8 +311,8 @@ class _BodyContentState extends State<_BodyContent> {
     _updateFormValidity();
   }
 
-  String _formatDouble(double value) {
-    if (value == 0) return '';
+  String _formatDouble(double value, {bool blankZero = true}) {
+    if (value == 0 && blankZero) return '';
     return value.toStringAsFixed(2);
   }
 
@@ -369,6 +404,7 @@ class _BodyContentState extends State<_BodyContent> {
     final vm = widget.vm;
     final t = AppLocalizations.of(context);
     final canReject = widget.orderId != 'new';
+    final readOnly = widget.readOnly;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -382,11 +418,12 @@ class _BodyContentState extends State<_BodyContent> {
                   child: TextFormField(
                     controller: _receiptNameCtrl,
                     decoration: InputDecoration(labelText: t.field_name),
-                    onChanged: (v) {
+                    onChanged: readOnly ? null : (v) {
                       vm.receiptName = v;
                       vm.markDirty();
                     },
-                    validator: _requiredText,
+                    validator: readOnly ? null : _requiredText,
+                    readOnly: readOnly,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -394,11 +431,12 @@ class _BodyContentState extends State<_BodyContent> {
                   child: TextFormField(
                     controller: _receiptCityCtrl,
                     decoration: InputDecoration(labelText: t.field_city),
-                    onChanged: (v) {
+                    onChanged: readOnly ? null : (v) {
                       vm.receiptCity = v;
                       vm.markDirty();
                     },
-                    validator: _requiredText,
+                    validator: readOnly ? null : _requiredText,
+                    readOnly: readOnly,
                   ),
                 ),
               ]),
@@ -408,11 +446,12 @@ class _BodyContentState extends State<_BodyContent> {
                   child: TextFormField(
                     controller: _receiptStreetCtrl,
                     decoration: InputDecoration(labelText: t.field_street),
-                    onChanged: (v) {
+                    onChanged: readOnly ? null : (v) {
                       vm.receiptStreet = v;
                       vm.markDirty();
                     },
-                    validator: _requiredText,
+                    validator: readOnly ? null : _requiredText,
+                    readOnly: readOnly,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -421,11 +460,12 @@ class _BodyContentState extends State<_BodyContent> {
                     controller: _receiptPhoneCtrl,
                     decoration: InputDecoration(labelText: t.field_phone),
                     keyboardType: TextInputType.phone,
-                    onChanged: (v) {
+                    onChanged: readOnly ? null : (v) {
                       vm.receiptPhone = v;
                       vm.markDirty();
                     },
-                    validator: _validatePhone,
+                    validator: readOnly ? null : _validatePhone,
+                    readOnly: readOnly,
                   ),
                 ),
               ]),
@@ -441,11 +481,12 @@ class _BodyContentState extends State<_BodyContent> {
                   child: TextFormField(
                     controller: _deliveryNameCtrl,
                     decoration: InputDecoration(labelText: t.field_name),
-                    onChanged: (v) {
+                    onChanged: readOnly ? null : (v) {
                       vm.deliveryName = v;
                       vm.markDirty();
                     },
-                    validator: _requiredText,
+                    validator: readOnly ? null : _requiredText,
+                    readOnly: readOnly,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -453,11 +494,12 @@ class _BodyContentState extends State<_BodyContent> {
                   child: TextFormField(
                     controller: _deliveryCityCtrl,
                     decoration: InputDecoration(labelText: t.field_city),
-                    onChanged: (v) {
+                    onChanged: readOnly ? null : (v) {
                       vm.deliveryCity = v;
                       vm.markDirty();
                     },
-                    validator: _requiredText,
+                    validator: readOnly ? null : _requiredText,
+                    readOnly: readOnly,
                   ),
                 ),
               ]),
@@ -467,11 +509,12 @@ class _BodyContentState extends State<_BodyContent> {
                   child: TextFormField(
                     controller: _deliveryStreetCtrl,
                     decoration: InputDecoration(labelText: t.field_street),
-                    onChanged: (v) {
+                    onChanged: readOnly ? null : (v) {
                       vm.deliveryStreet = v;
                       vm.markDirty();
                     },
-                    validator: _requiredText,
+                    validator: readOnly ? null : _requiredText,
+                    readOnly: readOnly,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -480,11 +523,12 @@ class _BodyContentState extends State<_BodyContent> {
                     controller: _deliveryPhoneCtrl,
                     decoration: InputDecoration(labelText: t.field_phone),
                     keyboardType: TextInputType.phone,
-                    onChanged: (v) {
+                    onChanged: readOnly ? null : (v) {
                       vm.deliveryPhone = v;
                       vm.markDirty();
                     },
-                    validator: _validatePhone,
+                    validator: readOnly ? null : _validatePhone,
+                    readOnly: readOnly,
                   ),
                 ),
               ]),
@@ -514,11 +558,12 @@ class _BodyContentState extends State<_BodyContent> {
                       context: context,
                       label: t.field_pickup_from,
                       value: vm.receiptDateBegin,
-                      onPick: (d) {
+                      onPick: readOnly ? (_) {} : (d) {
                         vm.receiptDateBegin = d;
                         vm.markDirty();
                       },
-                      validator: _validateReceiptDateBegin,
+                      validator: readOnly ? null : _validateReceiptDateBegin,
+                      readOnly: readOnly,
                     ),
                   ),
                   field(
@@ -526,11 +571,12 @@ class _BodyContentState extends State<_BodyContent> {
                       context: context,
                       label: t.field_pickup_to,
                       value: vm.receiptDateEnd,
-                      onPick: (d) {
+                      onPick: readOnly ? (_) {} : (d) {
                         vm.receiptDateEnd = d;
                         vm.markDirty();
                       },
-                      validator: _validateReceiptDateEnd,
+                      validator: readOnly ? null : _validateReceiptDateEnd,
+                      readOnly: readOnly,
                     ),
                   ),
                   field(
@@ -538,11 +584,12 @@ class _BodyContentState extends State<_BodyContent> {
                       context: context,
                       label: t.field_delivery_from,
                       value: vm.deliveryDateBegin,
-                      onPick: (d) {
+                      onPick: readOnly ? (_) {} : (d) {
                         vm.deliveryDateBegin = d;
                         vm.markDirty();
                       },
-                      validator: _validateDeliveryDateBegin,
+                      validator: readOnly ? null : _validateDeliveryDateBegin,
+                      readOnly: readOnly,
                     ),
                   ),
                   field(
@@ -550,11 +597,12 @@ class _BodyContentState extends State<_BodyContent> {
                       context: context,
                       label: t.field_delivery_to,
                       value: vm.deliveryDateEnd,
-                      onPick: (d) {
+                      onPick: readOnly ? (_) {} : (d) {
                         vm.deliveryDateEnd = d;
                         vm.markDirty();
                       },
-                      validator: _validateDeliveryDateEnd,
+                      validator: readOnly ? null : _validateDeliveryDateEnd,
+                      readOnly: readOnly,
                     ),
                   ),
                 ],
@@ -584,11 +632,12 @@ class _BodyContentState extends State<_BodyContent> {
                     TextFormField(
                       controller: _orderCustomerNrCtrl,
                       decoration: InputDecoration(labelText: t.field_customer_nr),
-                      onChanged: (v) {
+                      onChanged: readOnly ? null : (v) {
                         vm.orderCustomerNr = v;
                         vm.markDirty();
                       },
-                      validator: _requiredText,
+                      validator: readOnly ? null : _requiredText,
+                      readOnly: readOnly,
                     ),
                   ),
                   field(
@@ -596,11 +645,12 @@ class _BodyContentState extends State<_BodyContent> {
                       controller: _notificationEmailCtrl,
                       decoration: InputDecoration(labelText: t.field_notification_email),
                       keyboardType: TextInputType.emailAddress,
-                      onChanged: (v) {
+                      onChanged: readOnly ? null : (v) {
                         vm.notificationEmail = v;
                         vm.markDirty();
                       },
-                      validator: _validateEmail,
+                      validator: readOnly ? null : _validateEmail,
+                      readOnly: readOnly,
                     ),
                   ),
                   field(
@@ -608,11 +658,12 @@ class _BodyContentState extends State<_BodyContent> {
                       controller: _notificationSmsCtrl,
                       decoration: InputDecoration(labelText: t.field_notification_sms),
                       keyboardType: TextInputType.phone,
-                      onChanged: (v) {
+                      onChanged: readOnly ? null : (v) {
                         vm.notificationSms = v;
                         vm.markDirty();
                       },
-                      validator: _validatePhone,
+                      validator: readOnly ? null : _validatePhone,
+                      readOnly: readOnly,
                     ),
                   ),
                   field(
@@ -620,12 +671,13 @@ class _BodyContentState extends State<_BodyContent> {
                       controller: _orderValueCtrl,
                       decoration: InputDecoration(labelText: t.field_order_value_pln),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      focusNode: _orderValueFocus,
+                      focusNode: readOnly ? null : _orderValueFocus,
                       autovalidateMode: AutovalidateMode.onUnfocus,
-                      onEditingComplete: () {
+                      onEditingComplete: readOnly ? null : () {
                         FocusScope.of(context).unfocus();
                       },
-                      validator: _requiredNumber,
+                      validator: readOnly ? null : _requiredNumber,
+                      readOnly: readOnly,
                     ),
                   ),
                 ],
@@ -642,16 +694,17 @@ class _BodyContentState extends State<_BodyContent> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            PositiveActionButton(
-              onPressed: vm.addItem,
-              icon: Icons.add,
-              label: t.add_item,
-              tooltip: t.add_item,
-            ),
+            if (!readOnly)
+              PositiveActionButton(
+                onPressed: vm.addItem,
+                icon: Icons.add,
+                label: t.add_item,
+                tooltip: t.add_item,
+              ),
           ],
         ),
         const SizedBox(height: 8),
-        _OrderItemsTable(vm: vm),
+        _OrderItemsTable(vm: vm, readOnly: readOnly),
         const SizedBox(height: 12),
         _SectionCard(
           title: t.services_title,
@@ -659,7 +712,7 @@ class _BodyContentState extends State<_BodyContent> {
             children: [
               CheckboxListTile(
                 value: vm.services,
-                onChanged: (v) {
+                onChanged: readOnly ? null : (v) {
                   vm.services = v ?? false;
                   vm.markDirty();
                 },
@@ -668,7 +721,7 @@ class _BodyContentState extends State<_BodyContent> {
               ),
               CheckboxListTile(
                 value: vm.preAdvice,
-                onChanged: (v) {
+                onChanged: readOnly ? null : (v) {
                   vm.preAdvice = v ?? false;
                   vm.markDirty();
                 },
@@ -679,10 +732,11 @@ class _BodyContentState extends State<_BodyContent> {
                 controller: _insuranceValueCtrl,
                 decoration: InputDecoration(labelText: t.services_cargo_insurance),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (v) {
+                onChanged: readOnly ? null : (v) {
                   vm.insuranceValue = double.tryParse(v.replaceAll(',', '.')) ?? 0;
                   vm.markDirty();
                 },
+                readOnly: readOnly,
               ),
             ],
           ),
@@ -697,40 +751,50 @@ class _BodyContentState extends State<_BodyContent> {
           ],
         ),
         const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            PositiveActionButton(
-              icon: Icons.calculate,
-              label: t.action_calculate,
-              onPressed: (vm.hasChangesStored && _formValid) ? vm.calculate : null,
+        if (readOnly)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: NeutralActionButton(
+              icon: Icons.arrow_back,
+              label: 'Powrot',
+              onPressed: () => context.go('/order'),
             ),
-            NeutralActionButton(
-              icon: Icons.delete_outline,
-              label: t.action_clear,
-              onPressed: vm.hasChangesStored ? vm.clear : null,
-            ),
-            PositiveActionButton(
-              icon: Icons.send,
-              label: t.action_submit_order,
-              onPressed: _formValid ? vm.submit : null,
-            ),
-            DangerActionButton(
-              icon: Icons.cancel_outlined,
-              label: t.action_reject_order,
-              onPressed: canReject
-                  ? () async {
-                final ok = await _confirmRejectDialog(context, t);
-                if (ok != true) return;
-                await vm.rejectOrder(widget.orderId);
-                if (!context.mounted) return;
-                context.go('/order');
-              }
-                  : null,
-            ),
-          ],
-        ),
+          )
+        else
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              PositiveActionButton(
+                icon: Icons.calculate,
+                label: t.action_calculate,
+                onPressed: (vm.hasChangesStored && _formValid) ? vm.calculate : null,
+              ),
+              NeutralActionButton(
+                icon: Icons.delete_outline,
+                label: t.action_clear,
+                onPressed: vm.hasChangesStored ? vm.clear : null,
+              ),
+              PositiveActionButton(
+                icon: Icons.send,
+                label: t.action_submit_order,
+                onPressed: _formValid ? vm.submit : null,
+              ),
+              DangerActionButton(
+                icon: Icons.cancel_outlined,
+                label: t.action_reject_order,
+                onPressed: canReject
+                    ? () async {
+                        final ok = await _confirmRejectDialog(context, t);
+                        if (ok != true) return;
+                        await vm.rejectOrder(widget.orderId);
+                        if (!context.mounted) return;
+                        context.go('/order');
+                      }
+                    : null,
+              ),
+            ],
+          ),
       ],
     );
   }
@@ -756,6 +820,7 @@ class _BodyContentState extends State<_BodyContent> {
     required DateTime? value,
     required ValueChanged<DateTime?> onPick,
     String? Function(DateTime?)? validator,
+    bool readOnly = false,
   }) {
     return FormField<DateTime>(
       key: ValueKey('$label-${value?.toIso8601String() ?? 'none'}'),
@@ -763,7 +828,9 @@ class _BodyContentState extends State<_BodyContent> {
       validator: validator,
       builder: (field) {
         return InkWell(
-          onTap: () async {
+          onTap: readOnly
+              ? null
+              : () async {
             final now = DateTime.now();
             final picked = await showDatePicker(
               context: context,
@@ -836,9 +903,13 @@ class _SectionCard extends StatelessWidget {
 }
 
 class _OrderItemsTable extends StatefulWidget {
-  const _OrderItemsTable({required this.vm});
+  const _OrderItemsTable({
+    required this.vm,
+    required this.readOnly,
+  });
 
   final OrderViewModel vm;
+  final bool readOnly;
 
   @override
   State<_OrderItemsTable> createState() => _OrderItemsTableState();
@@ -909,7 +980,7 @@ class _OrderItemsTableState extends State<_OrderItemsTable> {
                   DataColumn(label: Text(t.label_weight_real_kg)),
                   DataColumn(label: Text(t.item_dangerous)),
                   DataColumn(label: Text(t.label_item_cbm)),
-                  const DataColumn(label: Text('')),
+                  if (!widget.readOnly) const DataColumn(label: Text('')),
                 ],
                 rows: List.generate(vm.items.length, (i) => _row(context, i, vm.items[i])),
               ),
@@ -926,64 +997,71 @@ class _OrderItemsTableState extends State<_OrderItemsTable> {
 
     return DataRow(
       cells: [
+        DataCell(widget.readOnly ? _readonlyCell(_wXS, '${it.qty ?? 0}') : _intField(
+          width: _wXS,
+          value: it.qty ?? 0,
+          validator: (v) => _requiredInt(v, t),
+          onChanged: (v) => vm.updateItem(index, it..qty = v),
+        )),
+        DataCell(widget.readOnly ? _readonlyCell(_wL, it.packType ?? '—') : _packDropdown(
+          width: _wL,
+          value: it.packType ?? 'EUR-1 (1,2x0,8)',
+          validator: (v) => (v == null || v.trim().isEmpty) ? t.validation_required : null,
+          onChanged: (v) => vm.updateItem(index, it..packType = v),
+        )),
+        DataCell(widget.readOnly ? _readonlyCell(_wS, _formatDim(it.lengthCm)) : _doubleField(
+          width: _wS,
+          value: it.lengthCm ?? 0,
+          validator: (v) => _requiredDouble(v, t),
+          onChanged: (v) => vm.updateItem(index, it..lengthCm = v),
+        )),
+        DataCell(widget.readOnly ? _readonlyCell(_wS, _formatDim(it.widthCm)) : _doubleField(
+          width: _wS,
+          value: it.widthCm ?? 0,
+          validator: (v) => _requiredDouble(v, t),
+          onChanged: (v) => vm.updateItem(index, it..widthCm = v),
+        )),
+        DataCell(widget.readOnly ? _readonlyCell(_wS, _formatDim(it.heightCm)) : _doubleField(
+          width: _wS,
+          value: it.heightCm ?? 0,
+          validator: (v) => _requiredDouble(v, t),
+          onChanged: (v) => vm.updateItem(index, it..heightCm = v),
+        )),
+        DataCell(widget.readOnly ? _readonlyCell(_wM, _formatDim(it.weightKg)) : _doubleField(
+          width: _wM,
+          value: it.weightKg ?? 0,
+          validator: (v) => _requiredDouble(v, t),
+          onChanged: (v) => vm.updateItem(index, it..weightKg = v),
+        )),
         DataCell(
-          _intField(
-            width: _wXS,
-            value: it.qty ?? 0,
-            validator: (v) => _requiredInt(v, t),
-            onChanged: (v) => vm.updateItem(index, it..qty = v),
-          ),
-        ),
-        DataCell(
-          _packDropdown(
-            width: _wL,
-            value: it.packType ?? 'EUR-1 (1,2x0,8)',
-            validator: (v) => (v == null || v.trim().isEmpty) ? t.validation_required : null,
-            onChanged: (v) => vm.updateItem(index, it..packType = v),
-          ),
-        ),
-        DataCell(
-          _doubleField(
-            width: _wS,
-            value: it.lengthCm ?? 0,
-            validator: (v) => _requiredDouble(v, t),
-            onChanged: (v) => vm.updateItem(index, it..lengthCm = v),
-          ),
-        ),
-        DataCell(
-          _doubleField(
-            width: _wS,
-            value: it.widthCm ?? 0,
-            validator: (v) => _requiredDouble(v, t),
-            onChanged: (v) => vm.updateItem(index, it..widthCm = v),
-          ),
-        ),
-        DataCell(
-          _doubleField(
-            width: _wS,
-            value: it.heightCm ?? 0,
-            validator: (v) => _requiredDouble(v, t),
-            onChanged: (v) => vm.updateItem(index, it..heightCm = v),
-          ),
-        ),
-        DataCell(
-          _doubleField(
-            width: _wM,
-            value: it.weightKg ?? 0,
-            validator: (v) => _requiredDouble(v, t),
-            onChanged: (v) => vm.updateItem(index, it..weightKg = v),
-          ),
-        ),
-        DataCell(
-          Checkbox(
-            value: it.adr,
-            onChanged: (v) => vm.updateItem(index, it..adr = (v ?? false)),
-          ),
+          widget.readOnly
+              ? Icon(it.adr ? Icons.check : Icons.remove, size: 18)
+              : Checkbox(
+                  value: it.adr,
+                  onChanged: (v) => vm.updateItem(index, it..adr = (v ?? false)),
+                ),
         ),
         DataCell(SizedBox(width: _wM, child: Text(it.cbm.toStringAsFixed(3)))),
-        DataCell(_deleteButton(t.item_delete_tt, () => vm.removeItem(index))),
+        if (!widget.readOnly)
+          DataCell(_deleteButton(t.item_delete_tt, () => vm.removeItem(index))),
       ],
     );
+  }
+
+  Widget _readonlyCell(double width, String value) {
+    return SizedBox(
+      width: width,
+      child: Text(
+        value,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  String _formatDim(double? value) {
+    if (value == null || value == 0) return '—';
+    return value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 1);
   }
 
   InputDecoration _cellDeco() => const InputDecoration(
