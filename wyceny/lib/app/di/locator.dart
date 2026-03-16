@@ -41,7 +41,6 @@ import 'package:wyceny/features/auth/data/services/token_storage/token_storage_s
 import 'package:wyceny/features/route_by_postcode/data/here_api.dart';
 import 'package:wyceny/features/route_by_postcode/data/ors_api.dart';
 import 'package:wyceny/features/route_by_postcode/data/route_repository_here.dart';
-import 'package:wyceny/features/route_by_postcode/data/route_repository_ors.dart';
 import 'package:wyceny/features/route_by_postcode/domain/route_repository.dart';
 import 'package:wyceny/features/logs/network/logging_interceptor.dart';
 //    if (dart.library.html) 'package:wyceny/features/auth/data/services/token_storage/token_storage_memory_web.dart'; // bez pamiętania
@@ -74,7 +73,6 @@ Future<void> setupDI() async {
     return await getIt<TokenStorage>().read(kAccessTokenKey);
   }
 
-
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt<Dio>()),
   );
@@ -85,10 +83,6 @@ Future<void> setupDI() async {
       storage: getIt<TokenStorage>(),
     ),
   );
-
-  getIt.registerLazySingleton<AuthState>(() => AuthState(
-      service: getIt<AuthService>()
-  ));
 
   final enableHttpLogging = envConfig.enableHttpLogging;
 
@@ -103,7 +97,6 @@ Future<void> setupDI() async {
     return client.instance;
   });
 
-
   getIt.registerLazySingleton<LogUploader>(() {
     final dio = getIt<Dio>();
     final endpoint = Uri.parse("${envConfig.baseUrl}/logs");
@@ -113,34 +106,56 @@ Future<void> setupDI() async {
   getIt.registerLazySingleton<GoRouter>(() => buildRouter(getIt<AuthState>()));
 
   if (USE_MOCK_API) {
-    getIt.registerLazySingleton<DictionariesRepository>(() => DictionariesRepositoryMock());
+    getIt.registerLazySingleton<DictionariesRepository>(
+      () => DictionariesRepositoryMock(),
+    );
   } else {
-    getIt.registerLazySingleton<DictionariesRepository>(() => DictionariesRepositoryImpl(getIt<Dio>()));
+    getIt.registerLazySingleton<DictionariesRepository>(
+      () => DictionariesRepositoryImpl(getIt<Dio>()),
+    );
   }
 
-  getIt.registerLazySingleton<MockQuotationsRepository>(() => MockQuotationsRepository());
-  if (USE_MOCK_API) {
-    getIt.registerLazySingleton<QuotationsRepository>(() => getIt<MockQuotationsRepository>());
-  } else {
-    getIt.registerLazySingleton<QuotationsRepository>(() => QuotationsRepositoryImpl(getIt<Dio>()));
-  }
-  if (USE_MOCK_API) {
-    getIt.registerLazySingleton<OrdersRepository>(() => MockOrdersRepository(getIt<MockQuotationsRepository>()));
-  } else {
-    getIt.registerLazySingleton<OrdersRepository>(() => OrdersRepositoryImpl(getIt<Dio>()));
-  }
+  getIt.registerLazySingleton<AuthState>(
+    () => AuthState(
+      service: getIt<AuthService>(),
+      dictionaries: getIt<DictionariesRepository>(),
+    ),
+  );
 
+  getIt.registerLazySingleton<MockQuotationsRepository>(
+    () => MockQuotationsRepository(),
+  );
+  if (USE_MOCK_API) {
+    getIt.registerLazySingleton<QuotationsRepository>(
+      () => getIt<MockQuotationsRepository>(),
+    );
+  } else {
+    getIt.registerLazySingleton<QuotationsRepository>(
+      () => QuotationsRepositoryImpl(getIt<Dio>()),
+    );
+  }
+  if (USE_MOCK_API) {
+    getIt.registerLazySingleton<OrdersRepository>(
+      () => MockOrdersRepository(getIt<MockQuotationsRepository>()),
+    );
+  } else {
+    getIt.registerLazySingleton<OrdersRepository>(
+      () => OrdersRepositoryImpl(getIt<Dio>()),
+    );
+  }
 
   getIt.registerLazySingleton<Dio>(() {
-    final dio = Dio(BaseOptions(
-      baseUrl: 'https://api.openrouteservice.org',
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
-      headers: {
-        'Accept': 'application/json',
-        // Authorization dodamy w OrsApi albo tu – jak wolisz
-      },
-    ));
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: 'https://api.openrouteservice.org',
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 15),
+        headers: {
+          'Accept': 'application/json',
+          // Authorization dodamy w OrsApi albo tu – jak wolisz
+        },
+      ),
+    );
     if (enableHttpLogging) {
       dio.interceptors.add(LoggingInterceptor());
     }
@@ -148,13 +163,13 @@ Future<void> setupDI() async {
   }, instanceName: 'orsDio');
 
   getIt.registerLazySingleton<Dio>(() {
-    final dio = Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
-      headers: const {
-        'Accept': 'application/json',
-      },
-    ));
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 15),
+        headers: const {'Accept': 'application/json'},
+      ),
+    );
     if (enableHttpLogging) {
       dio.interceptors.add(LoggingInterceptor());
     }
@@ -164,15 +179,19 @@ Future<void> setupDI() async {
   final orsKey = envConfig.orsKey;
   final hereKey = envConfig.hereKey;
 
-  getIt.registerLazySingleton<OrsApi>(() => OrsApi(
-    apiKey: orsKey,
-    dio: getIt<Dio>(instanceName: 'orsDio'),
-  ));
+  getIt.registerLazySingleton<OrsApi>(
+    () => OrsApi(
+      apiKey: orsKey,
+      dio: getIt<Dio>(instanceName: 'orsDio'),
+    ),
+  );
 
-  getIt.registerLazySingleton<HereApi>(() => HereApi(
-    apiKey: hereKey,
-    dio: getIt<Dio>(instanceName: 'hereDio'),
-  ));
+  getIt.registerLazySingleton<HereApi>(
+    () => HereApi(
+      apiKey: hereKey,
+      dio: getIt<Dio>(instanceName: 'hereDio'),
+    ),
+  );
 
   getIt.registerLazySingleton<RouteRepository>(
     () => HereRouteRepository(getIt<HereApi>()),
@@ -195,7 +214,6 @@ Future<void> setupDI() async {
   //   );
   // }
 
-
   // ViewModels (factory, bo zależy nam na świeżych instancjach)
   getIt.registerFactory<RecoverSetPasswordViewModel>(
     () => RecoverSetPasswordViewModel(getIt<AuthService>()),
@@ -204,12 +222,16 @@ Future<void> setupDI() async {
     () => LoginViewModel(getIt<AuthState>()),
   );
 
-  getIt.registerFactory<QuotationsListViewModel>(() => QuotationsListViewModel(repo: getIt<QuotationsRepository>(), auth: getIt<AuthState>() ));
+  getIt.registerFactory<QuotationsListViewModel>(
+    () => QuotationsListViewModel(
+      repo: getIt<QuotationsRepository>(),
+      auth: getIt<AuthState>(),
+    ),
+  );
   getIt.registerFactory<QuotationViewModel>(() => QuotationViewModel());
 
   getIt.registerFactory<OrdersListViewModel>(() => OrdersListViewModel());
   getIt.registerFactory<OrderViewModel>(() => OrderViewModel());
 
-  await getIt<DictionariesRepository>().preload();
   await getIt.allReady();
 }

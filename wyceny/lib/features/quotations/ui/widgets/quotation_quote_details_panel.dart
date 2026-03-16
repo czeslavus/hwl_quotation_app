@@ -3,10 +3,7 @@ import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dar
 import 'package:wyceny/l10n/app_localizations.dart';
 
 class QuotationQuoteDetailsPanel extends StatelessWidget {
-  const QuotationQuoteDetailsPanel({
-    super.key,
-    required this.vm,
-  });
+  const QuotationQuoteDetailsPanel({super.key, required this.vm});
 
   final QuotationViewModel vm;
 
@@ -30,32 +27,35 @@ class QuotationQuoteDetailsPanel extends StatelessWidget {
     final total = vm.totalPrice;
 
     return AbsorbPointer(
-      absorbing: vm.isUiLocked, // blokada interakcji w trakcie długiej wyceny / ładowań
+      absorbing: vm
+          .isUiLocked, // blokada interakcji w trakcie długiej wyceny / ładowań
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: ExpansionTile(
             key: ValueKey('quotePanel_v${vm.quoteVersion}'),
             tilePadding: EdgeInsets.zero,
-            initiallyExpanded: vm.quotePanelOpen, // panel domyślnie otwarty po wycenie
-            title: Row(
+            initiallyExpanded:
+                vm.quotePanelOpen, // panel domyślnie otwarty po wycenie
+            title: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Expanded(
-                  child: Text(
-                    '${t.fee_total}: ${total.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Text(
+                  '${t.fee_total}: ${total.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
-                if (vm.isSubmitting) ...[
+                if (vm.isSubmitting)
                   const SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  const SizedBox(width: 8),
-                ],
                 const Icon(Icons.tune),
-                const SizedBox(width: 6),
                 Text(t.details),
               ],
             ),
@@ -66,11 +66,13 @@ class QuotationQuoteDetailsPanel extends StatelessWidget {
                   child: Text(t.no_details),
                 )
               else
-                ...rows.map((r) => ListTile(
-                  dense: true,
-                  title: Text(_labelFor(context, t, r.key)),
-                  trailing: Text(r.value.toStringAsFixed(2)),
-                )),
+                ...rows.map(
+                  (r) => ListTile(
+                    dense: true,
+                    title: Text(_labelFor(context, t, r.key)),
+                    trailing: Text(r.value.toStringAsFixed(2)),
+                  ),
+                ),
             ],
           ),
         ),

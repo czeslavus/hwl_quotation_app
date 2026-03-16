@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
+import 'package:wyceny/features/logs/data/service/logger_service.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_item.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_post_model.dart';
@@ -14,13 +16,14 @@ class QuotationViewModel extends ChangeNotifier {
     QuotationsRepository? repo,
     DictionariesRepository? dictRepo,
     AuthState? auth,
-  })  : _repo = repo ?? getIt<QuotationsRepository>(),
-        _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
-        auth = auth ?? getIt<AuthState>();
+  }) : _repo = repo ?? getIt<QuotationsRepository>(),
+       _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
+       auth = auth ?? getIt<AuthState>();
 
   final QuotationsRepository _repo;
   final DictionariesRepository _dictRepo;
   final AuthState auth;
+  final _logger = getIt<LogService>().logger;
 
   Quotation? lastQuotation;
 
@@ -72,14 +75,15 @@ class QuotationViewModel extends ChangeNotifier {
     /// zostawione do uzupełnienia
   }
 
-
   // ================== WYCENA ==================
   bool hasQuote = false;
   bool quoteIsFresh = false;
   bool quotePanelOpen = false;
+  String? lastRequestQuoteErrorMessage;
 
   double get insurancePrice => lastQuotation?.insurancePrice ?? 0.0;
-  double get additionalServicePrice => lastQuotation?.additionalServicePrice ?? 0.0;
+  double get additionalServicePrice =>
+      lastQuotation?.additionalServicePrice ?? 0.0;
   double get adrPrice => lastQuotation?.adrPrice ?? 0.0;
   double get shippingPrice => lastQuotation?.shippingPrice ?? 0.0;
   double get baf => lastQuotation?.baf ?? 0.0;
@@ -90,7 +94,10 @@ class QuotationViewModel extends ChangeNotifier {
 
   String? countryCodeForId(int? id) {
     if (id == null) return null;
-    final c = countries.cast<CountryDictionary?>().firstWhere((x) => x?.countryId == id, orElse: () => null);
+    final c = countries.cast<CountryDictionary?>().firstWhere(
+      (x) => x?.countryId == id,
+      orElse: () => null,
+    );
     return c?.countryCode;
   }
 
@@ -288,14 +295,16 @@ class QuotationViewModel extends ChangeNotifier {
   }
 
   void addEmptyItem({bool md = true}) {
-    items.add(const QuotationItem(
-      quantity: 1,
-      length: 0,
-      width: 0,
-      height: 0,
-      weight: 0,
-      adr: false,
-    ));
+    items.add(
+      const QuotationItem(
+        quantity: 1,
+        length: 0,
+        width: 0,
+        height: 0,
+        weight: 0,
+        adr: false,
+      ),
+    );
     if (md) {
       markDirty();
     } else {
@@ -321,6 +330,7 @@ class QuotationViewModel extends ChangeNotifier {
 
     isSubmitting = true;
     quotePanelOpen = true;
+    lastRequestQuoteErrorMessage = null;
     notifyListeners();
 
     try {
@@ -333,8 +343,8 @@ class QuotationViewModel extends ChangeNotifier {
         additionalServiceId: additionalServiceId,
         adr: adr,
         insuranceValue: insuranceValue,
-        userName: auth.user ?? 'unknown',
-        quotationPositions:  List<QuotationItem>.from(items),
+        userName: auth.user,
+        quotationPositions: List<QuotationItem>.from(items),
       );
 
       final Quotation q = quotationId == null
@@ -348,18 +358,64 @@ class QuotationViewModel extends ChangeNotifier {
       quoteVersion++;
       hasAnyChangesStored = true;
       return true;
+    } on DioException catch (e, st) {
+      lastRequestQuoteErrorMessage = _requestQuoteErrorMessage(e);
+      _logger.e('[quote] requestQuote failed', error: e, stackTrace: st);
+      return false;
+    } catch (e, st) {
+      lastRequestQuoteErrorMessage =
+          'Nie udalo sie pobrac wyceny. Sprobuj ponownie.';
+      _logger.e('[quote] requestQuote failed', error: e, stackTrace: st);
+      return false;
     } finally {
       isSubmitting = false;
       notifyListeners();
     }
-    return false;
+  }
+
+  String _requestQuoteErrorMessage(DioException e) {
+    final status = e.response?.statusCode;
+    final details = _readErrorDetails(e.response?.data);
+    if (status != null && details != null && details.isNotEmpty) {
+      return 'Nie udalo sie pobrac wyceny (HTTP $status): $details';
+    }
+    if (status != null) {
+      return 'Nie udalo sie pobrac wyceny (HTTP $status).';
+    }
+    return 'Nie udalo sie pobrac wyceny. Sprobuj ponownie.';
+  }
+
+  String? _readErrorDetails(dynamic data) {
+    if (data == null) return null;
+    if (data is String) {
+      final text = data.trim();
+      return text.isEmpty ? null : text;
+    }
+    if (data is Map) {
+      final values = data.values
+          .map((value) => _readErrorDetails(value))
+          .whereType<String>()
+          .where((value) => value.isNotEmpty)
+          .toList(growable: false);
+      if (values.isEmpty) return null;
+      return values.join(' | ');
+    }
+    if (data is Iterable) {
+      final values = data
+          .map(_readErrorDetails)
+          .whereType<String>()
+          .where((value) => value.isNotEmpty)
+          .toList(growable: false);
+      if (values.isEmpty) return null;
+      return values.join(' | ');
+    }
+    return data.toString();
   }
 
   // ================== GETTERY UI ==================
   bool get canRequestQuote => !isUiLocked && items.isNotEmpty && !quoteIsFresh;
 
-  bool get canSubmitFinal =>
-      quoteIsFresh && quotationId != null && !isUiLocked;
+  bool get canSubmitFinal => quoteIsFresh && quotationId != null && !isUiLocked;
 
   Future<Quotation?> approve() async {
     final id = quotationId;

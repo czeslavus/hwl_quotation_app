@@ -110,121 +110,144 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     final vm = widget.vm;
     final t = AppLocalizations.of(context);
 
-    final content = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            t.quotation_title,
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-        ),
-        const SizedBox(height: 8),
-        // Ogłoszenia
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: AnnouncementsPanel(
-            header: Text("${t.announcement_line} • ${t.overdue_info}"),
-            body: Text("${t.announcement_line} • ${t.overdue_info}"),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: CountryDropdown(
-                      label: t.gen_origin_country,
-                      countriesLoading: vm.countriesLoading,
-                      countriesError: vm.countriesError,
-                      countries: vm.receiptCountries,
-                      selectedId: vm.originCountryId,
-                      onChanged: vm.originCountryLocked ? null : vm.setOriginCountryId,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _originZipCtrl,
-                      decoration: InputDecoration(labelText: t.gen_origin_zip),
-                      onChanged: vm.setOriginZip,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: CountryDropdown(
-                      label: t.gen_dest_country,
-                      countriesLoading: vm.countriesLoading,
-                      countriesError: vm.countriesError,
-                      countries: vm.deliveryCountries,
-                      selectedId: vm.destinationCountryId,
-                      onChanged: vm.setDestinationCountryId,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _destZipCtrl,
-                      decoration: InputDecoration(labelText: t.gen_dest_zip),
-                      onChanged: vm.setDestinationZip,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _AdrField(
-                      value: vm.adr,
-                      onChanged: vm.setAdr,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _insuranceValueCtrl,
-                      focusNode: _insuranceValueFocus,
-                      decoration: InputDecoration(labelText: t.insurance_value_label),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onEditingComplete: _commitInsuranceValue,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _ServicesDropdown(
-                      servicesLoading: vm.servicesLoading,
-                      servicesError: vm.servicesError,
-                      services: vm.services,
-                      selectedId: vm.additionalServiceId,
-                      onChanged: vm.setAdditionalServiceId,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+    final content = LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final stackTwoColumns = width < 760;
+        final stackThreeColumns = width < 920;
 
-        const SizedBox(height: 16),
-      ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(
+                t.quotation_title,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: AnnouncementsPanel(
+                header: Text("${t.announcement_line} • ${t.overdue_info}"),
+                body: Text("${t.announcement_line} • ${t.overdue_info}"),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  _FieldsRow(
+                    stacked: stackTwoColumns,
+                    children: [
+                      CountryDropdown(
+                        label: t.gen_origin_country,
+                        countriesLoading: vm.countriesLoading,
+                        countriesError: vm.countriesError,
+                        countries: vm.receiptCountries,
+                        selectedId: vm.originCountryId,
+                        onChanged: vm.originCountryLocked
+                            ? null
+                            : vm.setOriginCountryId,
+                      ),
+                      TextField(
+                        controller: _originZipCtrl,
+                        decoration: InputDecoration(
+                          labelText: t.gen_origin_zip,
+                        ),
+                        onChanged: vm.setOriginZip,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _FieldsRow(
+                    stacked: stackTwoColumns,
+                    children: [
+                      CountryDropdown(
+                        label: t.gen_dest_country,
+                        countriesLoading: vm.countriesLoading,
+                        countriesError: vm.countriesError,
+                        countries: vm.deliveryCountries,
+                        selectedId: vm.destinationCountryId,
+                        onChanged: vm.setDestinationCountryId,
+                      ),
+                      TextField(
+                        controller: _destZipCtrl,
+                        decoration: InputDecoration(labelText: t.gen_dest_zip),
+                        onChanged: vm.setDestinationZip,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _FieldsRow(
+                    stacked: stackThreeColumns,
+                    children: [
+                      _AdrField(value: vm.adr, onChanged: vm.setAdr),
+                      TextField(
+                        controller: _insuranceValueCtrl,
+                        focusNode: _insuranceValueFocus,
+                        decoration: InputDecoration(
+                          labelText: t.insurance_value_label,
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        onEditingComplete: _commitInsuranceValue,
+                      ),
+                      _ServicesDropdown(
+                        servicesLoading: vm.servicesLoading,
+                        servicesError: vm.servicesError,
+                        services: vm.services,
+                        selectedId: vm.additionalServiceId,
+                        onChanged: vm.setAdditionalServiceId,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
     );
 
     if (!widget.scrollable) return content;
 
     return ClipRect(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.zero,
-        child: content,
-      ),
+      child: SingleChildScrollView(padding: EdgeInsets.zero, child: content),
+    );
+  }
+}
+
+class _FieldsRow extends StatelessWidget {
+  const _FieldsRow({required this.children, required this.stacked});
+
+  final List<Widget> children;
+  final bool stacked;
+
+  @override
+  Widget build(BuildContext context) {
+    if (stacked) {
+      return Column(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i != children.length - 1) const SizedBox(height: 8),
+          ],
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          Expanded(child: children[i]),
+          if (i != children.length - 1) const SizedBox(width: 8),
+        ],
+      ],
     );
   }
 }
@@ -276,7 +299,7 @@ class CountryDropdown extends StatelessWidget {
         ? selectedId
         : null;
     return DropdownButtonFormField<int>(
-      value: safeValue,
+      initialValue: safeValue,
       decoration: InputDecoration(labelText: label),
       items: countries
           .map(
@@ -293,10 +316,7 @@ class CountryDropdown extends StatelessWidget {
 }
 
 class _AdrField extends StatelessWidget {
-  const _AdrField({
-    required this.value,
-    required this.onChanged,
-  });
+  const _AdrField({required this.value, required this.onChanged});
 
   final bool value;
   final ValueChanged<bool> onChanged;
@@ -305,10 +325,7 @@ class _AdrField extends StatelessWidget {
   Widget build(BuildContext context) {
     return InputDecorator(
       decoration: const InputDecoration(labelText: 'ADR'),
-      child: Checkbox(
-        value: value,
-        onChanged: (v) => onChanged(v ?? false),
-      ),
+      child: Checkbox(value: value, onChanged: (v) => onChanged(v ?? false)),
     );
   }
 }
@@ -349,7 +366,7 @@ class _ServicesDropdown extends StatelessWidget {
     }
 
     return DropdownButtonFormField<int>(
-      value: selectedId,
+      initialValue: selectedId,
       decoration: InputDecoration(labelText: t.additional_services_label),
       items: services
           .map(

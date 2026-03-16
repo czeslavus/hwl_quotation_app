@@ -30,29 +30,19 @@ class QuotationScreen extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  t.topbar_customer(
-                    '${vm.auth.forename} ${vm.auth.surname}',
-                    vm.auth.contractorName,
-                    vm.auth.skyLogicNumber,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              // Jeśli chcesz przycisk logout – możesz go dodać z powrotem
-              // FilledButton.tonalIcon(
-              //   onPressed: () {/* logout */},
-              //   icon: const Icon(Icons.logout),
-              //   label: Text(t.topbar_logout),
-              // ),
-            ],
+          title: Text(
+            t.topbar_customer(
+              '${vm.auth.forename} ${vm.auth.surname}',
+              vm.auth.contractorName,
+              vm.auth.skyLogicNumber,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
           actions: const [
-            LanguageFlagToggle(),
-            SizedBox(width: 8),
+            Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: Center(child: LanguageFlagToggle(size: 16)),
+            ),
           ],
         ),
         body: Stack(
@@ -106,15 +96,13 @@ class _WideLayout extends StatelessWidget {
             children: [
               Expanded(
                 flex: leftFlex,
-                child: QuotationHeaderSection(vm: vm, scrollable: false),
+                child: QuotationHeaderSection(vm: vm, scrollable: true),
               ),
               const VerticalDivider(width: 1),
               Expanded(
                 flex: rightFlex,
                 child: SizedBox.expand(
-                  child: ClipRect(
-                    child: const QuotationRouteMap(),
-                  ),
+                  child: ClipRect(child: const QuotationRouteMap()),
                 ),
               ),
             ],
@@ -177,19 +165,21 @@ class _BodyContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          t.items_section,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text(t.items_section, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
 
         QuotationItemsTable(vm: vm),
         const SizedBox(height: 8),
 
-        Row(
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Expanded(child: QuotationItemsSummaryRow(vm: vm)),
-            const SizedBox(width: 12),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 280, maxWidth: 900),
+              child: QuotationItemsSummaryRow(vm: vm),
+            ),
             PositiveActionButton(
               onPressed: vm.isUiLocked ? null : vm.addEmptyItem,
               icon: Icons.add,
@@ -231,10 +221,19 @@ class _ActionsRow extends StatelessWidget {
           label: t.action_quote,
           onPressed: vm.canRequestQuote
               ? () async {
-            final ok = await vm.requestQuote();
-            if (!ok) return;
-            if (!context.mounted) return;
-          }
+                  final ok = await vm.requestQuote();
+                  if (!context.mounted) return;
+                  if (!ok) {
+                    await _showErrorDialog(
+                      context: context,
+                      title: 'Blad wyceny',
+                      message:
+                          vm.lastRequestQuoteErrorMessage ??
+                          'Nie udalo sie pobrac wyceny. Sprobuj ponownie.',
+                    );
+                    return;
+                  }
+                }
               : null,
         ),
         NeutralActionButton(
@@ -243,15 +242,15 @@ class _ActionsRow extends StatelessWidget {
           onPressed: vm.isUiLocked
               ? null
               : () async {
-            final ok = await _confirmDialog(
-              context: context,
-              title: t.action_clear,
-              message: t.confirm_clear_all,
-            );
-            if (ok == true) {
-              vm.clearAllData();
-            }
-          },
+                  final ok = await _confirmDialog(
+                    context: context,
+                    title: t.action_clear,
+                    message: t.confirm_clear_all,
+                  );
+                  if (ok == true) {
+                    vm.clearAllData();
+                  }
+                },
         ),
 
         // Finalny przycisk aktywny tylko gdy wycena jest aktualna
@@ -260,11 +259,11 @@ class _ActionsRow extends StatelessWidget {
           label: t.action_submit,
           onPressed: vm.canSubmitFinal
               ? () async {
-            final q = await vm.approve();
-            if (q == null) return;
-            if (!context.mounted) return;
-            context.go('/order/new', extra: q);
-          }
+                  final q = await vm.approve();
+                  if (q == null) return;
+                  if (!context.mounted) return;
+                  context.go('/order/new', extra: q);
+                }
               : null,
         ),
 
@@ -276,8 +275,8 @@ class _ActionsRow extends StatelessWidget {
             onPressed: vm.isUiLocked
                 ? null
                 : () {
-              // TODO: rejection reasons / dialog
-            },
+                    // TODO: rejection reasons / dialog
+                  },
           ),
       ],
     );
@@ -302,6 +301,26 @@ Future<bool?> _confirmDialog({
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
           child: const Text('Tak'),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> _showErrorDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          child: const Text('OK'),
         ),
       ],
     ),

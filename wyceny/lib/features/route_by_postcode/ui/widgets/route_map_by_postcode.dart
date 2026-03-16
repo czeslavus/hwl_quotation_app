@@ -98,7 +98,8 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
     final dest = widget.destinationZip;
     final country = _pickCountryCode();
 
-    final changed = origin != _lastOrigin || dest != _lastDest || country != _lastCountry;
+    final changed =
+        origin != _lastOrigin || dest != _lastDest || country != _lastCountry;
     if (!changed) return;
 
     _lastOrigin = origin;
@@ -147,10 +148,7 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
               left: 8,
               top: 8,
               right: 8,
-              child: _StatusPill(
-                loading: rvm.loading,
-                error: rvm.error,
-              ),
+              child: _StatusPill(loading: rvm.loading, error: rvm.error),
             ),
             if (routeDistanceKm != null && points.isNotEmpty)
               Positioned(
@@ -201,10 +199,7 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
       final bounds = LatLngBounds.fromPoints(_lastPoints);
       final padding = _routePadding(constraints);
       _mapController.fitCamera(
-        CameraFit.bounds(
-          bounds: bounds,
-          padding: padding,
-        ),
+        CameraFit.bounds(bounds: bounds, padding: padding),
       );
     });
   }
@@ -262,7 +257,9 @@ class _RouteMap extends StatelessWidget {
         options: MapOptions(
           initialCenter: center,
           initialZoom: 10,
-          interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
+          interactionOptions: const InteractionOptions(
+            flags: InteractiveFlag.all,
+          ),
           onMapReady: onMapReady,
         ),
         children: [
@@ -273,7 +270,11 @@ class _RouteMap extends StatelessWidget {
           if (routePoints.isNotEmpty)
             PolylineLayer(
               polylines: [
-                Polyline(points: routePoints, strokeWidth: 4, color: routeColor),
+                Polyline(
+                  points: routePoints,
+                  strokeWidth: 4,
+                  color: routeColor,
+                ),
               ],
             ),
           if (markers.isNotEmpty) MarkerLayer(markers: markers),
@@ -287,10 +288,7 @@ class _StatusPill extends StatelessWidget {
   final bool loading;
   final String? error;
 
-  const _StatusPill({
-    required this.loading,
-    required this.error,
-  });
+  const _StatusPill({required this.loading, required this.error});
 
   @override
   Widget build(BuildContext context) {
@@ -302,11 +300,16 @@ class _StatusPill extends StatelessWidget {
 
     final Widget child;
     if (loading) {
-      child = const Row(
-        mainAxisSize: MainAxisSize.min,
+      child = const Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-          SizedBox(width: 8),
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
           Text('Wyznaczanie trasy...'),
         ],
       );
@@ -317,12 +320,16 @@ class _StatusPill extends StatelessWidget {
     return Material(
       elevation: 2,
       borderRadius: BorderRadius.circular(999),
-      color: error != null ? theme.colorScheme.errorContainer : theme.colorScheme.surface,
+      color: error != null
+          ? theme.colorScheme.errorContainer
+          : theme.colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: DefaultTextStyle(
           style: theme.textTheme.bodyMedium!.copyWith(
-            color: error != null ? theme.colorScheme.onErrorContainer : theme.colorScheme.onSurface,
+            color: error != null
+                ? theme.colorScheme.onErrorContainer
+                : theme.colorScheme.onSurface,
           ),
           child: child,
         ),

@@ -5,10 +5,7 @@ import 'package:wyceny/l10n/app_localizations.dart';
 import 'package:wyceny/ui/widgets/common/danger_action_button.dart';
 
 class QuotationItemsTable extends StatefulWidget {
-  const QuotationItemsTable({
-    super.key,
-    required this.vm,
-  });
+  const QuotationItemsTable({super.key, required this.vm});
 
   final QuotationViewModel vm;
 
@@ -29,7 +26,7 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
   static const _wXS = 62.0;
   static const _wS = 76.0;
   static const _wM = 92.0;
-  static const _wL = 120.0;
+  static const _wL = 150.0;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +71,10 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
                   DataColumn(label: Text(t.item_long_weight)),
                   const DataColumn(label: Text('')),
                 ],
-                rows: List.generate(vm.items.length, (i) => _row(context, i, vm.items[i])),
+                rows: List.generate(
+                  vm.items.length,
+                  (i) => _row(context, i, vm.items[i]),
+                ),
               ),
             ),
           ),
@@ -89,22 +89,73 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
 
     return DataRow(
       cells: [
-        DataCell(_intField(width: _wXS, value: it.quantity, onChanged: (v) => vm.updateItem(index, it.copyWith(quantity: v)))),
-        DataCell(_intField(width: _wS, value: it.length, onChanged: (v) => vm.updateItem(index, it.copyWith(length: v)))),
-        DataCell(_intField(width: _wS, value: it.width, onChanged: (v) => vm.updateItem(index, it.copyWith(width: v)))),
-        DataCell(_intField(width: _wS, value: it.height, onChanged: (v) => vm.updateItem(index, it.copyWith(height: v)))),
-        DataCell(_intField(width: _wS, value: it.weight, onChanged: (v) => vm.updateItem(index, it.copyWith(weight: v)))),
-        DataCell(_packagingDropdown(
-          width: _wL,
-          selectedId: it.packaging,
-          onChanged: (id) => vm.updateItem(index, it.copyWith(packaging: id)),
-          units: vm.packagingUnits,
-        )),
-        DataCell(_doubleField(width: _wM, value: it.packagingWeight, onChanged: (v) => vm.updateItem(index, it.copyWith(packagingWeight: v)))),
+        DataCell(
+          _intField(
+            width: _wXS,
+            value: it.quantity,
+            onChanged: (v) => vm.updateItem(index, it.copyWith(quantity: v)),
+          ),
+        ),
+        DataCell(
+          _intField(
+            width: _wS,
+            value: it.length,
+            onChanged: (v) => vm.updateItem(index, it.copyWith(length: v)),
+          ),
+        ),
+        DataCell(
+          _intField(
+            width: _wS,
+            value: it.width,
+            onChanged: (v) => vm.updateItem(index, it.copyWith(width: v)),
+          ),
+        ),
+        DataCell(
+          _intField(
+            width: _wS,
+            value: it.height,
+            onChanged: (v) => vm.updateItem(index, it.copyWith(height: v)),
+          ),
+        ),
+        DataCell(
+          _intField(
+            width: _wS,
+            value: it.weight,
+            onChanged: (v) => vm.updateItem(index, it.copyWith(weight: v)),
+          ),
+        ),
+        DataCell(
+          _packagingDropdown(
+            width: _wL,
+            selectedId: it.packaging,
+            onChanged: (id) => vm.updateItem(index, it.copyWith(packaging: id)),
+            units: vm.packagingUnits,
+          ),
+        ),
+        DataCell(
+          _doubleField(
+            width: _wM,
+            value: it.packagingWeight,
+            onChanged: (v) =>
+                vm.updateItem(index, it.copyWith(packagingWeight: v)),
+          ),
+        ),
         DataCell(_displayNumber(width: _wM, value: it.cbm)),
-        DataCell(_doubleField(width: _wM, value: it.ldm, onChanged: (v) => vm.updateItem(index, it.copyWith(ldm: v)))),
+        DataCell(
+          _doubleField(
+            width: _wM,
+            value: it.ldm,
+            onChanged: (v) => vm.updateItem(index, it.copyWith(ldm: v)),
+          ),
+        ),
         DataCell(_displayNumber(width: _wM, value: it.ldmCbm)),
-        DataCell(_doubleField(width: _wM, value: it.longWeight, onChanged: (v) => vm.updateItem(index, it.copyWith(longWeight: v)))),
+        DataCell(
+          _doubleField(
+            width: _wM,
+            value: it.longWeight,
+            onChanged: (v) => vm.updateItem(index, it.copyWith(longWeight: v)),
+          ),
+        ),
         DataCell(
           DangerActionButton(
             icon: Icons.delete_outline,
@@ -124,7 +175,8 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
     border: OutlineInputBorder(),
   );
 
-  TextStyle _cellStyle(BuildContext context) => Theme.of(context).textTheme.bodySmall ?? const TextStyle(fontSize: 12);
+  TextStyle _cellStyle(BuildContext context) =>
+      Theme.of(context).textTheme.bodySmall ?? const TextStyle(fontSize: 12);
 
   Widget _intField({
     required double width,
@@ -170,10 +222,7 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
     );
   }
 
-  Widget _displayNumber({
-    required double width,
-    required double? value,
-  }) {
+  Widget _displayNumber({required double width, required double? value}) {
     final text = (value == null) ? '—' : value.toStringAsFixed(3);
     return SizedBox(
       width: width,
@@ -201,18 +250,41 @@ class _QuotationItemsTableState extends State<QuotationItemsTable> {
     }
 
     final dropdownItems = <DropdownMenuItem<int?>>[
-      const DropdownMenuItem<int?>(value: null, child: Text('—')),
-      ...byId.entries.map((e) => DropdownMenuItem<int?>(value: e.key, child: Text(e.value))),
+      const DropdownMenuItem<int?>(
+        value: null,
+        child: Text('—', overflow: TextOverflow.ellipsis),
+      ),
+      ...byId.entries.map(
+        (e) => DropdownMenuItem<int?>(
+          value: e.key,
+          child: Text(e.value, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+      ),
     ];
 
-    final safeValue = (selectedId != null && byId.containsKey(selectedId)) ? selectedId : null;
+    final safeValue = (selectedId != null && byId.containsKey(selectedId))
+        ? selectedId
+        : null;
 
     return SizedBox(
       width: width,
       child: DropdownButtonFormField<int?>(
         isDense: true,
+        isExpanded: true,
         initialValue: safeValue,
         items: dropdownItems,
+        selectedItemBuilder: (context) => dropdownItems
+            .map(
+              (item) => Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  (item.child is Text) ? ((item.child as Text).data ?? '') : '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            )
+            .toList(growable: false),
         decoration: _cellDeco(),
         onChanged: onChanged,
       ),
