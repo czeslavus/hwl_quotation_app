@@ -24,12 +24,16 @@ class OrderHeaderSection extends StatefulWidget {
 class _OrderHeaderSectionState extends State<OrderHeaderSection> {
   late final TextEditingController _receiptZipCtrl;
   late final TextEditingController _deliveryZipCtrl;
+  late final FocusNode _receiptZipFocus;
+  late final FocusNode _deliveryZipFocus;
 
   @override
   void initState() {
     super.initState();
     _receiptZipCtrl = TextEditingController(text: widget.vm.receiptZipCode);
     _deliveryZipCtrl = TextEditingController(text: widget.vm.deliveryZipCode);
+    _receiptZipFocus = FocusNode()..addListener(_handleReceiptZipFocus);
+    _deliveryZipFocus = FocusNode()..addListener(_handleDeliveryZipFocus);
     widget.vm.addListener(_syncFromVm);
   }
 
@@ -46,10 +50,12 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
 
   void _syncFromVm() {
     final vm = widget.vm;
-    if (_receiptZipCtrl.text != vm.receiptZipCode) {
+    if (!_receiptZipFocus.hasFocus &&
+        _receiptZipCtrl.text != vm.receiptZipCode) {
       _receiptZipCtrl.text = vm.receiptZipCode;
     }
-    if (_deliveryZipCtrl.text != vm.deliveryZipCode) {
+    if (!_deliveryZipFocus.hasFocus &&
+        _deliveryZipCtrl.text != vm.deliveryZipCode) {
       _deliveryZipCtrl.text = vm.deliveryZipCode;
     }
   }
@@ -59,7 +65,33 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
     widget.vm.removeListener(_syncFromVm);
     _receiptZipCtrl.dispose();
     _deliveryZipCtrl.dispose();
+    _receiptZipFocus
+      ..removeListener(_handleReceiptZipFocus)
+      ..dispose();
+    _deliveryZipFocus
+      ..removeListener(_handleDeliveryZipFocus)
+      ..dispose();
     super.dispose();
+  }
+
+  void _handleReceiptZipFocus() {
+    if (!_receiptZipFocus.hasFocus) {
+      _commitReceiptZip();
+    }
+  }
+
+  void _handleDeliveryZipFocus() {
+    if (!_deliveryZipFocus.hasFocus) {
+      _commitDeliveryZip();
+    }
+  }
+
+  void _commitReceiptZip() {
+    widget.vm.setReceiptZip(_receiptZipCtrl.text.trim());
+  }
+
+  void _commitDeliveryZip() {
+    widget.vm.setDeliveryZip(_deliveryZipCtrl.text.trim());
   }
 
   @override
@@ -111,16 +143,28 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
                             countriesError: vm.countriesError,
                             countries: vm.receiptCountries,
                             selectedId: vm.receiptCountryId,
-                            onChanged: vm.originCountryLocked ? null : vm.setReceiptCountryId,
-                            validator: (v) => v == null ? t.validation_required : null,
+                            onChanged: vm.originCountryLocked
+                                ? null
+                                : vm.setReceiptCountryId,
+                            validator: (v) =>
+                                v == null ? t.validation_required : null,
                           ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
                       controller: _receiptZipCtrl,
+                      focusNode: _receiptZipFocus,
                       decoration: InputDecoration(labelText: t.gen_origin_zip),
-                      onChanged: widget.readOnly ? null : vm.setReceiptZip,
+                      onEditingComplete: widget.readOnly
+                          ? null
+                          : () {
+                              _commitReceiptZip();
+                              FocusScope.of(context).unfocus();
+                            },
+                      onTapOutside: widget.readOnly
+                          ? null
+                          : (_) => _commitReceiptZip(),
                       validator: widget.readOnly ? null : requiredValidator,
                       readOnly: widget.readOnly,
                     ),
@@ -146,15 +190,25 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
                             countries: vm.deliveryCountries,
                             selectedId: vm.deliveryCountryId,
                             onChanged: vm.setDeliveryCountryId,
-                            validator: (v) => v == null ? t.validation_required : null,
+                            validator: (v) =>
+                                v == null ? t.validation_required : null,
                           ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
                       controller: _deliveryZipCtrl,
+                      focusNode: _deliveryZipFocus,
                       decoration: InputDecoration(labelText: t.gen_dest_zip),
-                      onChanged: widget.readOnly ? null : vm.setDeliveryZip,
+                      onEditingComplete: widget.readOnly
+                          ? null
+                          : () {
+                              _commitDeliveryZip();
+                              FocusScope.of(context).unfocus();
+                            },
+                      onTapOutside: widget.readOnly
+                          ? null
+                          : (_) => _commitDeliveryZip(),
                       validator: widget.readOnly ? null : requiredValidator,
                       readOnly: widget.readOnly,
                     ),
@@ -171,19 +225,13 @@ class _OrderHeaderSectionState extends State<OrderHeaderSection> {
     if (!widget.scrollable) return content;
 
     return ClipRect(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.zero,
-        child: content,
-      ),
+      child: SingleChildScrollView(padding: EdgeInsets.zero, child: content),
     );
   }
 }
 
 class _ReadOnlyField extends StatelessWidget {
-  const _ReadOnlyField({
-    required this.label,
-    required this.value,
-  });
+  const _ReadOnlyField({required this.label, required this.value});
 
   final String label;
   final String value;

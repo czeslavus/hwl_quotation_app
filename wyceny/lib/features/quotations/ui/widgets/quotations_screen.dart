@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:wyceny/app/di/locator.dart';
+import 'package:wyceny/app/navigation_refresh.dart';
 
 import 'package:wyceny/features/quotations/ui/viewmodels/quotation_viewmodel.dart';
 import 'package:wyceny/features/quotations/ui/widgets/quotation_header_section.dart';
@@ -17,6 +19,16 @@ import 'package:wyceny/ui/widgets/common/positive_action_button.dart';
 class QuotationScreen extends StatelessWidget {
   const QuotationScreen({super.key});
 
+  Future<void> _handleBack(
+    BuildContext context,
+    QuotationViewModel vm,
+  ) async {
+    if (vm.hasAnyChangesStored && getIt.isRegistered<NavigationRefresh>()) {
+      getIt<NavigationRefresh>().refreshQuotations();
+    }
+    context.pop(vm.hasAnyChangesStored);
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<QuotationViewModel>();
@@ -26,10 +38,13 @@ class QuotationScreen extends StatelessWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        context.pop(vm.hasAnyChangesStored);
+        await _handleBack(context, vm);
       },
       child: Scaffold(
         appBar: AppBar(
+          leading: BackButton(
+            onPressed: () => _handleBack(context, vm),
+          ),
           title: Text(
             t.topbar_customer(
               '${vm.auth.forename} ${vm.auth.surname}',
@@ -259,10 +274,9 @@ class _ActionsRow extends StatelessWidget {
           label: t.action_submit,
           onPressed: vm.canSubmitFinal
               ? () async {
-                  final q = await vm.approve();
-                  if (q == null) return;
-                  if (!context.mounted) return;
-                  context.go('/order/new', extra: q);
+                  final order = await vm.approveAndBuildOrder();
+                  if (order == null) return;
+                  getIt<GoRouter>().go('/order/new', extra: order);
                 }
               : null,
         ),

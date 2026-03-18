@@ -4,7 +4,7 @@ import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
-import 'package:wyceny/features/logs/data/service/logger_service.dart';
+import 'package:wyceny/features/orders/domain/models/order_model.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_item.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation_post_model.dart';
@@ -23,7 +23,6 @@ class QuotationViewModel extends ChangeNotifier {
   final QuotationsRepository _repo;
   final DictionariesRepository _dictRepo;
   final AuthState auth;
-  final _logger = getIt<LogService>().logger;
 
   Quotation? lastQuotation;
 
@@ -94,7 +93,12 @@ class QuotationViewModel extends ChangeNotifier {
 
   String? countryCodeForId(int? id) {
     if (id == null) return null;
-    final c = countries.cast<CountryDictionary?>().firstWhere(
+    final sources = <CountryDictionary>[
+      ...countries,
+      ...receiptCountries,
+      ...deliveryCountries,
+    ];
+    final c = sources.cast<CountryDictionary?>().firstWhere(
       (x) => x?.countryId == id,
       orElse: () => null,
     );
@@ -137,7 +141,14 @@ class QuotationViewModel extends ChangeNotifier {
 
     quotationId = q.quotationId;
 
-    originCountryId = q.receiptCountryId;
+    final fallbackReceiptCountryId =
+        originCountryLocked && receiptCountries.length == 1
+        ? receiptCountries.first.countryId
+        : originCountryId;
+
+    originCountryId = q.receiptCountryId > 0
+        ? q.receiptCountryId
+        : fallbackReceiptCountryId;
     destinationCountryId = q.deliveryCountryId;
 
     originZip = q.receiptZipCode;
@@ -358,14 +369,12 @@ class QuotationViewModel extends ChangeNotifier {
       quoteVersion++;
       hasAnyChangesStored = true;
       return true;
-    } on DioException catch (e, st) {
+    } on DioException catch (e) {
       lastRequestQuoteErrorMessage = _requestQuoteErrorMessage(e);
-      _logger.e('[quote] requestQuote failed', error: e, stackTrace: st);
       return false;
-    } catch (e, st) {
+    } catch (e) {
       lastRequestQuoteErrorMessage =
           'Nie udalo sie pobrac wyceny. Sprobuj ponownie.';
-      _logger.e('[quote] requestQuote failed', error: e, stackTrace: st);
       return false;
     } finally {
       isSubmitting = false;
@@ -430,6 +439,25 @@ class QuotationViewModel extends ChangeNotifier {
       quoteIsFresh = true;
       hasAnyChangesStored = true;
       return q;
+    } finally {
+      isSubmitting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<OrderModel?> approveAndBuildOrder() async {
+    final id = quotationId;
+    if (id == null || isUiLocked) return null;
+
+    isSubmitting = true;
+    notifyListeners();
+
+    try {
+      final q = await _repo.approve(id);
+      _mapQuotation(q);
+      quoteIsFresh = true;
+      hasAnyChangesStored = true;
+      return await _repo.buildOrderFromQuotation(id);
     } finally {
       isSubmitting = false;
       notifyListeners();

@@ -30,21 +30,30 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
     DateTime? dateFrom,
     DateTime? dateTo,
     int? destCountryId,
+    int? statusId,
   }) async {
     final query = <String, dynamic>{
       'page': page,
       'pageSize': pageSize,
       if (dateFrom != null) 'startDate': dateFrom.toUtc().toIso8601String(),
       if (dateTo != null) 'endDate': dateTo.toUtc().toIso8601String(),
+      ...?statusId == null ? null : <String, dynamic>{'statusId': statusId},
       ...?destCountryId == null
           ? null
           : <String, dynamic>{'deliveryCountryId': destCountryId},
     };
 
-    final res = await _dio.get(
-      _quotationsPath,
-      queryParameters: query,
-    );
+    late final Response<dynamic> res;
+    try {
+      res = await _dio.get(_quotationsPath, queryParameters: query);
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      final data = e.response?.data;
+      if (statusCode == 404 && _isEmptyListPayload(data)) {
+        return const [];
+      }
+      rethrow;
+    }
     return _parseQuotationList(
       res.data,
       requestOptions: res.requestOptions,
@@ -129,6 +138,11 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
   }
 
   @override
+  Future<void> delete(int id) async {
+    await _dio.delete('$_quotationsPath/$id');
+  }
+
+  @override
   Future<OrderModel> buildOrderFromQuotation(int id) async {
     final res = await _dio.get('/orders/sendorder/quotation/$id');
     final data = res.data;
@@ -147,7 +161,9 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
   Future<String> sendOrder(OrderModel model) async {
     final quotationId = model.quotationId;
     if (quotationId == null) {
-      throw ArgumentError('quotationId is required to send order from quotation');
+      throw ArgumentError(
+        'quotationId is required to send order from quotation',
+      );
     }
 
     final res = await _dio.post(
@@ -164,7 +180,8 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
       requestOptions: res.requestOptions,
       response: res,
       type: DioExceptionType.badResponse,
-      error: 'Expected JSON object/string from /orders/sendorder/quotation/$quotationId',
+      error:
+          'Expected JSON object/string from /orders/sendorder/quotation/$quotationId',
     );
   }
 
@@ -206,6 +223,12 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
     };
   }
 
+  bool _isEmptyListPayload(dynamic data) {
+    if (data is List) return data.isEmpty;
+    if (data is String) return data.trim() == '[]';
+    return false;
+  }
+
   Quotation _parseQuotation(
     dynamic data, {
     required RequestOptions requestOptions,
@@ -221,9 +244,8 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
       );
     }
     final map = Map<String, dynamic>.from(data);
-    map['receiptCountryId'] = _asInt(map['receiptCountryId']) ??
-        fallbackReceiptCountryId ??
-        0;
+    map['receiptCountryId'] =
+        _asInt(map['receiptCountryId']) ?? fallbackReceiptCountryId ?? 0;
     return Quotation.fromJson(map);
   }
 
@@ -259,11 +281,13 @@ class QuotationsRepositoryImpl implements QuotationsRepository {
 
     return raw
         .whereType<Map>()
-        .map((e) => _parseQuotation(
-              e,
-              requestOptions: requestOptions,
-              response: response,
-            ))
+        .map(
+          (e) => _parseQuotation(
+            e,
+            requestOptions: requestOptions,
+            response: response,
+          ),
+        )
         .toList(growable: false);
   }
 

@@ -4,14 +4,15 @@ import 'package:wyceny/features/auth/network/auth_rules.dart';
 
 typedef RefreshFn = Future<String?> Function(String? refreshToken);
 
+const _kRefreshRetried = 'refreshRetried';
+
 class RefreshTokenInterceptor extends Interceptor {
   RefreshTokenInterceptor(
-      this._dio,
-      this._storage,
-      this._refreshFn,
-      this._onRefreshFailed,
-
-      );
+    this._dio,
+    this._storage,
+    this._refreshFn,
+    this._onRefreshFailed,
+  );
 
   final Dio _dio;
   final TokenStorage _storage;
@@ -25,7 +26,12 @@ class RefreshTokenInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Tylko 401 i nie dla endpointów auth/refresh
-    if (err.response?.statusCode != 401 || AuthRules.isAuthExempt(err.requestOptions)) {
+    if (err.response?.statusCode != 401 ||
+        AuthRules.isAuthExempt(err.requestOptions)) {
+      return handler.next(err);
+    }
+
+    if (err.requestOptions.extra[_kRefreshRetried] == true) {
       return handler.next(err);
     }
 
@@ -36,7 +42,9 @@ class RefreshTokenInterceptor extends Interceptor {
     if (newAccess == null) {
       // Jeśli odświeżenie tokenu się nie powiodło, wywołaj funkcję obsługującą błąd
       await _onRefreshFailed();
-      return handler.next(err); // Przekaż błąd dalej, aby oryginalne żądanie zakończyło się niepowodzeniem
+      return handler.next(
+        err,
+      ); // Przekaż błąd dalej, aby oryginalne żądanie zakończyło się niepowodzeniem
     }
 
     await _storage.write(kAccessTokenKey, newAccess);
@@ -44,26 +52,32 @@ class RefreshTokenInterceptor extends Interceptor {
     // powtórz oryginalne żądanie z nowym tokenem
 
     final orig = err.requestOptions;
-    final response = await _dio.request<dynamic>(
-      orig.path,
-      data: orig.data,
-      queryParameters: orig.queryParameters,
-      options: Options(
-        method: orig.method,
-        headers: Map<String, dynamic>.from(orig.headers)..remove('Authorization'),
-        contentType: orig.contentType,
-        responseType: orig.responseType,
-        sendTimeout: orig.sendTimeout,
-        receiveTimeout: orig.receiveTimeout,
-        followRedirects: orig.followRedirects,
-        validateStatus: orig.validateStatus,
-        receiveDataWhenStatusError: orig.receiveDataWhenStatusError,
-        extra: orig.extra,
-      ),
-      cancelToken: orig.cancelToken,
-      onSendProgress: orig.onSendProgress,
-      onReceiveProgress: orig.onReceiveProgress,
-    );
-    return handler.resolve(response);
+    try {
+      final response = await _dio.request<dynamic>(
+        orig.path,
+        data: orig.data,
+        queryParameters: orig.queryParameters,
+        options: Options(
+          method: orig.method,
+          headers: Map<String, dynamic>.from(orig.headers)
+            ..remove('Authorization'),
+          contentType: orig.contentType,
+          responseType: orig.responseType,
+          sendTimeout: orig.sendTimeout,
+          receiveTimeout: orig.receiveTimeout,
+          followRedirects: orig.followRedirects,
+          validateStatus: orig.validateStatus,
+          receiveDataWhenStatusError: orig.receiveDataWhenStatusError,
+          extra: Map<String, dynamic>.from(orig.extra)
+            ..[_kRefreshRetried] = true,
+        ),
+        cancelToken: orig.cancelToken,
+        onSendProgress: orig.onSendProgress,
+        onReceiveProgress: orig.onReceiveProgress,
+      );
+      return handler.resolve(response);
+    } on DioException catch (retryError) {
+      return handler.next(retryError);
+    }
   }
 }

@@ -18,6 +18,7 @@ class OrderModel {
   final int? orderId;
   final String? orderNr;
   final String? stageTtNr;
+  final int? statusId;
   final String? status;
   final List<String>? errors;
 
@@ -39,57 +40,66 @@ class OrderModel {
     this.orderId,
     this.orderNr,
     this.stageTtNr,
+    this.statusId,
     this.status,
     this.errors,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
-        quotationId: _asInt(json['quotationId']),
-        receiptPoint: AddressModel.fromJson(json['receiptPoint'] as Map<String, dynamic>),
-        deliveryPoint: AddressModel.fromJson(json['deliveryPoint'] as Map<String, dynamic>),
-        loads: (json['loads'] as List<dynamic>?)
-            ?.map((e) => LoadModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        receiptDateBegin: _asDate(json['receiptDateBegin']),
-        receiptDateEnd: _asDate(json['receiptDateEnd']),
-        deliveryDateBegin: _asDate(json['deliveryDateBegin']),
-        deliveryDateEnd: _asDate(json['deliveryDateEnd']),
-        orderCustomerNr: json['orderCustomerNR'] as String?,
-        orderValue: _asDouble(json['orderValue']),
-        orderValueCurrency: json['orderValueCurrency'] as String?,
-        notificationEmail: json['notificationEmail'] as String?,
-        notificationSms: json['notificationSms'] as String?,
-        instructionCodes: (json['instructionCodes'] as List<dynamic>?)
-            ?.map((e) => InstructionCodeModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        orderId: _asInt(json['orderID']),
-        orderNr: json['orderNR'] as String?,
-        stageTtNr: json['stageTTNR'] as String?,
-        status: json['status'] as String?,
-        errors: (json['errors'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
-      );
+    quotationId: _asInt(json['quotationId']),
+    receiptPoint: AddressModel.fromJson(
+      json['receiptPoint'] as Map<String, dynamic>,
+    ),
+    deliveryPoint: AddressModel.fromJson(
+      json['deliveryPoint'] as Map<String, dynamic>,
+    ),
+    loads: (json['loads'] as List<dynamic>?)
+        ?.map((e) => LoadModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    receiptDateBegin: _asDate(json['receiptDateBegin']),
+    receiptDateEnd: _asDate(json['receiptDateEnd']),
+    deliveryDateBegin: _asDate(json['deliveryDateBegin']),
+    deliveryDateEnd: _asDate(json['deliveryDateEnd']),
+    orderCustomerNr: json['orderCustomerNR'] as String?,
+    orderValue: _asDouble(json['orderValue']),
+    orderValueCurrency: json['orderValueCurrency'] as String?,
+    notificationEmail: json['notificationEmail'] as String?,
+    notificationSms: json['notificationSms'] as String?,
+    instructionCodes: (json['instructionCodes'] as List<dynamic>?)
+        ?.map((e) => InstructionCodeModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    orderId: _asInt(json['orderID']),
+    orderNr: json['orderNR'] as String?,
+    stageTtNr: json['stageTTNR'] as String?,
+    statusId: _asInt(json['statusId']),
+    status: json['status'] as String?,
+    errors: (json['errors'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList(),
+  );
 
   Map<String, dynamic> toJson() => {
-        'quotationId': quotationId,
-        'receiptPoint': receiptPoint.toJson(),
-        'deliveryPoint': deliveryPoint.toJson(),
-        'loads': loads?.map((e) => e.toJson()).toList(),
-        'receiptDateBegin': receiptDateBegin?.toIso8601String(),
-        'receiptDateEnd': receiptDateEnd?.toIso8601String(),
-        'deliveryDateBegin': deliveryDateBegin?.toIso8601String(),
-        'deliveryDateEnd': deliveryDateEnd?.toIso8601String(),
-        'orderCustomerNR': orderCustomerNr,
-        'orderValue': orderValue,
-        'orderValueCurrency': orderValueCurrency,
-        'notificationEmail': notificationEmail,
-        'notificationSms': notificationSms,
-        'instructionCodes': instructionCodes?.map((e) => e.toJson()).toList(),
-        'orderID': orderId,
-        'orderNR': orderNr,
-        'stageTTNR': stageTtNr,
-        'status': status,
-        'errors': errors,
-      };
+    'quotationId': quotationId,
+    'receiptPoint': receiptPoint.toJson(),
+    'deliveryPoint': deliveryPoint.toJson(),
+    'loads': loads?.map((e) => e.toJson()).toList(),
+    'receiptDateBegin': receiptDateBegin?.toIso8601String(),
+    'receiptDateEnd': receiptDateEnd?.toIso8601String(),
+    'deliveryDateBegin': deliveryDateBegin?.toIso8601String(),
+    'deliveryDateEnd': deliveryDateEnd?.toIso8601String(),
+    'orderCustomerNR': orderCustomerNr,
+    'orderValue': orderValue,
+    'orderValueCurrency': orderValueCurrency,
+    'notificationEmail': notificationEmail,
+    'notificationSms': notificationSms,
+    'instructionCodes': instructionCodes?.map((e) => e.toJson()).toList(),
+    'orderID': orderId,
+    'orderNR': orderNr,
+    'stageTTNR': stageTtNr,
+    'statusId': statusId,
+    'status': status,
+    'errors': errors,
+  };
 
   int get itemsCount {
     if (loads == null || loads!.isEmpty) return 0;
@@ -121,22 +131,22 @@ class AddressModel {
   });
 
   factory AddressModel.fromJson(Map<String, dynamic> json) => AddressModel(
-        name: json['name'] as String? ?? '',
-        city: json['city'] as String? ?? '',
-        street: json['street'] as String? ?? '',
-        zipCode: json['zipCode'] as String? ?? '',
-        country: json['country'] as String? ?? '',
-        phoneNr: json['phoneNr'] as String?,
-      );
+    name: json['name'] as String? ?? '',
+    city: json['city'] as String? ?? '',
+    street: json['street'] as String? ?? '',
+    zipCode: json['zipCode'] as String? ?? '',
+    country: json['country'] as String? ?? '',
+    phoneNr: json['phoneNr'] as String?,
+  );
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'city': city,
-        'street': street,
-        'zipCode': zipCode,
-        'country': country,
-        'phoneNr': phoneNr,
-      };
+    'name': name,
+    'city': city,
+    'street': street,
+    'zipCode': zipCode,
+    'country': country,
+    'phoneNr': phoneNr,
+  };
 }
 
 class InstructionCodeModel {
@@ -148,15 +158,16 @@ class InstructionCodeModel {
     this.instructionCodeInfo,
   });
 
-  factory InstructionCodeModel.fromJson(Map<String, dynamic> json) => InstructionCodeModel(
+  factory InstructionCodeModel.fromJson(Map<String, dynamic> json) =>
+      InstructionCodeModel(
         instructionCodeNr: json['instructionCodeNr'] as String? ?? '',
         instructionCodeInfo: json['instructionCodeInfo'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
-        'instructionCodeNr': instructionCodeNr,
-        'instructionCodeInfo': instructionCodeInfo,
-      };
+    'instructionCodeNr': instructionCodeNr,
+    'instructionCodeInfo': instructionCodeInfo,
+  };
 }
 
 class LoadModel {
@@ -181,28 +192,28 @@ class LoadModel {
   });
 
   factory LoadModel.fromJson(Map<String, dynamic> json) => LoadModel(
-        weight: _asDouble(json['weight']),
-        volume: _asDouble(json['volume']),
-        length: _asDouble(json['lenght']),
-        width: _asDouble(json['width']),
-        height: _asDouble(json['height']),
-        unitType: json['unitType'] as String?,
-        unitQuantity: _asInt(json['unitQuantity']),
-        loadAdrs: (json['loadADRs'] as List<dynamic>?)
-            ?.map((e) => LoadAdrModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    weight: _asDouble(json['weight']),
+    volume: _asDouble(json['volume']),
+    length: _asDouble(json['lenght']),
+    width: _asDouble(json['width']),
+    height: _asDouble(json['height']),
+    unitType: json['unitType'] as String?,
+    unitQuantity: _asInt(json['unitQuantity']),
+    loadAdrs: (json['loadADRs'] as List<dynamic>?)
+        ?.map((e) => LoadAdrModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 
   Map<String, dynamic> toJson() => {
-        'weight': weight,
-        'volume': volume,
-        'lenght': length,
-        'width': width,
-        'height': height,
-        'unitType': unitType,
-        'unitQuantity': unitQuantity,
-        'loadADRs': loadAdrs?.map((e) => e.toJson()).toList(),
-      };
+    'weight': weight,
+    'volume': volume,
+    'lenght': length,
+    'width': width,
+    'height': height,
+    'unitType': unitType,
+    'unitQuantity': unitQuantity,
+    'loadADRs': loadAdrs?.map((e) => e.toJson()).toList(),
+  };
 }
 
 class LoadAdrModel {
@@ -223,24 +234,24 @@ class LoadAdrModel {
   });
 
   factory LoadAdrModel.fromJson(Map<String, dynamic> json) => LoadAdrModel(
-        row: _asInt(json['row']),
-        weight: _asDouble(json['weight']),
-        name: json['name'] as String?,
-        packageUnitQuantity: _asInt(json['packageUnitQuantity']),
-        packageUnitType: json['packageUnitType'] as String?,
-        adrFull: json['adrFull'] == null
-            ? null
-            : AdrModel.fromJson(json['adrFull'] as Map<String, dynamic>),
-      );
+    row: _asInt(json['row']),
+    weight: _asDouble(json['weight']),
+    name: json['name'] as String?,
+    packageUnitQuantity: _asInt(json['packageUnitQuantity']),
+    packageUnitType: json['packageUnitType'] as String?,
+    adrFull: json['adrFull'] == null
+        ? null
+        : AdrModel.fromJson(json['adrFull'] as Map<String, dynamic>),
+  );
 
   Map<String, dynamic> toJson() => {
-        'row': row,
-        'weight': weight,
-        'name': name,
-        'packageUnitQuantity': packageUnitQuantity,
-        'packageUnitType': packageUnitType,
-        'adrFull': adrFull?.toJson(),
-      };
+    'row': row,
+    'weight': weight,
+    'name': name,
+    'packageUnitQuantity': packageUnitQuantity,
+    'packageUnitType': packageUnitType,
+    'adrFull': adrFull?.toJson(),
+  };
 }
 
 class AdrModel {
@@ -259,20 +270,20 @@ class AdrModel {
   });
 
   factory AdrModel.fromJson(Map<String, dynamic> json) => AdrModel(
-        adrUn: json['adrun'] as String?,
-        adrName: json['adrName'] as String?,
-        adrClass: json['adrClass'] as String?,
-        packingGroup: json['packingGroup'] as String?,
-        tremcard: json['tremcard'] as String?,
-      );
+    adrUn: json['adrun'] as String?,
+    adrName: json['adrName'] as String?,
+    adrClass: json['adrClass'] as String?,
+    packingGroup: json['packingGroup'] as String?,
+    tremcard: json['tremcard'] as String?,
+  );
 
   Map<String, dynamic> toJson() => {
-        'adrun': adrUn,
-        'adrName': adrName,
-        'adrClass': adrClass,
-        'packingGroup': packingGroup,
-        'tremcard': tremcard,
-      };
+    'adrun': adrUn,
+    'adrName': adrName,
+    'adrClass': adrClass,
+    'packingGroup': packingGroup,
+    'tremcard': tremcard,
+  };
 }
 
 int? _asInt(dynamic value) {

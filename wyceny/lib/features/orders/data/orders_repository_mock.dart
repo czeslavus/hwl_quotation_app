@@ -18,12 +18,35 @@ class MockOrdersRepository implements OrdersRepository {
 
     final now = DateTime.now();
     final rng = Random(1);
-    final statuses = ['NEW', 'IN_PROGRESS', 'DONE', 'CANCELED'];
+    final statuses = <({int id, String name})>[
+      (id: 1, name: 'Nowe'),
+      (id: 2, name: 'W realizacji'),
+      (id: 3, name: 'Zrealizowane'),
+      (id: 4, name: 'Anulowane'),
+    ];
 
     final countries = [
-      const AddressModel(name: 'Poland', city: 'Warszawa', street: 'Jasna 1', zipCode: '00-001', country: 'PL'),
-      const AddressModel(name: 'Germany', city: 'Berlin', street: 'Unter 2', zipCode: '10115', country: 'DE'),
-      const AddressModel(name: 'Czechia', city: 'Prague', street: 'Main 3', zipCode: '11000', country: 'CZ'),
+      const AddressModel(
+        name: 'Poland',
+        city: 'Warszawa',
+        street: 'Jasna 1',
+        zipCode: '00-001',
+        country: 'PL',
+      ),
+      const AddressModel(
+        name: 'Germany',
+        city: 'Berlin',
+        street: 'Unter 2',
+        zipCode: '10115',
+        country: 'DE',
+      ),
+      const AddressModel(
+        name: 'Czechia',
+        city: 'Prague',
+        street: 'Main 3',
+        zipCode: '11000',
+        country: 'CZ',
+      ),
     ];
 
     for (var i = 0; i < 45; i++) {
@@ -79,7 +102,8 @@ class MockOrdersRepository implements OrdersRepository {
           orderId: i + 500,
           orderNr: 'ORD-${(i + 1).toString().padLeft(5, '0')}',
           stageTtNr: 'ST-${i + 1}',
-          status: statuses[i % statuses.length],
+          statusId: statuses[i % statuses.length].id,
+          status: statuses[i % statuses.length].name,
           errors: const [],
         ),
       );
@@ -95,7 +119,7 @@ class MockOrdersRepository implements OrdersRepository {
     DateTime? deliveryEndDate,
     DateTime? receiptStartDate,
     DateTime? receiptEndDate,
-    String? statusNr,
+    int? statusId,
     String? deliveryCountry,
     String? deliveryZipCode,
     String? receiptZipCode,
@@ -106,49 +130,75 @@ class MockOrdersRepository implements OrdersRepository {
 
     if (orderCustomerNr != null && orderCustomerNr.trim().isNotEmpty) {
       final q = orderCustomerNr.trim().toLowerCase();
-      filtered = filtered.where((o) => (o.orderCustomerNr ?? '').toLowerCase().contains(q));
+      filtered = filtered.where(
+        (o) => (o.orderCustomerNr ?? '').toLowerCase().contains(q),
+      );
     }
 
-    if (statusNr != null && statusNr.trim().isNotEmpty) {
-      final s = statusNr.trim().toLowerCase();
-      filtered = filtered.where((o) => (o.status ?? '').toLowerCase() == s);
+    if (statusId != null) {
+      filtered = filtered.where((o) => o.statusId == statusId);
     }
 
     if (deliveryCountry != null && deliveryCountry.trim().isNotEmpty) {
       final c = deliveryCountry.trim().toLowerCase();
-      filtered = filtered.where((o) => o.deliveryPoint.country.toLowerCase() == c);
+      filtered = filtered.where(
+        (o) => o.deliveryPoint.country.toLowerCase() == c,
+      );
     }
 
     if (deliveryZipCode != null && deliveryZipCode.trim().isNotEmpty) {
       final z = deliveryZipCode.trim().toLowerCase();
-      filtered = filtered.where((o) => o.deliveryPoint.zipCode.toLowerCase().contains(z));
+      filtered = filtered.where(
+        (o) => o.deliveryPoint.zipCode.toLowerCase().contains(z),
+      );
     }
 
     if (receiptZipCode != null && receiptZipCode.trim().isNotEmpty) {
       final z = receiptZipCode.trim().toLowerCase();
-      filtered = filtered.where((o) => o.receiptPoint.zipCode.toLowerCase().contains(z));
+      filtered = filtered.where(
+        (o) => o.receiptPoint.zipCode.toLowerCase().contains(z),
+      );
     }
 
     if (receiptStartDate != null) {
-      filtered = filtered.where((o) => (o.receiptDateBegin ?? DateTime(0)).isAfter(receiptStartDate) ||
-          (o.receiptDateBegin ?? DateTime(0)).isAtSameMomentAs(receiptStartDate));
+      filtered = filtered.where(
+        (o) =>
+            (o.receiptDateBegin ?? DateTime(0)).isAfter(receiptStartDate) ||
+            (o.receiptDateBegin ?? DateTime(0)).isAtSameMomentAs(
+              receiptStartDate,
+            ),
+      );
     }
 
     if (receiptEndDate != null) {
-      filtered = filtered.where((o) => (o.receiptDateEnd ?? o.receiptDateBegin ?? DateTime(9999))
-          .isBefore(receiptEndDate) ||
-          (o.receiptDateEnd ?? o.receiptDateBegin ?? DateTime(9999)).isAtSameMomentAs(receiptEndDate));
+      filtered = filtered.where(
+        (o) =>
+            (o.receiptDateEnd ?? o.receiptDateBegin ?? DateTime(9999)).isBefore(
+              receiptEndDate,
+            ) ||
+            (o.receiptDateEnd ?? o.receiptDateBegin ?? DateTime(9999))
+                .isAtSameMomentAs(receiptEndDate),
+      );
     }
 
     if (deliveryStartDate != null) {
-      filtered = filtered.where((o) => (o.deliveryDateBegin ?? DateTime(0)).isAfter(deliveryStartDate) ||
-          (o.deliveryDateBegin ?? DateTime(0)).isAtSameMomentAs(deliveryStartDate));
+      filtered = filtered.where(
+        (o) =>
+            (o.deliveryDateBegin ?? DateTime(0)).isAfter(deliveryStartDate) ||
+            (o.deliveryDateBegin ?? DateTime(0)).isAtSameMomentAs(
+              deliveryStartDate,
+            ),
+      );
     }
 
     if (deliveryEndDate != null) {
-      filtered = filtered.where((o) => (o.deliveryDateEnd ?? o.deliveryDateBegin ?? DateTime(9999))
-          .isBefore(deliveryEndDate) ||
-          (o.deliveryDateEnd ?? o.deliveryDateBegin ?? DateTime(9999)).isAtSameMomentAs(deliveryEndDate));
+      filtered = filtered.where(
+        (o) =>
+            (o.deliveryDateEnd ?? o.deliveryDateBegin ?? DateTime(9999))
+                .isBefore(deliveryEndDate) ||
+            (o.deliveryDateEnd ?? o.deliveryDateBegin ?? DateTime(9999))
+                .isAtSameMomentAs(deliveryEndDate),
+      );
     }
 
     final start = (page - 1) * pageSize;
@@ -158,11 +208,14 @@ class MockOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Future<List<OrderModel>> getOrdersHistory() async => _pricingRepo.debugOrders();
+  Future<List<OrderModel>> getOrdersHistory() async =>
+      _pricingRepo.debugOrders();
 
   @override
-  Future<List<Quotation>> getQuotationsConverted() async =>
-      _pricingRepo.debugQuotations().where((p) => (p.orderNrSl ?? '').isNotEmpty).toList();
+  Future<List<Quotation>> getQuotationsConverted() async => _pricingRepo
+      .debugQuotations()
+      .where((p) => (p.orderNrSl ?? '').isNotEmpty)
+      .toList();
 
   @override
   Future<void> cancelOrder(String id) async {
@@ -178,10 +231,10 @@ class MockOrdersRepository implements OrdersRepository {
       throw Exception('Order not found');
     }
     final current = _orders[idx];
-    _orders[idx] = _copyWithStatus(current, 'CANCELED');
+    _orders[idx] = _copyWithStatus(current, 4, 'Anulowane');
   }
 
-  OrderModel _copyWithStatus(OrderModel o, String status) {
+  OrderModel _copyWithStatus(OrderModel o, int statusId, String status) {
     return OrderModel(
       quotationId: o.quotationId,
       receiptPoint: o.receiptPoint,
@@ -200,6 +253,7 @@ class MockOrdersRepository implements OrdersRepository {
       orderId: o.orderId,
       orderNr: o.orderNr,
       stageTtNr: o.stageTtNr,
+      statusId: statusId,
       status: status,
       errors: o.errors,
     );

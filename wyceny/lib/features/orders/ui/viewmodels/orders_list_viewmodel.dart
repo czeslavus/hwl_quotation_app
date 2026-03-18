@@ -3,6 +3,7 @@ import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/features/dictionaries/domain/models/country_dictionary.dart';
+import 'package:wyceny/features/dictionaries/domain/models/statuses_dictionary.dart';
 import 'package:wyceny/features/orders/domain/models/order_model.dart';
 import 'package:wyceny/features/orders/domain/orders_repository.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
@@ -12,9 +13,9 @@ class OrdersListViewModel extends ChangeNotifier {
     OrdersRepository? repo,
     DictionariesRepository? dictRepo,
     AuthState? auth,
-  })  : _repo = repo ?? getIt<OrdersRepository>(),
-        _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
-        auth = auth ?? getIt<AuthState>();
+  }) : _repo = repo ?? getIt<OrdersRepository>(),
+       _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
+       auth = auth ?? getIt<AuthState>();
 
   final OrdersRepository _repo;
   final DictionariesRepository _dictRepo;
@@ -35,15 +36,14 @@ class OrdersListViewModel extends ChangeNotifier {
   DateTime? deliveryEndDate;
   DateTime? receiptStartDate;
   DateTime? receiptEndDate;
-  String? statusNr;
+  int? statusId;
   String? deliveryCountry;
   String? deliveryZipCode;
   String? receiptZipCode;
 
-  final List<String> statusOptions = const ['NEW', 'IN_PROGRESS', 'DONE', 'CANCELED'];
-
   // Słowniki
   List<CountryDictionary> countries = const [];
+  List<StatusesDictionary> orderStatuses = const [];
 
   // Lista
   List<OrderModel> items = const [];
@@ -55,6 +55,7 @@ class OrdersListViewModel extends ChangeNotifier {
 
     try {
       countries = _dictRepo.countries;
+      orderStatuses = _dictRepo.orderStatuses;
       await _loadPage();
     } catch (e) {
       error = e;
@@ -73,7 +74,7 @@ class OrdersListViewModel extends ChangeNotifier {
       deliveryEndDate: deliveryEndDate,
       receiptStartDate: receiptStartDate,
       receiptEndDate: receiptEndDate,
-      statusNr: statusNr,
+      statusId: statusId,
       deliveryCountry: deliveryCountry,
       deliveryZipCode: deliveryZipCode,
       receiptZipCode: receiptZipCode,
@@ -88,7 +89,7 @@ class OrdersListViewModel extends ChangeNotifier {
     DateTime? deliveryEnd,
     DateTime? receiptStart,
     DateTime? receiptEnd,
-    String? status,
+    int? statusId,
     String? deliveryCountry,
     String? deliveryZip,
     String? receiptZip,
@@ -98,7 +99,7 @@ class OrdersListViewModel extends ChangeNotifier {
     deliveryEndDate = deliveryEnd;
     receiptStartDate = receiptStart;
     receiptEndDate = receiptEnd;
-    statusNr = status;
+    this.statusId = statusId;
     this.deliveryCountry = deliveryCountry;
     deliveryZipCode = deliveryZip;
     receiptZipCode = receiptZip;
@@ -106,13 +107,18 @@ class OrdersListViewModel extends ChangeNotifier {
     refresh();
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool resetPage = false}) async {
+    if (resetPage) {
+      page = 1;
+    }
     loading = true;
     notifyListeners();
     await _loadPage();
     loading = false;
     notifyListeners();
   }
+
+  Future<void> showLatest() => refresh(resetPage: true);
 
   void nextPage() {
     if (isLastPage) return;
@@ -140,25 +146,27 @@ class OrdersListViewModel extends ChangeNotifier {
     await refresh();
   }
 
-  String statusLabel(String? s) {
-    switch (s) {
-      case 'NEW':
-        return 'Nowe';
-      case 'IN_PROGRESS':
-        return 'W realizacji';
-      case 'DONE':
-        return 'Zrealizowane';
-      case 'CANCELED':
-        return 'Anulowane';
-      default:
-        return '—';
+  List<int> get statusOptions =>
+      orderStatuses.map((s) => s.statusId).toList(growable: false);
+
+  String statusLabel(int? id, {String? fallback}) {
+    if (id == null) {
+      if (fallback != null && fallback.trim().isNotEmpty) return fallback;
+      return '—';
     }
+    final match = orderStatuses.cast<StatusesDictionary?>().firstWhere(
+      (s) => s?.statusId == id,
+      orElse: () => null,
+    );
+    return match?.name?.trim().isNotEmpty == true
+        ? match!.name!
+        : (fallback?.trim().isNotEmpty == true ? fallback! : id.toString());
   }
 
   String localizeCountryName(String? countryCode, context) {
     if (countryCode == null || countryCode.trim().isEmpty) return '—';
     final c = countries.cast<CountryDictionary?>().firstWhere(
-          (x) => x?.countryCode.toLowerCase() == countryCode.toLowerCase(),
+      (x) => x?.countryCode.toLowerCase() == countryCode.toLowerCase(),
       orElse: () => null,
     );
     return CountryLocalizer.localize(c?.country, context);
@@ -167,7 +175,7 @@ class OrdersListViewModel extends ChangeNotifier {
   String? countryCodeForId(int? id) {
     if (id == null) return null;
     final c = countries.cast<CountryDictionary?>().firstWhere(
-          (x) => x?.countryId == id,
+      (x) => x?.countryId == id,
       orElse: () => null,
     );
     return c?.countryCode;

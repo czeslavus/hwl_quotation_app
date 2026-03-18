@@ -28,6 +28,8 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
   late final TextEditingController _originZipCtrl;
   late final TextEditingController _destZipCtrl;
   late final TextEditingController _insuranceValueCtrl;
+  late final FocusNode _originZipFocus;
+  late final FocusNode _destZipFocus;
   late final FocusNode _insuranceValueFocus;
 
   @override
@@ -38,6 +40,8 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     _insuranceValueCtrl = TextEditingController(
       text: widget.vm.insuranceValue?.toString() ?? '',
     );
+    _originZipFocus = FocusNode()..addListener(_handleOriginZipFocus);
+    _destZipFocus = FocusNode()..addListener(_handleDestinationZipFocus);
     _insuranceValueFocus = FocusNode()..addListener(_handleInsuranceValueFocus);
 
     widget.vm.addListener(_syncFromVm);
@@ -62,10 +66,10 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     // (ale nie rozwalamy wpisywania użytkownika)
     final vm = widget.vm;
 
-    if (_originZipCtrl.text != vm.originZip) {
+    if (!_originZipFocus.hasFocus && _originZipCtrl.text != vm.originZip) {
       _originZipCtrl.text = vm.originZip;
     }
-    if (_destZipCtrl.text != vm.destinationZip) {
+    if (!_destZipFocus.hasFocus && _destZipCtrl.text != vm.destinationZip) {
       _destZipCtrl.text = vm.destinationZip;
     }
     final insuranceText = vm.insuranceValue?.toString() ?? '';
@@ -79,6 +83,12 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     widget.vm.removeListener(_syncFromVm);
     _originZipCtrl.dispose();
     _destZipCtrl.dispose();
+    _originZipFocus
+      ..removeListener(_handleOriginZipFocus)
+      ..dispose();
+    _destZipFocus
+      ..removeListener(_handleDestinationZipFocus)
+      ..dispose();
     _insuranceValueCtrl.dispose();
     _insuranceValueFocus
       ..removeListener(_handleInsuranceValueFocus)
@@ -90,6 +100,26 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
     if (!_insuranceValueFocus.hasFocus) {
       _commitInsuranceValue();
     }
+  }
+
+  void _handleOriginZipFocus() {
+    if (!_originZipFocus.hasFocus) {
+      _commitOriginZip();
+    }
+  }
+
+  void _handleDestinationZipFocus() {
+    if (!_destZipFocus.hasFocus) {
+      _commitDestinationZip();
+    }
+  }
+
+  void _commitOriginZip() {
+    widget.vm.setOriginZip(_originZipCtrl.text.trim());
+  }
+
+  void _commitDestinationZip() {
+    widget.vm.setDestinationZip(_destZipCtrl.text.trim());
   }
 
   void _commitInsuranceValue() {
@@ -116,100 +146,140 @@ class _QuotationHeaderSectionState extends State<QuotationHeaderSection> {
         final stackTwoColumns = width < 760;
         final stackThreeColumns = width < 920;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(
-                t.quotation_title,
-                style: Theme.of(context).textTheme.headlineMedium,
+        return FocusTraversalGroup(
+          policy: OrderedTraversalPolicy(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  t.quotation_title,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: AnnouncementsPanel(
-                header: Text("${t.announcement_line} • ${t.overdue_info}"),
-                body: Text("${t.announcement_line} • ${t.overdue_info}"),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: AnnouncementsPanel(
+                  header: Text("${t.announcement_line} • ${t.overdue_info}"),
+                  body: Text("${t.announcement_line} • ${t.overdue_info}"),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  _FieldsRow(
-                    stacked: stackTwoColumns,
-                    children: [
-                      CountryDropdown(
-                        label: t.gen_origin_country,
-                        countriesLoading: vm.countriesLoading,
-                        countriesError: vm.countriesError,
-                        countries: vm.receiptCountries,
-                        selectedId: vm.originCountryId,
-                        onChanged: vm.originCountryLocked
-                            ? null
-                            : vm.setOriginCountryId,
-                      ),
-                      TextField(
-                        controller: _originZipCtrl,
-                        decoration: InputDecoration(
-                          labelText: t.gen_origin_zip,
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    _FieldsRow(
+                      stacked: stackTwoColumns,
+                      children: [
+                        FocusTraversalOrder(
+                          order: const NumericFocusOrder(1),
+                          child: CountryDropdown(
+                            label: t.gen_origin_country,
+                            countriesLoading: vm.countriesLoading,
+                            countriesError: vm.countriesError,
+                            countries: vm.receiptCountries,
+                            selectedId: vm.originCountryId,
+                            onChanged: vm.originCountryLocked
+                                ? null
+                                : vm.setOriginCountryId,
+                          ),
                         ),
-                        onChanged: vm.setOriginZip,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  _FieldsRow(
-                    stacked: stackTwoColumns,
-                    children: [
-                      CountryDropdown(
-                        label: t.gen_dest_country,
-                        countriesLoading: vm.countriesLoading,
-                        countriesError: vm.countriesError,
-                        countries: vm.deliveryCountries,
-                        selectedId: vm.destinationCountryId,
-                        onChanged: vm.setDestinationCountryId,
-                      ),
-                      TextField(
-                        controller: _destZipCtrl,
-                        decoration: InputDecoration(labelText: t.gen_dest_zip),
-                        onChanged: vm.setDestinationZip,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  _FieldsRow(
-                    stacked: stackThreeColumns,
-                    children: [
-                      _AdrField(value: vm.adr, onChanged: vm.setAdr),
-                      TextField(
-                        controller: _insuranceValueCtrl,
-                        focusNode: _insuranceValueFocus,
-                        decoration: InputDecoration(
-                          labelText: t.insurance_value_label,
+                        FocusTraversalOrder(
+                          order: const NumericFocusOrder(2),
+                          child: TextField(
+                            controller: _originZipCtrl,
+                            focusNode: _originZipFocus,
+                            decoration: InputDecoration(
+                              labelText: t.gen_origin_zip,
+                            ),
+                            onEditingComplete: () {
+                              _commitOriginZip();
+                              FocusScope.of(context).nextFocus();
+                            },
+                            onTapOutside: (_) => _commitOriginZip(),
+                          ),
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _FieldsRow(
+                      stacked: stackTwoColumns,
+                      children: [
+                        FocusTraversalOrder(
+                          order: const NumericFocusOrder(3),
+                          child: CountryDropdown(
+                            label: t.gen_dest_country,
+                            countriesLoading: vm.countriesLoading,
+                            countriesError: vm.countriesError,
+                            countries: vm.deliveryCountries,
+                            selectedId: vm.destinationCountryId,
+                            onChanged: vm.setDestinationCountryId,
+                          ),
                         ),
-                        onEditingComplete: _commitInsuranceValue,
-                      ),
-                      _ServicesDropdown(
-                        servicesLoading: vm.servicesLoading,
-                        servicesError: vm.servicesError,
-                        services: vm.services,
-                        selectedId: vm.additionalServiceId,
-                        onChanged: vm.setAdditionalServiceId,
-                      ),
-                    ],
-                  ),
-                ],
+                        FocusTraversalOrder(
+                          order: const NumericFocusOrder(4),
+                          child: TextField(
+                            controller: _destZipCtrl,
+                            focusNode: _destZipFocus,
+                            decoration: InputDecoration(
+                              labelText: t.gen_dest_zip,
+                            ),
+                            onEditingComplete: () {
+                              _commitDestinationZip();
+                              FocusScope.of(context).nextFocus();
+                            },
+                            onTapOutside: (_) => _commitDestinationZip(),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _FieldsRow(
+                      stacked: stackThreeColumns,
+                      children: [
+                        FocusTraversalOrder(
+                          order: const NumericFocusOrder(5),
+                          child: _AdrField(value: vm.adr, onChanged: vm.setAdr),
+                        ),
+                        FocusTraversalOrder(
+                          order: const NumericFocusOrder(6),
+                          child: TextField(
+                            controller: _insuranceValueCtrl,
+                            focusNode: _insuranceValueFocus,
+                            decoration: InputDecoration(
+                              labelText: t.insurance_value_label,
+                            ),
+                            keyboardType:
+                                const TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
+                            onEditingComplete: () {
+                              _commitInsuranceValue();
+                              FocusScope.of(context).nextFocus();
+                            },
+                          ),
+                        ),
+                        FocusTraversalOrder(
+                          order: const NumericFocusOrder(7),
+                          child: _ServicesDropdown(
+                            servicesLoading: vm.servicesLoading,
+                            servicesError: vm.servicesError,
+                            services: vm.services,
+                            selectedId: vm.additionalServiceId,
+                            onChanged: vm.setAdditionalServiceId,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-          ],
+              const SizedBox(height: 16),
+            ],
+          ),
         );
       },
     );

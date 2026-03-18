@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/app/di/locator.dart';
+import 'package:wyceny/app/navigation_refresh.dart';
 import 'package:wyceny/features/common/top_bar_appbar.dart';
 import 'package:wyceny/features/orders/domain/models/order_model.dart';
 import 'package:wyceny/features/orders/ui/viewmodels/orders_list_viewmodel.dart';
@@ -27,6 +28,72 @@ class OrdersListScreen extends StatelessWidget {
 
 class _OrdersListView extends StatelessWidget {
   const _OrdersListView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _OrdersListViewBody();
+  }
+}
+
+class _OrdersListViewBody extends StatefulWidget {
+  const _OrdersListViewBody();
+
+  @override
+  State<_OrdersListViewBody> createState() => _OrdersListViewBodyState();
+}
+
+class _OrdersListViewBodyState extends State<_OrdersListViewBody> {
+  String? _lastMatchedLocation;
+  NavigationRefresh? _navigationRefresh;
+  int _lastRefreshVersion = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (getIt.isRegistered<NavigationRefresh>()) {
+      _navigationRefresh = getIt<NavigationRefresh>();
+      _lastRefreshVersion = _navigationRefresh!.ordersVersion;
+      _navigationRefresh!.addListener(_handleRefreshSignal);
+    }
+  }
+
+  @override
+  void dispose() {
+    _navigationRefresh?.removeListener(_handleRefreshSignal);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final matchedLocation = GoRouterState.of(context).matchedLocation;
+    final shouldRefresh =
+        _lastMatchedLocation != null &&
+        _lastMatchedLocation != matchedLocation &&
+        matchedLocation == '/order';
+    _lastMatchedLocation = matchedLocation;
+
+    if (shouldRefresh) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<OrdersListViewModel>().showLatest();
+      });
+    }
+  }
+
+  void _handleRefreshSignal() {
+    final navigationRefresh = _navigationRefresh;
+    if (navigationRefresh == null) return;
+
+    final nextVersion = navigationRefresh.ordersVersion;
+    if (_lastRefreshVersion == nextVersion) return;
+    _lastRefreshVersion = nextVersion;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<OrdersListViewModel>().showLatest();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,10 +163,10 @@ class _OrdersListView extends StatelessWidget {
             child: vm.loading
                 ? const Center(child: CircularProgressIndicator())
                 : vm.error != null
-                    ? Center(child: Text(t.error_generic(vm.error.toString())))
-                    : vm.items.isEmpty
-                        ? Center(child: Text(t.list_empty))
-                        : _OrdersTable(vm: vm),
+                ? Center(child: Text(t.error_generic(vm.error.toString())))
+                : vm.items.isEmpty
+                ? Center(child: Text(t.list_empty))
+                : _OrdersTable(vm: vm),
           ),
           const Divider(height: 1),
           _PaginationBar(vm: vm),
@@ -145,7 +212,8 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     final t = AppLocalizations.of(context);
     final vm = widget.vm;
     final countryItems = _countryItems(context, vm);
-    final selectedCountry = countryItems.any((item) => item.value == vm.deliveryCountry)
+    final selectedCountry =
+        countryItems.any((item) => item.value == vm.deliveryCountry)
         ? vm.deliveryCountry
         : null;
 
@@ -153,10 +221,30 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     final isPhone = width < 600;
 
     final fields = <Widget>[
-      _dateField(context: context, label: 'Odbiór od', value: _receiptFrom, onPick: (d) => setState(() => _receiptFrom = d)),
-      _dateField(context: context, label: 'Odbiór do', value: _receiptTo, onPick: (d) => setState(() => _receiptTo = d)),
-      _dateField(context: context, label: 'Dostawa od', value: _deliveryFrom, onPick: (d) => setState(() => _deliveryFrom = d)),
-      _dateField(context: context, label: 'Dostawa do', value: _deliveryTo, onPick: (d) => setState(() => _deliveryTo = d)),
+      _dateField(
+        context: context,
+        label: 'Odbiór od',
+        value: _receiptFrom,
+        onPick: (d) => setState(() => _receiptFrom = d),
+      ),
+      _dateField(
+        context: context,
+        label: 'Odbiór do',
+        value: _receiptTo,
+        onPick: (d) => setState(() => _receiptTo = d),
+      ),
+      _dateField(
+        context: context,
+        label: 'Dostawa od',
+        value: _deliveryFrom,
+        onPick: (d) => setState(() => _deliveryFrom = d),
+      ),
+      _dateField(
+        context: context,
+        label: 'Dostawa do',
+        value: _deliveryTo,
+        onPick: (d) => setState(() => _deliveryTo = d),
+      ),
       SizedBox(
         width: 200,
         child: DropdownButtonFormField<String>(
@@ -176,27 +264,30 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
       ),
       SizedBox(
         width: 200,
-        child: DropdownButtonFormField<String>(
+        child: DropdownButtonFormField<int>(
           isExpanded: true,
-          initialValue: vm.statusNr,
+          initialValue: vm.statusId,
           decoration: InputDecoration(labelText: t.col_status),
           items: vm.statusOptions
-              .map((s) => DropdownMenuItem(value: s, child: Text(vm.statusLabel(s))))
+              .map(
+                (s) =>
+                    DropdownMenuItem(value: s, child: Text(vm.statusLabel(s))),
+              )
               .toList(),
-          onChanged: (s) => setState(() => vm.statusNr = s),
+          onChanged: (s) => setState(() => vm.statusId = s),
         ),
       ),
     ];
 
     void onApply() => vm.applyFilters(
-          deliveryStart: _deliveryFrom,
-          deliveryEnd: _deliveryTo,
-          receiptStart: _receiptFrom,
-          receiptEnd: _receiptTo,
-          status: vm.statusNr,
-          deliveryCountry: vm.deliveryCountry,
-          deliveryZip: _deliveryZipCtrl.text,
-        );
+      deliveryStart: _deliveryFrom,
+      deliveryEnd: _deliveryTo,
+      receiptStart: _receiptFrom,
+      receiptEnd: _receiptTo,
+      statusId: vm.statusId,
+      deliveryCountry: vm.deliveryCountry,
+      deliveryZip: _deliveryZipCtrl.text,
+    );
 
     void onClear() {
       setState(() {
@@ -205,7 +296,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         _receiptFrom = null;
         _receiptTo = null;
         _deliveryZipCtrl.clear();
-        vm.statusNr = null;
+        vm.statusId = null;
         vm.deliveryCountry = null;
       });
       vm.applyFilters(
@@ -213,7 +304,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         deliveryEnd: null,
         receiptStart: null,
         receiptEnd: null,
-        status: null,
+        statusId: null,
         deliveryCountry: null,
         deliveryZip: null,
       );
@@ -228,11 +319,17 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
           ...fields,
           Tooltip(
             message: t.filter_apply,
-            child: IconButton.filled(onPressed: onApply, icon: const Icon(Icons.filter_alt)),
+            child: IconButton.filled(
+              onPressed: onApply,
+              icon: const Icon(Icons.filter_alt),
+            ),
           ),
           Tooltip(
             message: t.filter_clear,
-            child: IconButton.outlined(onPressed: onClear, icon: const Icon(Icons.filter_alt_off)),
+            child: IconButton.outlined(
+              onPressed: onClear,
+              icon: const Icon(Icons.filter_alt_off),
+            ),
           ),
         ],
       );
@@ -369,29 +466,64 @@ class _OrdersTable extends StatelessWidget {
                       DataColumn(label: Text(t.col_actions)),
                     ],
                     rows: vm.items.map((o) {
-                      final receipt = '${o.receiptPoint.country} ${o.receiptPoint.zipCode}';
-                      final delivery = '${o.deliveryPoint.country} ${o.deliveryPoint.zipCode}';
-                      final receiptDate = o.receiptDateBegin?.toLocal().toString().split(' ').first ?? '—';
-                      final deliveryDate = o.deliveryDateBegin?.toLocal().toString().split(' ').first ?? '—';
+                      final receipt =
+                          '${o.receiptPoint.country} ${o.receiptPoint.zipCode}';
+                      final delivery =
+                          '${o.deliveryPoint.country} ${o.deliveryPoint.zipCode}';
+                      final receiptDate =
+                          o.receiptDateBegin
+                              ?.toLocal()
+                              .toString()
+                              .split(' ')
+                              .first ??
+                          '—';
+                      final deliveryDate =
+                          o.deliveryDateBegin
+                              ?.toLocal()
+                              .toString()
+                              .split(' ')
+                              .first ??
+                          '—';
 
-                      return DataRow(cells: [
-                        DataCell(_twoLines(o.orderNr ?? '—', o.orderCustomerNr ?? '—')),
-                        DataCell(_twoLines(receipt, delivery)),
-                        DataCell(_twoLines(receiptDate, deliveryDate)),
-                        DataCell(_twoLines('MP: ${o.itemsCount}', 'W: ${o.totalWeight.toStringAsFixed(1)} kg')),
-                        DataCell(Text('${o.orderValue?.toStringAsFixed(2) ?? '0.00'} ${o.orderValueCurrency ?? ''}'.trim())),
-                        DataCell(Text(vm.statusLabel(o.status))),
-                        DataCell(
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: _ActionsCell(
-                              vm: vm,
-                              orderId: o.orderId?.toString() ?? '',
-                              order: o,
+                      return DataRow(
+                        cells: [
+                          DataCell(
+                            _twoLines(
+                              o.orderNr ?? '—',
+                              o.orderCustomerNr ?? '—',
                             ),
                           ),
-                        ),
-                      ]);
+                          DataCell(_twoLines(receipt, delivery)),
+                          DataCell(_twoLines(receiptDate, deliveryDate)),
+                          DataCell(
+                            _twoLines(
+                              'MP: ${o.itemsCount}',
+                              'W: ${o.totalWeight.toStringAsFixed(1)} kg',
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              '${o.orderValue?.toStringAsFixed(2) ?? '0.00'} ${o.orderValueCurrency ?? ''}'
+                                  .trim(),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              vm.statusLabel(o.statusId, fallback: o.status),
+                            ),
+                          ),
+                          DataCell(
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: _ActionsCell(
+                                vm: vm,
+                                orderId: o.orderId?.toString() ?? '',
+                                order: o,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
                     }).toList(),
                   ),
                 ),
@@ -501,7 +633,12 @@ class _PaginationBar extends StatelessWidget {
             value: vm.pageSize,
             onChanged: (v) => v == null ? null : vm.setPageSize(v),
             items: vm.pageSizeOptions
-                .map((s) => DropdownMenuItem(value: s, child: Text("${t.pagination_page_size}: $s")))
+                .map(
+                  (s) => DropdownMenuItem(
+                    value: s,
+                    child: Text("${t.pagination_page_size}: $s"),
+                  ),
+                )
                 .toList(),
           ),
         ],

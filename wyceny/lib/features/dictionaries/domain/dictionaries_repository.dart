@@ -19,6 +19,7 @@ abstract class DictionariesRepository {
   // --- API: pozostałe listy ---
   List<ServicesDictionary> get services;
   List<StatusesDictionary> get statuses;
+  List<StatusesDictionary> get orderStatuses;
   List<RejectCausesDictionary> get rejectCauses;
   List<ADRNameDictionary> get adrNames;
   List<ADRPackageUnitTypeDictionary> get adrPackageUnits;

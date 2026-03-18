@@ -10,7 +10,8 @@ abstract class QuotationsRepository {
     int pageSize = 10,
     DateTime? dateFrom,
     DateTime? dateTo,
-    int? destCountryId
+    int? destCountryId,
+    int? statusId,
   });
   Future<Quotation> create(QuotationPostModel model);
   Future<Quotation> update(QuotationPostModel model);
@@ -19,6 +20,7 @@ abstract class QuotationsRepository {
   Future<Quotation> copy(int id);
   Future<Quotation> approve(int id);
   Future<Quotation> reject(RejectModel model);
+  Future<void> delete(int id);
 
   // Konwersja do zamówienia
   Future<OrderModel> buildOrderFromQuotation(int id);

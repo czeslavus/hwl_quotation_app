@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:wyceny/app/di/locator.dart';
+import 'package:wyceny/app/navigation_refresh.dart';
 import 'package:wyceny/features/common/top_bar_appbar.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/features/quotations/ui/widgets/announcements_panel_widget.dart';
@@ -30,6 +31,89 @@ class _QuotationsListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return const _QuotationsListViewBody();
+  }
+}
+
+class _QuotationsListViewBody extends StatefulWidget {
+  const _QuotationsListViewBody();
+
+  @override
+  State<_QuotationsListViewBody> createState() =>
+      _QuotationsListViewBodyState();
+}
+
+class _QuotationsListViewBodyState extends State<_QuotationsListViewBody> {
+  String? _lastMatchedLocation;
+  NavigationRefresh? _navigationRefresh;
+  int _lastRefreshVersion = 0;
+  GoRouter? _router;
+
+  @override
+  void initState() {
+    super.initState();
+    if (getIt.isRegistered<NavigationRefresh>()) {
+      _navigationRefresh = getIt<NavigationRefresh>();
+      _lastRefreshVersion = _navigationRefresh!.quotationsVersion;
+      _navigationRefresh!.addListener(_handleRefreshSignal);
+    }
+  }
+
+  @override
+  void dispose() {
+    _router?.routerDelegate.removeListener(_handleRouteChange);
+    _navigationRefresh?.removeListener(_handleRefreshSignal);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final router = GoRouter.of(context);
+    if (_router != router) {
+      _router?.routerDelegate.removeListener(_handleRouteChange);
+      _router = router;
+      _router!.routerDelegate.addListener(_handleRouteChange);
+    }
+
+    _handleRouteChange();
+  }
+
+  void _handleRefreshSignal() {
+    final navigationRefresh = _navigationRefresh;
+    if (navigationRefresh == null) return;
+
+    final nextVersion = navigationRefresh.quotationsVersion;
+    if (_lastRefreshVersion == nextVersion) return;
+    _lastRefreshVersion = nextVersion;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<QuotationsListViewModel>().showLatest();
+    });
+  }
+
+  void _handleRouteChange() {
+    final router = _router;
+    if (router == null) return;
+
+    final matchedLocation = GoRouterState.of(context).matchedLocation;
+    final shouldRefresh =
+        _lastMatchedLocation != null &&
+        _lastMatchedLocation != matchedLocation &&
+        matchedLocation == '/quote';
+    _lastMatchedLocation = matchedLocation;
+
+    if (!shouldRefresh) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<QuotationsListViewModel>().showLatest();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final vm = context.watch<QuotationsListViewModel>();
     final t = AppLocalizations.of(context);
 
@@ -37,9 +121,7 @@ class _QuotationsListView extends StatelessWidget {
     final isPhone = width < 600;
 
     return Scaffold(
-      appBar: TopBarAppBar(
-        authState: vm.auth,
-      ),
+      appBar: TopBarAppBar(authState: vm.auth),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -48,39 +130,39 @@ class _QuotationsListView extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: isPhone
                 ? Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    t.quotations_title,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                PositiveActionButton(
-                  tooltip: t.action_new_quotation,
-                  label: t.action_new_quotation,
-                  icon: Icons.add,
-                  showCaption: false,
-                  onPressed: () => context.push('/quote/new'),
-                ),
-              ],
-            )
+                    children: [
+                      Expanded(
+                        child: Text(
+                          t.quotations_title,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      PositiveActionButton(
+                        tooltip: t.action_new_quotation,
+                        label: t.action_new_quotation,
+                        icon: Icons.add,
+                        showCaption: false,
+                        onPressed: () => context.push('/quote/new'),
+                      ),
+                    ],
+                  )
                 : Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    t.quotations_title,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          t.quotations_title,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                      ),
+                      PositiveActionButton(
+                        onPressed: () => context.push('/quote/new'),
+                        icon: Icons.add,
+                        label: t.action_new_quotation,
+                        tooltip: t.action_new_quotation,
+                      ),
+                    ],
                   ),
-                ),
-                PositiveActionButton(
-                  onPressed: () => context.push('/quote/new'),
-                  icon: Icons.add,
-                  label: t.action_new_quotation,
-                  tooltip: t.action_new_quotation
-                ),
-              ],
-            ),
           ),
 
           // Ogłoszenia
@@ -131,12 +213,16 @@ class _ResponsiveFiltersBar extends StatefulWidget {
 class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
   DateTime? _from;
   DateTime? _to;
+  int? _destCountryId;
+  int? _statusId;
 
   @override
   void initState() {
     super.initState();
     _from = widget.vm.dateFrom;
     _to = widget.vm.dateTo;
+    _destCountryId = widget.vm.destCountryId;
+    _statusId = widget.vm.statusId;
   }
 
   @override
@@ -148,46 +234,76 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     final isPhone = width < 600;
 
     final fields = <Widget>[
-      Row(mainAxisSize: MainAxisSize.min, children: [
-        _dateField(
-          context: context,
-          label: t.filter_date_from,
-          value: _from,
-          onPick: (d) => setState(() => _from = d),
-        ),
-        const SizedBox(width: 8),
-        _dateField(
-          context: context,
-          label: t.filter_date_to,
-          value: _to,
-          onPick: (d) => setState(() => _to = d),
-        ),
-      ]),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _dateField(
+            context: context,
+            label: t.filter_date_from,
+            value: _from,
+            onPick: (d) => setState(() => _from = d),
+          ),
+          const SizedBox(width: 8),
+          _dateField(
+            context: context,
+            label: t.filter_date_to,
+            value: _to,
+            onPick: (d) => setState(() => _to = d),
+          ),
+        ],
+      ),
       SizedBox(
         width: 240,
-        child: DropdownButtonFormField<int>(
+        child: DropdownButtonFormField<int?>(
           isExpanded: true,
-          initialValue: vm.destCountryId,
+          initialValue: _destCountryId,
           decoration: InputDecoration(labelText: t.gen_dest_country),
-          items: vm.countries
-              .map((c) => DropdownMenuItem(
-            value: c.countryId,
-            child: Text(CountryLocalizer.localize(c.country, context)),
-          ))
-              .toList(),
-          onChanged: (id) => setState(() => vm.destCountryId = id),
+          items: [
+            const DropdownMenuItem<int?>(value: null, child: Text('---')),
+            ...vm.countries.map(
+              (c) => DropdownMenuItem<int?>(
+                value: c.countryId,
+                child: Text(CountryLocalizer.localize(c.country, context)),
+              ),
+            ),
+          ],
+          onChanged: (id) => setState(() => _destCountryId = id),
+        ),
+      ),
+      SizedBox(
+        width: 240,
+        child: DropdownButtonFormField<int?>(
+          isExpanded: true,
+          initialValue: _statusId,
+          decoration: InputDecoration(labelText: t.col_status),
+          items: [
+            const DropdownMenuItem<int?>(value: null, child: Text('---')),
+            ...vm.statusOptions.map(
+              (id) => DropdownMenuItem<int?>(
+                value: id,
+                child: Text(vm.statusLabel(id)),
+              ),
+            ),
+          ],
+          onChanged: (id) => setState(() => _statusId = id),
         ),
       ),
     ];
 
-    void onApply() => vm.applyFilters(from: _from, to: _to, destId: vm.destCountryId);
+    void onApply() => vm.applyFilters(
+      from: _from,
+      to: _to,
+      destId: _destCountryId,
+      statusId: _statusId,
+    );
     void onClear() {
       setState(() {
         _from = null;
         _to = null;
-        vm.destCountryId = null;
+        _destCountryId = null;
+        _statusId = null;
       });
-      vm.applyFilters(from: null, to: null, destId: null);
+      vm.applyFilters(from: null, to: null, destId: null, statusId: null);
     }
 
     if (isPhone) {
@@ -324,38 +440,55 @@ class _QuotationsTable extends StatelessWidget {
                     ],
 
                     rows: vm.items.map((q) {
-                      final mp = (q.quotationPositions ?? [])
-                          .fold<double>(0, (s, it) => s + (it.quantity ?? 0));
-                      final wgh = (q.quotationPositions ?? [])
-                          .fold<double>(0, (s, it) => s + (it.weight ?? 0));
+                      final mp = (q.quotationPositions ?? []).fold<double>(
+                        0,
+                        (s, it) => s + it.quantity,
+                      );
+                      final wgh = (q.quotationPositions ?? []).fold<double>(
+                        0,
+                        (s, it) => s + it.weight,
+                      );
 
-                      return DataRow(cells: [
-                        DataCell(_twoLines(
-                          q.createDate?.toLocal().toString().split(' ').first ?? '—',
-                          q.quotationId?.toString() ?? '—',
-                        )),
-                        DataCell(_twoLines(
-                          '${vm.countryCodeForId(q.receiptCountryId)} ${q.receiptZipCode}',
-                          '${vm.countryCodeForId(q.deliveryCountryId)} ${q.deliveryZipCode}',
-                        )),
-                        DataCell(_twoLines(
-                          'MP: ${mp.toStringAsFixed(0)}',
-                          'W: ${wgh.toStringAsFixed(2)}',
-                        )),
-                        DataCell(Text(q.totalPrice.toStringAsFixed(2))),
-                        DataCell(Text(vm.statusLabel(q.status))),
-                        DataCell(
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: QuotationListActionsCell(
-                              quotationId: q.quotationId ?? 0,
-                              statusId: q.status,
-                              orderNrSl: q.orderNrSl,
-                              vm: vm,
+                      return DataRow(
+                        cells: [
+                          DataCell(
+                            _twoLines(
+                              q.createDate
+                                      ?.toLocal()
+                                      .toString()
+                                      .split(' ')
+                                      .first ??
+                                  '—',
+                              q.quotationId?.toString() ?? '—',
                             ),
                           ),
-                        ),
-                      ]);
+                          DataCell(
+                            _twoLines(
+                              '${vm.countryCodeForId(q.receiptCountryId)} ${q.receiptZipCode}',
+                              '${vm.countryCodeForId(q.deliveryCountryId)} ${q.deliveryZipCode}',
+                            ),
+                          ),
+                          DataCell(
+                            _twoLines(
+                              'MP: ${mp.toStringAsFixed(0)}',
+                              'W: ${wgh.toStringAsFixed(2)}',
+                            ),
+                          ),
+                          DataCell(Text(q.totalPrice.toStringAsFixed(2))),
+                          DataCell(Text(vm.statusLabel(q.status))),
+                          DataCell(
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: QuotationListActionsCell(
+                                quotationId: q.quotationId ?? 0,
+                                statusId: q.status,
+                                orderNrSl: q.orderNrSl,
+                                vm: vm,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
                     }).toList(),
                   ),
                 ),
@@ -410,7 +543,12 @@ class _PaginationBar extends StatelessWidget {
             value: vm.pageSize,
             onChanged: (v) => v == null ? null : vm.setPageSize(v),
             items: vm.pageSizeOptions
-                .map((s) => DropdownMenuItem(value: s, child: Text("${t.pagination_page_size}: $s")))
+                .map(
+                  (s) => DropdownMenuItem(
+                    value: s,
+                    child: Text("${t.pagination_page_size}: $s"),
+                  ),
+                )
                 .toList(),
           ),
         ],
@@ -418,4 +556,3 @@ class _PaginationBar extends StatelessWidget {
     );
   }
 }
-

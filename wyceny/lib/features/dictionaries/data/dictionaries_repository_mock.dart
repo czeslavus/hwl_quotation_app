@@ -13,6 +13,7 @@ class DictionariesRepositoryMock implements DictionariesRepository {
 
   List<ServicesDictionary> _services = const [];
   List<StatusesDictionary> _statuses = const [];
+  List<StatusesDictionary> _orderStatuses = const [];
   List<RejectCausesDictionary> _rejectCauses = const [];
   List<ADRNameDictionary> _adrNames = const [];
   List<ADRPackageUnitTypeDictionary> _adrPackageUnits = const [];
@@ -53,8 +54,16 @@ class DictionariesRepositoryMock implements DictionariesRepository {
     ];
 
     _services = const [
-      ServicesDictionary(serviceId: 1, name: 'FTL', description: 'Full Truck Load'),
-      ServicesDictionary(serviceId: 2, name: 'LTL', description: 'Less Than Truck Load'),
+      ServicesDictionary(
+        serviceId: 1,
+        name: 'FTL',
+        description: 'Full Truck Load',
+      ),
+      ServicesDictionary(
+        serviceId: 2,
+        name: 'LTL',
+        description: 'Less Than Truck Load',
+      ),
     ];
 
     _statuses = const [
@@ -64,19 +73,44 @@ class DictionariesRepositoryMock implements DictionariesRepository {
       StatusesDictionary(statusId: 4, name: 'Rejected'),
     ];
 
+    _orderStatuses = const [
+      StatusesDictionary(statusId: 1, name: 'Nowe'),
+      StatusesDictionary(statusId: 2, name: 'W realizacji'),
+      StatusesDictionary(statusId: 3, name: 'Zrealizowane'),
+      StatusesDictionary(statusId: 4, name: 'Anulowane'),
+    ];
+
     _rejectCauses = const [
       RejectCausesDictionary(rejectCauseId: 1, rejectCauseName: 'Other'),
-      RejectCausesDictionary(rejectCauseId: 2, rejectCauseName: 'Incorrect data'),
-      RejectCausesDictionary(rejectCauseId: 3, rejectCauseName: 'Price too high'),
+      RejectCausesDictionary(
+        rejectCauseId: 2,
+        rejectCauseName: 'Incorrect data',
+      ),
+      RejectCausesDictionary(
+        rejectCauseId: 3,
+        rejectCauseName: 'Price too high',
+      ),
     ];
 
     _adrNames = const [
-      ADRNameDictionary(un: '1202', name: 'GAS OIL', adrClass: '3', packingGroup: 'III', tremcard: '30G26'),
+      ADRNameDictionary(
+        un: '1202',
+        name: 'GAS OIL',
+        adrClass: '3',
+        packingGroup: 'III',
+        tremcard: '30G26',
+      ),
     ];
 
     _adrPackageUnits = const [
-      ADRPackageUnitTypeDictionary(packageUnitTypeNR: 'BX', packageUnitTypeName: 'Box'),
-      ADRPackageUnitTypeDictionary(packageUnitTypeNR: 'DR', packageUnitTypeName: 'Drum'),
+      ADRPackageUnitTypeDictionary(
+        packageUnitTypeNR: 'BX',
+        packageUnitTypeName: 'Box',
+      ),
+      ADRPackageUnitTypeDictionary(
+        packageUnitTypeNR: 'DR',
+        packageUnitTypeName: 'Drum',
+      ),
     ];
 
     _stageTt = const [
@@ -86,13 +120,29 @@ class DictionariesRepositoryMock implements DictionariesRepository {
     ];
 
     _loadUnits = const [
-      LoadUnitDictionary(loadUnitTypeId: 1, loadUnitTypeNr: 'PAL', loadUnitTypeName: 'Pallet'),
-      LoadUnitDictionary(loadUnitTypeId: 2, loadUnitTypeNr: 'BOX', loadUnitTypeName: 'Box'),
+      LoadUnitDictionary(
+        loadUnitTypeId: 1,
+        loadUnitTypeNr: 'PAL',
+        loadUnitTypeName: 'Pallet',
+      ),
+      LoadUnitDictionary(
+        loadUnitTypeId: 2,
+        loadUnitTypeNr: 'BOX',
+        loadUnitTypeName: 'Box',
+      ),
     ];
 
     _instructionCodes = const [
-      InstructionCodeDictionary(instructionCodeId: 1, instructionCodeNr: 'CALL', instructionCodeName: 'Call before delivery'),
-      InstructionCodeDictionary(instructionCodeId: 2, instructionCodeNr: 'LIFT', instructionCodeName: 'Liftgate required'),
+      InstructionCodeDictionary(
+        instructionCodeId: 1,
+        instructionCodeNr: 'CALL',
+        instructionCodeName: 'Call before delivery',
+      ),
+      InstructionCodeDictionary(
+        instructionCodeId: 2,
+        instructionCodeNr: 'LIFT',
+        instructionCodeName: 'Liftgate required',
+      ),
     ];
 
     _loaded = true;
@@ -115,6 +165,8 @@ class DictionariesRepositoryMock implements DictionariesRepository {
   List<ServicesDictionary> get services => _services;
   @override
   List<StatusesDictionary> get statuses => _statuses;
+  @override
+  List<StatusesDictionary> get orderStatuses => _orderStatuses;
   @override
   List<RejectCausesDictionary> get rejectCauses => _rejectCauses;
   @override

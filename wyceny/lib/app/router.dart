@@ -47,17 +47,17 @@ GoRouter buildRouter(AuthState auth) {
       GoRoute(
         path: '/splash',
         pageBuilder: (context, state) =>
-        const NoTransitionPage(child: SplashScreen()),
+            const NoTransitionPage(child: SplashScreen()),
       ),
       GoRoute(
         path: '/login',
         pageBuilder: (context, state) =>
-        const NoTransitionPage(child: LoginScreen()),
+            const NoTransitionPage(child: LoginScreen()),
       ),
       GoRoute(
         path: '/recover',
         pageBuilder: (context, state) =>
-        const NoTransitionPage(child: RecoverSetPasswordScreen()),
+            const NoTransitionPage(child: RecoverSetPasswordScreen()),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppScaffold(shell: shell),
@@ -81,13 +81,18 @@ GoRouter buildRouter(AuthState auth) {
                   GoRoute(
                     path: ':quotationId',
                     builder: (context, state) {
-                      final quotationIdStr = state.pathParameters['quotationId'];
+                      final quotationIdStr =
+                          state.pathParameters['quotationId'];
                       final quotationId = int.tryParse(quotationIdStr ?? '');
 
-                      debugPrint('ROUTE /quote/:quotationId -> quotationIdStr=$quotationIdStr, parsed=$quotationId');
+                      debugPrint(
+                        'ROUTE /quote/:quotationId -> quotationIdStr=$quotationIdStr, parsed=$quotationId',
+                      );
 
                       return ChangeNotifierProvider(
-                        create: (_) => getIt<QuotationViewModel>()..init(quotationId: quotationId),
+                        create: (_) =>
+                            getIt<QuotationViewModel>()
+                              ..init(quotationId: quotationId),
                         child: const QuotationScreen(),
                       );
                     },
@@ -138,7 +143,9 @@ GoRouter buildRouter(AuthState auth) {
                       return ChangeNotifierProvider(
                         create: (_) {
                           final vm = getIt<OrderViewModel>();
-                          if (orderId == 'new' && extra is Quotation) {
+                          if (orderId == 'new' && extra is OrderModel) {
+                            vm.prefillFromOrder(extra);
+                          } else if (orderId == 'new' && extra is Quotation) {
                             vm.prefillFromQuotation(extra);
                           }
                           vm.init();
@@ -146,7 +153,8 @@ GoRouter buildRouter(AuthState auth) {
                         },
                         child: OrderScreen(orderId: orderId),
                       );
-                    },),
+                    },
+                  ),
                 ],
               ),
             ],
@@ -158,12 +166,12 @@ GoRouter buildRouter(AuthState auth) {
                 path: '/preferences',
                 name: 'preferences',
                 pageBuilder: (context, state) =>
-                const NoTransitionPage(child: PreferencesScreen()),
+                    const NoTransitionPage(child: PreferencesScreen()),
                 routes: [
                   GoRoute(
                     path: 'logs',
                     builder: (context, state) {
-                      return LogsScreen(logService: getIt(),);
+                      return LogsScreen(logService: getIt());
                     },
                   ),
                 ],

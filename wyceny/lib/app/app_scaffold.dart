@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:wyceny/app/auth.dart';
+import 'package:wyceny/app/di/locator.dart';
+import 'package:wyceny/app/navigation_refresh.dart';
 import 'package:wyceny/features/common/language_flag_toggle.dart';
 import 'package:wyceny/l10n/app_localizations.dart';
 
@@ -52,15 +54,31 @@ class AppScaffold extends StatefulWidget {
 // ...imports bez zmian
 class _AppScaffoldState extends State<AppScaffold> {
   int get index => widget.shell.currentIndex;
-  void _onTap(int i) => widget.shell.goBranch(i, initialLocation: i == index);
+  void _onTap(int i) {
+    widget.shell.goBranch(i, initialLocation: i == index);
+
+    if (!getIt.isRegistered<NavigationRefresh>()) {
+      return;
+    }
+
+    if (i == 0) {
+      getIt<NavigationRefresh>().refreshQuotations();
+    } else if (i == 1) {
+      getIt<NavigationRefresh>().refreshOrders();
+    }
+  }
 
   String _titleFor(BuildContext context, int i) {
     final t = AppLocalizations.of(context);
     switch (i) {
-      case 0: return t.nav_quote;
-      case 1: return t.nav_order;
-      case 2: return t.nav_settings;
-      default: return '…';
+      case 0:
+        return t.nav_quote;
+      case 1:
+        return t.nav_order;
+      case 2:
+        return t.nav_settings;
+      default:
+        return '…';
     }
   }
 
@@ -70,15 +88,39 @@ class _AppScaffoldState extends State<AppScaffold> {
     final isWide = MediaQuery.sizeOf(context).width >= 600;
 
     final mobileDestinations = [
-      NavigationDestination(icon: const Icon(Icons.euro_outlined), selectedIcon: const Icon(Icons.euro), label: t.nav_quote),
-      NavigationDestination(icon: const Icon(Icons.shopping_basket_outlined), selectedIcon: const Icon(Icons.shopping_basket), label: t.nav_order),
-      NavigationDestination(icon: const Icon(Icons.settings_outlined), selectedIcon: const Icon(Icons.settings), label: t.nav_settings),
+      NavigationDestination(
+        icon: const Icon(Icons.euro_outlined),
+        selectedIcon: const Icon(Icons.euro),
+        label: t.nav_quote,
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.shopping_basket_outlined),
+        selectedIcon: const Icon(Icons.shopping_basket),
+        label: t.nav_order,
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        label: t.nav_settings,
+      ),
     ];
 
     final railDestinations = [
-      NavigationRailDestination(icon: const Icon(Icons.euro_outlined), selectedIcon: const Icon(Icons.euro), label: Text(t.nav_quote)),
-      NavigationRailDestination(icon: const Icon(Icons.shopping_basket_outlined), selectedIcon: const Icon(Icons.shopping_basket), label: Text(t.nav_order)),
-      NavigationRailDestination(icon: const Icon(Icons.settings_outlined), selectedIcon: const Icon(Icons.settings), label: Text(t.nav_settings)),
+      NavigationRailDestination(
+        icon: const Icon(Icons.euro_outlined),
+        selectedIcon: const Icon(Icons.euro),
+        label: Text(t.nav_quote),
+      ),
+      NavigationRailDestination(
+        icon: const Icon(Icons.shopping_basket_outlined),
+        selectedIcon: const Icon(Icons.shopping_basket),
+        label: Text(t.nav_order),
+      ),
+      NavigationRailDestination(
+        icon: const Icon(Icons.settings_outlined),
+        selectedIcon: const Icon(Icons.settings),
+        label: Text(t.nav_settings),
+      ),
     ];
 
     final content = ClipRect(child: widget.shell);
@@ -89,8 +131,8 @@ class _AppScaffoldState extends State<AppScaffold> {
       final rail = Theme(
         data: Theme.of(context).copyWith(
           navigationRailTheme: NavigationRailThemeData(
-            backgroundColor: Colors.indigo,          // <- CAŁY rail niebieski
-            indicatorColor: Colors.white24,          // <- podświetlenie aktywnej pozycji
+            backgroundColor: Colors.indigo, // <- CAŁY rail niebieski
+            indicatorColor: Colors.white24, // <- podświetlenie aktywnej pozycji
             elevation: 0,
 
             selectedIconTheme: const IconThemeData(
@@ -115,7 +157,8 @@ class _AppScaffoldState extends State<AppScaffold> {
           ),
         ),
         child: NavigationRail(
-          backgroundColor: Colors.indigo, // <- DODATKOWO jawnie, żeby nic nie „przebiło”
+          backgroundColor:
+              Colors.indigo, // <- DODATKOWO jawnie, żeby nic nie „przebiło”
           selectedIndex: index,
           onDestinationSelected: _onTap,
           labelType: NavigationRailLabelType.all,
@@ -166,7 +209,6 @@ class _AppScaffoldState extends State<AppScaffold> {
       );
     }
 
-
     // WIDOK MOBILNY/TABLETOWY: AppBar z logo (jak wcześniej)
     return Scaffold(
       appBar: AppBar(
@@ -174,7 +216,12 @@ class _AppScaffoldState extends State<AppScaffold> {
         title: Row(
           children: [
             const SizedBox(width: 8),
-            Image.asset('assets/hellmannblue.png', height: 22, fit: BoxFit.contain, semanticLabel: t.app_companyName),
+            Image.asset(
+              'assets/hellmannblue.png',
+              height: 22,
+              fit: BoxFit.contain,
+              semanticLabel: t.app_companyName,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -186,8 +233,11 @@ class _AppScaffoldState extends State<AppScaffold> {
             const LanguageFlagToggle(size: 18),
             const SizedBox(width: 8),
             _UserMenu(
-              onOpenSettings: () => widget.shell.goBranch(5, initialLocation: false),
-              onLogoutDone: () { if (context.mounted) context.go('/login'); },
+              onOpenSettings: () =>
+                  widget.shell.goBranch(5, initialLocation: false),
+              onLogoutDone: () {
+                if (context.mounted) context.go('/login');
+              },
             ),
           ],
         ),
@@ -202,7 +252,6 @@ class _AppScaffoldState extends State<AppScaffold> {
   }
 }
 
-
 enum _UserMenuAction { settings, logout }
 
 class _UserMenu extends StatelessWidget {
@@ -215,7 +264,9 @@ class _UserMenu extends StatelessWidget {
     final t = AppLocalizations.of(context);
     final auth = AuthScope.of(context);
     final display = auth.user;
-    final initials = (display.isNotEmpty ? display.trim()[0].toUpperCase() : 'U');
+    final initials = (display.isNotEmpty
+        ? display.trim()[0].toUpperCase()
+        : 'U');
 
     return PopupMenuButton<_UserMenuAction>(
       tooltip: t.menu_account,
@@ -231,9 +282,15 @@ class _UserMenu extends StatelessWidget {
         }
       },
       itemBuilder: (context) => [
-        PopupMenuItem(value: _UserMenuAction.settings, child: Text(t.menu_settings)),
+        PopupMenuItem(
+          value: _UserMenuAction.settings,
+          child: Text(t.menu_settings),
+        ),
         const PopupMenuDivider(),
-        PopupMenuItem(value: _UserMenuAction.logout, child: Text(t.menu_logout)),
+        PopupMenuItem(
+          value: _UserMenuAction.logout,
+          child: Text(t.menu_logout),
+        ),
       ],
       child: Row(
         mainAxisSize: MainAxisSize.min,

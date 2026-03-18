@@ -14,9 +14,9 @@ class OrderViewModel extends ChangeNotifier {
     DictionariesRepository? dictRepo,
     OrdersRepository? ordersRepo,
     AuthState? auth,
-  })  : _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
-        _ordersRepo = ordersRepo ?? getIt<OrdersRepository>(),
-        auth = auth ?? getIt<AuthState>();
+  }) : _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
+       _ordersRepo = ordersRepo ?? getIt<OrdersRepository>(),
+       auth = auth ?? getIt<AuthState>();
 
   final DictionariesRepository _dictRepo;
   final OrdersRepository _ordersRepo;
@@ -207,7 +207,9 @@ class OrderViewModel extends ChangeNotifier {
     items
       ..clear()
       ..addAll(_mapItemsFromOrder(order));
-    cbmTotal = order.loads?.fold<double>(0, (sum, load) => sum + (load.volume ?? 0)) ?? 0;
+    cbmTotal =
+        order.loads?.fold<double>(0, (sum, load) => sum + (load.volume ?? 0)) ??
+        0;
     chargeableWeight = order.totalWeight;
     totalPrice = order.orderValue ?? 0;
     hasChangesStored = false;
@@ -228,28 +230,33 @@ class OrderViewModel extends ChangeNotifier {
 
   String? countryCodeForId(int? id) {
     if (id == null) return null;
-    final c = countries.cast<CountryDictionary?>().firstWhere((x) => x?.countryId == id, orElse: () => null);
+    final sources = <CountryDictionary>[
+      ...countries,
+      ...receiptCountries,
+      ...deliveryCountries,
+    ];
+    final c = sources.cast<CountryDictionary?>().firstWhere(
+      (x) => x?.countryId == id,
+      orElse: () => null,
+    );
     return c?.countryCode;
   }
 
-  String countryNameForIdOrCode(
-    int? id,
-    String? fallbackCode,
-  ) {
+  String countryNameForIdOrCode(int? id, String? fallbackCode) {
     CountryDictionary? match;
     if (id != null) {
       match = countries.cast<CountryDictionary?>().firstWhere(
-            (x) => x?.countryId == id,
-            orElse: () => null,
-          );
+        (x) => x?.countryId == id,
+        orElse: () => null,
+      );
     }
     match ??= countries.cast<CountryDictionary?>().firstWhere(
-          (x) =>
-              fallbackCode != null &&
-              fallbackCode.isNotEmpty &&
-              x?.countryCode.toLowerCase() == fallbackCode.toLowerCase(),
-          orElse: () => null,
-        );
+      (x) =>
+          fallbackCode != null &&
+          fallbackCode.isNotEmpty &&
+          x?.countryCode.toLowerCase() == fallbackCode.toLowerCase(),
+      orElse: () => null,
+    );
 
     if (match?.country != null && match!.country!.trim().isNotEmpty) {
       return match.country!;
@@ -260,24 +267,26 @@ class OrderViewModel extends ChangeNotifier {
     return '—';
   }
 
-  String get receiptCountryDisplay => countryNameForIdOrCode(
-        receiptCountryId,
-        _pendingReceiptCountryCode,
-      );
+  String get receiptCountryDisplay =>
+      countryNameForIdOrCode(receiptCountryId, _pendingReceiptCountryCode);
 
-  String get deliveryCountryDisplay => countryNameForIdOrCode(
-        deliveryCountryId,
-        _pendingDeliveryCountryCode,
-      );
+  String get deliveryCountryDisplay =>
+      countryNameForIdOrCode(deliveryCountryId, _pendingDeliveryCountryCode);
 
   void _recalcPricing() {
     cbmTotal = items.fold<double>(0, (s, it) => s + it.cbm);
 
     final volumetricKg = cbmTotal * 167.0;
-    final realKg = items.fold<double>(0, (s, it) => s + (it.weightKg ?? 0) * (it.qty ?? 0));
+    final realKg = items.fold<double>(
+      0,
+      (s, it) => s + (it.weightKg ?? 0) * (it.qty ?? 0),
+    );
     chargeableWeight = realKg > volumetricKg ? realKg : volumetricKg;
 
-    final basePerKg = _baseRatePerKgForRelation(receiptCountryId, deliveryCountryId);
+    final basePerKg = _baseRatePerKgForRelation(
+      receiptCountryId,
+      deliveryCountryId,
+    );
     freight = chargeableWeight * basePerKg;
 
     final hasAdr = items.any((it) => it.adr == true);
@@ -296,11 +305,20 @@ class OrderViewModel extends ChangeNotifier {
   }
 
   void _resolvePendingCountryIds() {
-    receiptCountryId ??= _findCountryIdByCode(_pendingReceiptCountryCode, receiptCountries);
-    deliveryCountryId ??= _findCountryIdByCode(_pendingDeliveryCountryCode, deliveryCountries);
+    receiptCountryId ??= _findCountryIdByCode(
+      _pendingReceiptCountryCode,
+      receiptCountries,
+    );
+    deliveryCountryId ??= _findCountryIdByCode(
+      _pendingDeliveryCountryCode,
+      deliveryCountries,
+    );
   }
 
-  int? _findCountryIdByCode(String? countryCode, List<CountryDictionary> source) {
+  int? _findCountryIdByCode(
+    String? countryCode,
+    List<CountryDictionary> source,
+  ) {
     if (countryCode == null || countryCode.isEmpty) return null;
     for (final country in source) {
       if (country.countryCode.toLowerCase() == countryCode.toLowerCase()) {
@@ -343,22 +361,24 @@ class OrderViewModel extends ChangeNotifier {
     final loads = order.loads;
     if (loads == null || loads.isEmpty) return <OrderItem>[];
 
-    return loads.map((load) {
-      final qty = load.unitQuantity ?? 1;
-      final lengthCm = (load.length ?? 0) * 100;
-      final widthCm = (load.width ?? 0) * 100;
-      final heightCm = _deriveHeightCm(load, qty, lengthCm, widthCm);
+    return loads
+        .map((load) {
+          final qty = load.unitQuantity ?? 1;
+          final lengthCm = (load.length ?? 0) * 100;
+          final widthCm = (load.width ?? 0) * 100;
+          final heightCm = _deriveHeightCm(load, qty, lengthCm, widthCm);
 
-      return OrderItem(
-        qty: qty,
-        packType: load.unitType,
-        lengthCm: lengthCm > 0 ? lengthCm : null,
-        widthCm: widthCm > 0 ? widthCm : null,
-        heightCm: (heightCm != null && heightCm > 0) ? heightCm : null,
-        weightKg: load.weight,
-        adr: (load.loadAdrs?.isNotEmpty ?? false),
-      );
-    }).toList(growable: false);
+          return OrderItem(
+            qty: qty,
+            packType: load.unitType,
+            lengthCm: lengthCm > 0 ? lengthCm : null,
+            widthCm: widthCm > 0 ? widthCm : null,
+            heightCm: (heightCm != null && heightCm > 0) ? heightCm : null,
+            weightKg: load.weight,
+            adr: (load.loadAdrs?.isNotEmpty ?? false),
+          );
+        })
+        .toList(growable: false);
   }
 
   double? _deriveHeightCm(
@@ -373,7 +393,11 @@ class OrderViewModel extends ChangeNotifier {
     // Orders API often omits height, so for preview we reconstruct it from volume
     // to keep the existing editable table layout populated with meaningful values.
     final volume = load.volume;
-    if (volume == null || volume <= 0 || qty <= 0 || lengthCm <= 0 || widthCm <= 0) {
+    if (volume == null ||
+        volume <= 0 ||
+        qty <= 0 ||
+        lengthCm <= 0 ||
+        widthCm <= 0) {
       return null;
     }
     final baseAreaM2 = (lengthCm / 100) * (widthCm / 100) * qty;

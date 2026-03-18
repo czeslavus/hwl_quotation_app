@@ -19,7 +19,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
     DateTime? deliveryEndDate,
     DateTime? receiptStartDate,
     DateTime? receiptEndDate,
-    String? statusNr,
+    int? statusId,
     String? deliveryCountry,
     String? deliveryZipCode,
     String? receiptZipCode,
@@ -36,16 +36,13 @@ class OrdersRepositoryImpl implements OrdersRepository {
         'receiptStartDate': receiptStartDate.toUtc().toIso8601String(),
       if (receiptEndDate != null)
         'receiptEndDate': receiptEndDate.toUtc().toIso8601String(),
-      if (_hasText(statusNr)) 'statusNr': statusNr!.trim(),
+      if (statusId != null) 'statusNr': statusId.toString(),
       if (_hasText(deliveryCountry)) 'deliveryCountry': deliveryCountry!.trim(),
       if (_hasText(deliveryZipCode)) 'deliveryZipCode': deliveryZipCode!.trim(),
       if (_hasText(receiptZipCode)) 'receiptZipCode': receiptZipCode!.trim(),
     };
 
-    final res = await _dio.get(
-      _ordersPath,
-      queryParameters: query,
-    );
+    final res = await _dio.get(_ordersPath, queryParameters: query);
     return _parseOrderList(
       res.data,
       requestOptions: res.requestOptions,

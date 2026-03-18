@@ -29,40 +29,59 @@ class AuthServiceImpl implements AuthService {
   String _branch = '';
   String _slNumber = '';
 
-
   AuthServiceImpl({
     required AuthRepository repository,
     required TokenStorage storage,
-  })  : _repo = repository,
-        _secureStorage = storage;
+  }) : _repo = repository,
+       _secureStorage = storage;
 
   Timer? _refreshTimer;
-  bool _isRefreshing = false;
+  Completer<bool>? _refreshCompleter;
   DateTime? _lastRefreshAttemptAt;
   bool _lastRefreshOk = true;
   static const Duration _refreshThrottle = Duration(seconds: 30);
+  static const Duration _refreshSkew = Duration(seconds: 60);
 
   @override
   Future<bool> init() async {
     final access = await _secureStorage.read(kAccessTokenKey);
     final refresh = await _secureStorage.read(kRefreshTokenKey);
-    if (access != null && refresh != null) {
-      _scheduleRefreshFromAccess(access);
-      _firstName = await _secureStorage.read('firstName') ?? 'Jan';
-      _lastName = await _secureStorage.read('lastName') ?? 'Nowak';
-      _slNumber = await _secureStorage.read('skyLogicNumber') ?? '007';
-      _branch = await _secureStorage.read('branch') ?? 'CD Projekt';
+    if (access == null || refresh == null) {
+      return false;
+    }
 
+    _firstName = await _secureStorage.read('firstName') ?? 'Jan';
+    _lastName = await _secureStorage.read('lastName') ?? 'Nowak';
+    _slNumber = await _secureStorage.read('skyLogicNumber') ?? '007';
+    _branch = await _secureStorage.read('branch') ?? 'CD Projekt';
+
+    if (_shouldRefreshImmediately(access)) {
+      final refreshed = await refreshAccessToken();
+      if (!refreshed) {
+        return false;
+      }
+
+      final currentAccess = await _secureStorage.read(kAccessTokenKey);
+      if (currentAccess == null || currentAccess.isEmpty) {
+        return false;
+      }
+      _scheduleRefreshFromAccess(currentAccess);
       return true;
     }
-    return false;
+
+    _scheduleRefreshFromAccess(access);
+    return true;
   }
 
   @override
   Future<bool> login(String username, String password) async {
     final res = await _repo.login(username: username, password: password);
     final access = _readString(res, 'accessToken', fallbackKey: 'access_token');
-    final refresh = _readString(res, 'refreshToken', fallbackKey: 'refresh_token');
+    final refresh = _readString(
+      res,
+      'refreshToken',
+      fallbackKey: 'refresh_token',
+    );
     final du = _readNestedString(res, ['user', 'username']);
     _displayUserName = du ?? username;
     _firstName = _readString(res, 'firstName') ?? 'Jan';
@@ -90,45 +109,57 @@ class AuthServiceImpl implements AuthService {
     await _secureStorage.delete(kRefreshTokenKey);
     _refreshTimer?.cancel();
     _refreshTimer = null;
+    _refreshCompleter = null;
+    _lastRefreshAttemptAt = null;
+    _lastRefreshOk = false;
   }
 
   @override
   Future<bool> refreshAccessToken() async {
-    if (_isRefreshing) return false;
-    if (_lastRefreshAttemptAt != null &&
-        DateTime.now().difference(_lastRefreshAttemptAt!) < _refreshThrottle &&
-        _lastRefreshOk) {
-      // throttle
+    if (_refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+
+    final access = await _secureStorage.read(kAccessTokenKey);
+    final refresh = await _secureStorage.read(kRefreshTokenKey);
+    if (refresh == null ||
+        refresh.isEmpty ||
+        access == null ||
+        access.isEmpty) {
+      _lastRefreshOk = false;
+      await logout();
       return false;
     }
 
-    _isRefreshing = true;
+    if (_lastRefreshAttemptAt != null &&
+        DateTime.now().difference(_lastRefreshAttemptAt!) < _refreshThrottle &&
+        _lastRefreshOk &&
+        !_shouldRefreshImmediately(access)) {
+      return true;
+    }
+
+    final completer = Completer<bool>();
+    _refreshCompleter = completer;
     _lastRefreshAttemptAt = DateTime.now();
 
     try {
-      final refresh = await _secureStorage.read(kRefreshTokenKey);
-      final access = await _secureStorage.read(kAccessTokenKey);
-      if (refresh == null || access == null) {
-        _isRefreshing = false;
-        _lastRefreshOk = false;
-        await logout(); // Automatyczne wylogowanie przy braku refresh tokena
-        return false;
-      }
-
       final res = await _repo.refreshAccessToken(
         accessToken: access,
         refreshToken: refresh,
       );
-      final newAccess =
-          _readString(res, 'accessToken', fallbackKey: 'access_token');
+      final newAccess = _readString(
+        res,
+        'accessToken',
+        fallbackKey: 'access_token',
+      );
       final newRefresh =
           _readString(res, 'refreshToken', fallbackKey: 'refresh_token') ??
-              refresh;
+          refresh;
 
       if (newAccess == null) {
-        _isRefreshing = false;
         _lastRefreshOk = false;
-        await logout(); // Automatyczne wylogowanie przy braku nowego access tokena
+        await logout();
+        completer.complete(false);
         return false;
       }
 
@@ -136,29 +167,36 @@ class AuthServiceImpl implements AuthService {
       await _secureStorage.write(kRefreshTokenKey, newRefresh);
 
       _scheduleRefreshFromAccess(newAccess);
-      _isRefreshing = false;
       _lastRefreshOk = true;
+      completer.complete(true);
       return true;
     } on DioException catch (e, st) {
       if (kDebugMode) {
         // ignore: avoid_print
         print('refreshAccessToken DioException: $e\n$st');
       }
-      _isRefreshing = false;
       _lastRefreshOk = false;
       if (e.response?.statusCode == 401) {
-        await logout(); // Automatyczne wylogowanie po 401
+        await logout();
       }
+      if (!completer.isCompleted) completer.complete(false);
       return false;
     } catch (e, st) {
       if (kDebugMode) {
         // ignore: avoid_print
         print('refreshAccessToken error: $e\n$st');
       }
-      _isRefreshing = false;
       _lastRefreshOk = false;
-      await logout(); // Automatyczne wylogowanie przy innych błędach
+      await logout();
+      if (!completer.isCompleted) completer.complete(false);
       return false;
+    } finally {
+      if (!completer.isCompleted) {
+        completer.complete(false);
+      }
+      if (identical(_refreshCompleter, completer)) {
+        _refreshCompleter = null;
+      }
     }
   }
 
@@ -170,10 +208,10 @@ class AuthServiceImpl implements AuthService {
 
   @override
   Future<bool> recoverSetPassword(
-      String username,
-      String code,
-      String password,
-      ) async {
+    String username,
+    String code,
+    String password,
+  ) async {
     await _repo.recoverSetPassword(
       username: username,
       code: code,
@@ -191,20 +229,23 @@ class AuthServiceImpl implements AuthService {
 
     final now = DateTime.now().toUtc();
     final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000, isUtc: true);
-    // odśwież 60s przed wygaśnięciem (min. 10s)
-    var delta = expiry.difference(now) - const Duration(seconds: 60);
-    if (delta.isNegative) delta = const Duration(seconds: 10);
+    final delta = expiry.difference(now) - _refreshSkew;
 
-    _refreshTimer = Timer(delta, () {
-      refreshAccessToken();
-    });
+    if (delta <= Duration.zero) {
+      unawaited(refreshAccessToken());
+      return;
+    }
+
+    _refreshTimer = Timer(delta, refreshAccessToken);
   }
 
   int? _jwtExp(String token) {
     try {
       final parts = token.split('.');
       if (parts.length != 3) return null;
-      var payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      var payload = utf8.decode(
+        base64Url.decode(base64Url.normalize(parts[1])),
+      );
       final map = json.decode(payload) as Map<String, dynamic>;
       var exp = map['exp'];
       int? v;
@@ -224,7 +265,8 @@ class AuthServiceImpl implements AuthService {
     String key, {
     String? fallbackKey,
   }) {
-    final value = source[key] ?? (fallbackKey == null ? null : source[fallbackKey]);
+    final value =
+        source[key] ?? (fallbackKey == null ? null : source[fallbackKey]);
     if (value == null) return null;
     if (value is String) return value;
     return value.toString();
@@ -244,6 +286,15 @@ class AuthServiceImpl implements AuthService {
 
   @override
   String getDisplayName() {
-    return firstName+' '+lastName+" ("+skyLogicNumber+", "+branch+")";
+    return '$firstName $lastName ($skyLogicNumber, $branch)';
+  }
+
+  bool _shouldRefreshImmediately(String access) {
+    final exp = _jwtExp(access);
+    if (exp == null) return true;
+
+    final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000, isUtc: true);
+    final now = DateTime.now().toUtc();
+    return !expiry.isAfter(now.add(_refreshSkew));
   }
 }

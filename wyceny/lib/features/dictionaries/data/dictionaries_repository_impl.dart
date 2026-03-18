@@ -6,12 +6,13 @@ import 'package:wyceny/features/dictionaries/domain/models/models.dart';
 
 class DictionariesRepositoryImpl implements DictionariesRepository {
   DictionariesRepositoryImpl(
-      this._dio, {
-        String Function(int countryId, String? countryName)? resolveCountryIso2,
-      }) : _resolveCountryIso2 = resolveCountryIso2;
+    this._dio, {
+    String Function(int countryId, String? countryName)? resolveCountryIso2,
+  }) : _resolveCountryIso2 = resolveCountryIso2;
 
   final Dio _dio;
-  final String Function(int countryId, String? countryName)? _resolveCountryIso2;
+  final String Function(int countryId, String? countryName)?
+  _resolveCountryIso2;
 
   bool _loaded = false;
 
@@ -24,6 +25,7 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
 
   List<ServicesDictionary> _services = const [];
   List<StatusesDictionary> _statuses = const [];
+  List<StatusesDictionary> _orderStatuses = const [];
   List<RejectCausesDictionary> _rejectCauses = const [];
   List<ADRNameDictionary> _adrNames = const [];
   List<ADRPackageUnitTypeDictionary> _adrPackageUnits = const [];
@@ -39,16 +41,19 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
   List<CountryDictionary> get countries => UnmodifiableListView(_countries);
 
   @override
-  List<CountryDictionary> get countriesDelivery => UnmodifiableListView(_countriesDelivery);
+  List<CountryDictionary> get countriesDelivery =>
+      UnmodifiableListView(_countriesDelivery);
 
   @override
-  List<CountryDictionary> get countriesReceipt => UnmodifiableListView(_countriesReceipt);
+  List<CountryDictionary> get countriesReceipt =>
+      UnmodifiableListView(_countriesReceipt);
 
   @override
   AdditionsDictionary? get additions => _additions;
 
   @override
-  List<AdditionsDictionaryClassic> get additionsV2 => UnmodifiableListView(_additionsV2);
+  List<AdditionsDictionaryClassic> get additionsV2 =>
+      UnmodifiableListView(_additionsV2);
 
   @override
   List<ServicesDictionary> get services => UnmodifiableListView(_services);
@@ -57,13 +62,19 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
   List<StatusesDictionary> get statuses => UnmodifiableListView(_statuses);
 
   @override
-  List<RejectCausesDictionary> get rejectCauses => UnmodifiableListView(_rejectCauses);
+  List<StatusesDictionary> get orderStatuses =>
+      UnmodifiableListView(_orderStatuses);
+
+  @override
+  List<RejectCausesDictionary> get rejectCauses =>
+      UnmodifiableListView(_rejectCauses);
 
   @override
   List<ADRNameDictionary> get adrNames => UnmodifiableListView(_adrNames);
 
   @override
-  List<ADRPackageUnitTypeDictionary> get adrPackageUnits => UnmodifiableListView(_adrPackageUnits);
+  List<ADRPackageUnitTypeDictionary> get adrPackageUnits =>
+      UnmodifiableListView(_adrPackageUnits);
 
   @override
   List<StageTTDictionary> get stageTtStatuses => UnmodifiableListView(_stageTt);
@@ -72,7 +83,8 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
   List<LoadUnitDictionary> get loadUnits => UnmodifiableListView(_loadUnits);
 
   @override
-  List<InstructionCodeDictionary> get instructionCodes => UnmodifiableListView(_instructionCodes);
+  List<InstructionCodeDictionary> get instructionCodes =>
+      UnmodifiableListView(_instructionCodes);
 
   @override
   Future<void> preload() async {
@@ -87,6 +99,7 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
       _loadAdditionsV2(),
       _loadServices(),
       _loadStatuses(),
+      _loadOrderStatuses(),
       _loadRejectCauses(),
       _loadAdrNames(),
       _loadAdrPackageUnits(),
@@ -103,30 +116,30 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
   Future<void> _loadCountries() async {
     final data = await _getList('/dictionaries/countries');
     _countries = data
-        .map((e) => CountryDictionary.fromJson(
-      e,
-      resolveIso2: _resolveCountryIso2,
-    ))
+        .map(
+          (e) =>
+              CountryDictionary.fromJson(e, resolveIso2: _resolveCountryIso2),
+        )
         .toList(growable: false);
   }
 
   Future<void> _loadCountriesDelivery() async {
     final data = await _getList('/dictionaries/countries-delivery');
     _countriesDelivery = data
-        .map((e) => CountryDictionary.fromJson(
-      e,
-      resolveIso2: _resolveCountryIso2,
-    ))
+        .map(
+          (e) =>
+              CountryDictionary.fromJson(e, resolveIso2: _resolveCountryIso2),
+        )
         .toList(growable: false);
   }
 
   Future<void> _loadCountriesReceipt() async {
     final data = await _getList('/dictionaries/countries-receipt');
     _countriesReceipt = data
-        .map((e) => CountryDictionary.fromJson(
-      e,
-      resolveIso2: _resolveCountryIso2,
-    ))
+        .map(
+          (e) =>
+              CountryDictionary.fromJson(e, resolveIso2: _resolveCountryIso2),
+        )
         .toList(growable: false);
   }
 
@@ -137,48 +150,72 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
 
   Future<void> _loadAdditionsV2() async {
     final data = await _getList('/dictionaries/additions-v2');
-    _additionsV2 = data.map((e) => AdditionsDictionaryClassic.fromJson(e)).toList(growable: false);
+    _additionsV2 = data
+        .map((e) => AdditionsDictionaryClassic.fromJson(e))
+        .toList(growable: false);
   }
 
   Future<void> _loadServices() async {
     final data = await _getList('/dictionaries/services');
-    _services = data.map((e) => ServicesDictionary.fromJson(e)).toList(growable: false);
+    _services = data
+        .map((e) => ServicesDictionary.fromJson(e))
+        .toList(growable: false);
   }
 
   Future<void> _loadStatuses() async {
     final data = await _getList('/dictionaries/statuses');
-    _statuses = data.map((e) => StatusesDictionary.fromJson(e)).toList(growable: false);
+    _statuses = data
+        .map((e) => StatusesDictionary.fromJson(e))
+        .toList(growable: false);
+  }
+
+  Future<void> _loadOrderStatuses() async {
+    final data = await _getList('/dictionaries/order-statuses');
+    _orderStatuses = data
+        .map((e) => StatusesDictionary.fromJson(e))
+        .toList(growable: false);
   }
 
   Future<void> _loadRejectCauses() async {
     final data = await _getList('/dictionaries/reject-causes');
-    _rejectCauses = data.map((e) => RejectCausesDictionary.fromJson(e)).toList(growable: false);
+    _rejectCauses = data
+        .map((e) => RejectCausesDictionary.fromJson(e))
+        .toList(growable: false);
   }
 
   Future<void> _loadAdrNames() async {
     final data = await _getList('/dictionaries/adr-names');
-    _adrNames = data.map((e) => ADRNameDictionary.fromJson(e)).toList(growable: false);
+    _adrNames = data
+        .map((e) => ADRNameDictionary.fromJson(e))
+        .toList(growable: false);
   }
 
   Future<void> _loadAdrPackageUnits() async {
     final data = await _getList('/dictionaries/adr-package-units');
-    _adrPackageUnits =
-        data.map((e) => ADRPackageUnitTypeDictionary.fromJson(e)).toList(growable: false);
+    _adrPackageUnits = data
+        .map((e) => ADRPackageUnitTypeDictionary.fromJson(e))
+        .toList(growable: false);
   }
 
   Future<void> _loadStageTtStatuses() async {
     final data = await _getList('/dictionaries/stagett-statuses');
-    _stageTt = data.map((e) => StageTTDictionary.fromJson(e)).toList(growable: false);
+    _stageTt = data
+        .map((e) => StageTTDictionary.fromJson(e))
+        .toList(growable: false);
   }
 
   Future<void> _loadLoadUnits() async {
     final data = await _getList('/dictionaries/load-units');
-    _loadUnits = data.map((e) => LoadUnitDictionary.fromJson(e)).toList(growable: false);
+    _loadUnits = data
+        .map((e) => LoadUnitDictionary.fromJson(e))
+        .toList(growable: false);
   }
 
   Future<void> _loadInstructionCodes() async {
     final data = await _getList('/dictionaries/instruction-codes');
-    _instructionCodes = data.map((e) => InstructionCodeDictionary.fromJson(e)).toList(growable: false);
+    _instructionCodes = data
+        .map((e) => InstructionCodeDictionary.fromJson(e))
+        .toList(growable: false);
   }
 
   // -------- dio helpers --------
@@ -188,7 +225,9 @@ class DictionariesRepositoryImpl implements DictionariesRepository {
     final data = res.data;
 
     if (data is List) {
-      return data.map((e) => Map<String, dynamic>.from(e as Map)).toList(growable: false);
+      return data
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList(growable: false);
     }
 
     throw DioException(

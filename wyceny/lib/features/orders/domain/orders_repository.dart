@@ -10,7 +10,7 @@ abstract class OrdersRepository {
     DateTime? deliveryEndDate,
     DateTime? receiptStartDate,
     DateTime? receiptEndDate,
-    String? statusNr,
+    int? statusId,
     String? deliveryCountry,
     String? deliveryZipCode,
     String? receiptZipCode,

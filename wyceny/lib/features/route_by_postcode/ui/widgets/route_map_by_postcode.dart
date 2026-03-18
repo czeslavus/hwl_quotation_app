@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:wyceny/app/env/app_environment.dart';
 import 'package:wyceny/app/di/locator.dart' show getIt;
+import 'package:wyceny/features/logs/data/service/logger_service.dart';
 import 'package:wyceny/features/route_by_postcode/domain/route_repository.dart';
 import 'package:wyceny/features/route_by_postcode/ui/viewmodels/route_by_postcode_viewmodel.dart';
 
@@ -63,10 +64,12 @@ class _RouteMapBody extends StatefulWidget {
 
 class _RouteMapBodyState extends State<_RouteMapBody> {
   final MapController _mapController = MapController();
+  final _logger = getIt<LogService>().logger;
 
   String? _lastOrigin;
   String? _lastDest;
-  String? _lastCountry;
+  String? _lastOriginCountry;
+  String? _lastDestCountry;
   String? _lastFitKey;
   bool _mapReady = false;
   BoxConstraints? _lastConstraints;
@@ -96,29 +99,39 @@ class _RouteMapBodyState extends State<_RouteMapBody> {
 
     final origin = widget.originZip;
     final dest = widget.destinationZip;
-    final country = _pickCountryCode();
+    final originCountry = _normalizeCountryCode(widget.originCountryCode);
+    final destCountry = _normalizeCountryCode(widget.destinationCountryCode);
 
     final changed =
-        origin != _lastOrigin || dest != _lastDest || country != _lastCountry;
+        origin != _lastOrigin ||
+        dest != _lastDest ||
+        originCountry != _lastOriginCountry ||
+        destCountry != _lastDestCountry;
     if (!changed) return;
 
     _lastOrigin = origin;
     _lastDest = dest;
-    _lastCountry = country;
+    _lastOriginCountry = originCountry;
+    _lastDestCountry = destCountry;
+
+    _logger.i(
+      '[route-widget] schedule originZip=$origin originCountry=$originCountry '
+      'destZip=$dest destCountry=$destCountry changed=$changed',
+    );
 
     rvm.scheduleBuildRoute(
       originZip: origin,
       destinationZip: dest,
-      countryCode: country,
+      originCountryCode: originCountry,
+      destinationCountryCode: destCountry,
     );
   }
 
-  String _pickCountryCode() {
-    final origin = widget.originCountryCode?.trim();
-    if (origin != null && origin.isNotEmpty) return origin;
-    final dest = widget.destinationCountryCode?.trim();
-    if (dest != null && dest.isNotEmpty) return dest;
-    return widget.defaultCountryCode;
+  String? _normalizeCountryCode(String? code) {
+    final normalized = code?.trim().toUpperCase();
+    if (normalized == null || normalized.isEmpty) return null;
+    if (RegExp(r'^[A-Z]{2}$').hasMatch(normalized)) return normalized;
+    return null;
   }
 
   @override

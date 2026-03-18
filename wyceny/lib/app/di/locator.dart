@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wyceny/app/locale_controller.dart';
+import 'package:wyceny/app/navigation_refresh.dart';
 
 import 'package:wyceny/features/auth/ui/viewmodels/login_view_model.dart';
 import 'package:wyceny/app/auth.dart';
@@ -59,6 +60,7 @@ Future<void> setupDI() async {
   getIt.registerSingleton<LogService>(LogService());
 
   getIt.registerLazySingleton<LocaleController>(() => LocaleController());
+  getIt.registerLazySingleton<NavigationRefresh>(() => NavigationRefresh());
 
   getIt.registerLazySingleton<FlutterSecureStorage>(
     () => const FlutterSecureStorage(),

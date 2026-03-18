@@ -3,6 +3,7 @@ import 'package:wyceny/app/auth.dart';
 import 'package:wyceny/app/di/locator.dart';
 import 'package:wyceny/features/dictionaries/domain/dictionaries_repository.dart';
 import 'package:wyceny/l10n/country_localizer.dart';
+import 'package:wyceny/features/orders/domain/models/order_model.dart';
 import 'package:wyceny/features/quotations/domain/models/quotation.dart';
 import 'package:wyceny/features/quotations/domain/models/reject_model.dart';
 import 'package:wyceny/features/dictionaries/domain/models/models.dart';
@@ -13,9 +14,9 @@ class QuotationsListViewModel extends ChangeNotifier {
     QuotationsRepository? repo,
     DictionariesRepository? dictRepo,
     AuthState? auth,
-  })  : _repo = repo ?? getIt<QuotationsRepository>(),
-        _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
-        auth = auth ?? getIt<AuthState>();
+  }) : _repo = repo ?? getIt<QuotationsRepository>(),
+       _dictRepo = dictRepo ?? getIt<DictionariesRepository>(),
+       auth = auth ?? getIt<AuthState>();
 
   final QuotationsRepository _repo;
   final AuthState auth;
@@ -27,6 +28,7 @@ class QuotationsListViewModel extends ChangeNotifier {
 
   /// Dest = kraj dostawy (deliveryCountryId w API)
   int? destCountryId;
+  int? statusId;
 
   // Słowniki
   List<CountryDictionary> countries = const [];
@@ -52,15 +54,20 @@ class QuotationsListViewModel extends ChangeNotifier {
     try {
       final data = _dictRepo.countries;
       countries = data;
-
-    } catch (_) {/* brak fatal */}
+    } catch (_) {
+      /* brak fatal */
+    }
   }
 
   Future<void> _loadStatuses() async {
     try {
       final dicts = _dictRepo.statuses;
-      statuses = {for (final s in dicts) s.statusId: (s.name ?? s.statusId.toString())};
-    } catch (_) {/* fallback na ID */}
+      statuses = {
+        for (final s in dicts) s.statusId: (s.name ?? s.statusId.toString()),
+      };
+    } catch (_) {
+      /* fallback na ID */
+    }
   }
 
   Future<void> fetch() async {
@@ -75,9 +82,20 @@ class QuotationsListViewModel extends ChangeNotifier {
         dateFrom: dateFrom,
         dateTo: dateTo,
         destCountryId: destCountryId,
+        statusId: statusId,
       );
 
-      items = result;
+      final sorted = result.toList(growable: false)
+        ..sort((a, b) {
+          final byDate = (b.createDate ?? DateTime.fromMillisecondsSinceEpoch(0))
+              .compareTo(
+                a.createDate ?? DateTime.fromMillisecondsSinceEpoch(0),
+              );
+          if (byDate != 0) return byDate;
+          return (b.quotationId ?? 0).compareTo(a.quotationId ?? 0);
+        });
+
+      items = sorted;
       isLastPage = result.length < pageSize;
     } catch (e) {
       error = e;
@@ -85,6 +103,11 @@ class QuotationsListViewModel extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> showLatest() async {
+    page = 1;
+    await fetch();
   }
 
   void setPageSize(int newSize) {
@@ -111,12 +134,19 @@ class QuotationsListViewModel extends ChangeNotifier {
     DateTime? from,
     DateTime? to,
     int? destId,
+    int? statusId,
   }) {
     dateFrom = from;
     dateTo = to;
     destCountryId = destId;
+    this.statusId = statusId;
     page = 1;
     fetch();
+  }
+
+  List<int> get statusOptions {
+    final ids = statuses.keys.toList(growable: false)..sort();
+    return ids;
   }
 
   // Akcje na rekordzie
@@ -133,11 +163,25 @@ class QuotationsListViewModel extends ChangeNotifier {
     }
   }
 
+  Future<OrderModel?> approveAndBuildOrder(int quotationId) async {
+    loading = true;
+    notifyListeners();
+    try {
+      await _repo.approve(quotationId);
+      final order = await _repo.buildOrderFromQuotation(quotationId);
+      await fetch();
+      return order;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> reject(
-      int quotationId, {
-        int? rejectCauseId,
-        String? rejectCause,
-      }) async {
+    int quotationId, {
+    int? rejectCauseId,
+    String? rejectCause,
+  }) async {
     loading = true;
     notifyListeners();
     try {
@@ -155,22 +199,80 @@ class QuotationsListViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Quotation> copy(int quotationId) => _repo.copy(quotationId);
+  Future<Quotation?> copy(int quotationId) async {
+    loading = true;
+    notifyListeners();
+    try {
+      final q = await _repo.copy(quotationId);
+      await fetch();
+      return q;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> delete(int quotationId) async {
+    loading = true;
+    notifyListeners();
+    try {
+      await _repo.delete(quotationId);
+      await fetch();
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<OrderModel?> buildOrderDraft(int quotationId) async {
+    loading = true;
+    notifyListeners();
+    try {
+      return await _repo.buildOrderFromQuotation(quotationId);
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
 
   // ---- Helpery do tabeli ----
 
-  String statusLabel(int? id) => (id == null) ? "-" : (statuses[id] ?? id.toString());
+  String statusLabel(int? id) =>
+      (id == null) ? "-" : (statuses[id] ?? id.toString());
+
+  bool isRejectedStatus(int? id) {
+    final normalized = _normalizeStatusLabel(statusLabel(id));
+    return normalized.contains('odrzu') || normalized.contains('reject');
+  }
+
+  bool isApprovedStatus(int? id, {String? orderNrSl}) {
+    if (orderNrSl != null && orderNrSl.trim().isNotEmpty) return true;
+
+    final normalized = _normalizeStatusLabel(statusLabel(id));
+    return normalized.contains('zatwier') ||
+        normalized.contains('zaakcept') ||
+        normalized.contains('approved') ||
+        normalized.contains('accept');
+  }
+
+  String _normalizeStatusLabel(String value) => value.trim().toLowerCase();
 
   String localizeCountryName(int? id, BuildContext context) {
     if (id == null) return "—";
-    final c = countries.cast<CountryDictionary?>().firstWhere((x) => x?.countryId == id, orElse: () => null);
+    final c = countries.cast<CountryDictionary?>().firstWhere(
+      (x) => x?.countryId == id,
+      orElse: () => null,
+    );
     return CountryLocalizer.localize(c?.country, context);
   }
 
   String countryCodeForId(int? id) {
     if (id == null) return "—";
 
-    final c = countries.cast<CountryDictionary?>().firstWhere((x) => x?.countryId == id, orElse: () => null);
+    final c = countries.cast<CountryDictionary?>().firstWhere(
+      (x) => x?.countryId == id,
+      orElse: () => null,
+    );
     final code = (c?.countryCode ?? "").trim();
     if (code.isNotEmpty) {
       return code;

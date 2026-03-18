@@ -62,24 +62,40 @@ class MockQuotationsRepository implements QuotationsRepository {
     DateTime? dateFrom,
     DateTime? dateTo,
     int? destCountryId,
+    int? statusId,
   }) async {
     Iterable<Quotation> data = _archive;
 
     if (destCountryId != null) {
       data = data.where((q) => q.deliveryCountryId == destCountryId);
     }
-    final l1 = data.toList();
+    if (statusId != null) {
+      data = data.where((q) => q.status == statusId);
+    }
 
     if (dateFrom != null) {
       final from = DateTime(dateFrom.year, dateFrom.month, dateFrom.day);
-      data = data.where((q) => (q.createDate ?? DateTime.fromMillisecondsSinceEpoch(0)).isAfter(from) ||
-          (q.createDate ?? DateTime.fromMillisecondsSinceEpoch(0)).isAtSameMomentAs(from));
+      data = data.where(
+        (q) =>
+            (q.createDate ?? DateTime.fromMillisecondsSinceEpoch(0)).isAfter(
+              from,
+            ) ||
+            (q.createDate ?? DateTime.fromMillisecondsSinceEpoch(0))
+                .isAtSameMomentAs(from),
+      );
     }
 
     if (dateTo != null) {
       // do końca dnia
-      final toExclusive = DateTime(dateTo.year, dateTo.month, dateTo.day).add(const Duration(days: 1));
-      data = data.where((q) => (q.createDate ?? DateTime.fromMillisecondsSinceEpoch(0)).isBefore(toExclusive));
+      final toExclusive = DateTime(
+        dateTo.year,
+        dateTo.month,
+        dateTo.day,
+      ).add(const Duration(days: 1));
+      data = data.where(
+        (q) => (q.createDate ?? DateTime.fromMillisecondsSinceEpoch(0))
+            .isBefore(toExclusive),
+      );
     }
 
     final list = data.toList();
@@ -93,12 +109,17 @@ class MockQuotationsRepository implements QuotationsRepository {
     final id = _idSeq++;
 
     final random = Random();
-    final double? ninsPrice = (model.insuranceValue != null && model.insuranceValue! > 0) ? model.insuranceValue!*0.1 : null;
-    final double? nadrPrice = (model.adr != null && model.adr!) ? random.nextDouble()*10 : null;
-    final double nShippingPrice = random.nextDouble()*125;
-    final double? nbaf = model.baf ?? random.nextDouble()*20;
-    final double? ntaf = model.taf ?? random.nextDouble()*5;
-    final double nInflCorr = nShippingPrice *0.05;
+    final double? ninsPrice =
+        (model.insuranceValue != null && model.insuranceValue! > 0)
+        ? model.insuranceValue! * 0.1
+        : null;
+    final double? nadrPrice = (model.adr != null && model.adr!)
+        ? random.nextDouble() * 10
+        : null;
+    final double nShippingPrice = random.nextDouble() * 125;
+    final double nbaf = model.baf ?? random.nextDouble() * 20;
+    final double ntaf = model.taf ?? random.nextDouble() * 5;
+    final double nInflCorr = nShippingPrice * 0.05;
 
     final q = Quotation(
       quotationId: id,
@@ -147,12 +168,17 @@ class MockQuotationsRepository implements QuotationsRepository {
     final existing = await getQuotation(id);
 
     final random = Random();
-    final double? ninsPrice = (model.insuranceValue != null && model.insuranceValue! > 0) ? model.insuranceValue!*0.1 : null;
-    final double? nadrPrice = (model.adr != null && model.adr!) ? random.nextDouble()*10 : null;
-    final double nShippingPrice = random.nextDouble()*125;
-    final double? nbaf = model.baf ?? random.nextDouble()*20;
-    final double? ntaf = model.taf ?? random.nextDouble()*5;
-    final double nInflCorr = nShippingPrice *0.05;
+    final double? ninsPrice =
+        (model.insuranceValue != null && model.insuranceValue! > 0)
+        ? model.insuranceValue! * 0.1
+        : null;
+    final double? nadrPrice = (model.adr != null && model.adr!)
+        ? random.nextDouble() * 10
+        : null;
+    final double nShippingPrice = random.nextDouble() * 125;
+    final double nbaf = model.baf ?? random.nextDouble() * 20;
+    final double ntaf = model.taf ?? random.nextDouble() * 5;
+    final double nInflCorr = nShippingPrice * 0.05;
 
     final updated = Quotation(
       quotationId: existing.quotationId,
@@ -161,18 +187,21 @@ class MockQuotationsRepository implements QuotationsRepository {
       deliveryZipCode: model.deliveryZipCode,
       receiptCountryId: _originCountryId,
       receiptZipCode: model.receiptZipCode,
-      additionalServiceId: model.additionalServiceId ?? existing.additionalServiceId,
+      additionalServiceId:
+          model.additionalServiceId ?? existing.additionalServiceId,
       adr: model.adr ?? existing.adr,
       insuranceCurrency: model.insuranceCurrency ?? existing.insuranceCurrency,
       insurancePrice: ninsPrice,
       insuranceValue: model.insuranceValue ?? existing.insuranceValue,
       userName: model.userName ?? existing.userName,
-      quotationPositions: model.quotationPositions ?? existing.quotationPositions,
+      quotationPositions:
+          model.quotationPositions ?? existing.quotationPositions,
 
       // response-like fields
       createDate: model.createDate ?? existing.createDate,
       status: model.status ?? existing.status,
-      additionalServicePrice: model.additionalServicePrice ?? existing.additionalServicePrice,
+      additionalServicePrice:
+          model.additionalServicePrice ?? existing.additionalServicePrice,
       adrPrice: nadrPrice,
       allIn: model.allIn ?? existing.allIn,
       comments: model.comments ?? existing.comments,
@@ -184,7 +213,7 @@ class MockQuotationsRepository implements QuotationsRepository {
       orderDateSl: model.orderDateSl ?? existing.orderDateSl,
       baf: nbaf,
       taf: ntaf,
-      inflCorrection: nInflCorr
+      inflCorrection: nInflCorr,
     );
 
     await Future.delayed(const Duration(seconds: 2));
@@ -195,7 +224,6 @@ class MockQuotationsRepository implements QuotationsRepository {
 
     return updated;
   }
-
 
   // --- akcje ---
   @override
@@ -287,6 +315,12 @@ class MockQuotationsRepository implements QuotationsRepository {
     return rejected;
   }
 
+  @override
+  Future<void> delete(int id) async {
+    _byId.remove(id);
+    _archive.removeWhere((q) => q.quotationId == id);
+  }
+
   // --- wycena -> zamówienie ---
   @override
   Future<OrderModel> buildOrderFromQuotation(int id) async {
@@ -312,7 +346,15 @@ class MockQuotationsRepository implements QuotationsRepository {
         phoneNr: '+49 222 333 444',
       ),
       loads: [
-        const LoadModel(weight: 120, volume: 1.2, length: 120, width: 80, height: 80, unitType: 'PAL', unitQuantity: 1),
+        const LoadModel(
+          weight: 120,
+          volume: 1.2,
+          length: 120,
+          width: 80,
+          height: 80,
+          unitType: 'PAL',
+          unitQuantity: 1,
+        ),
       ],
       receiptDateBegin: DateTime.now().add(const Duration(days: 2)),
       receiptDateEnd: DateTime.now().add(const Duration(days: 3)),
@@ -324,7 +366,10 @@ class MockQuotationsRepository implements QuotationsRepository {
       notificationEmail: 'client@example.com',
       notificationSms: '+48123123123',
       instructionCodes: const [
-        InstructionCodeModel(instructionCodeNr: 'POD', instructionCodeInfo: 'Proof of delivery'),
+        InstructionCodeModel(
+          instructionCodeNr: 'POD',
+          instructionCodeInfo: 'Proof of delivery',
+        ),
       ],
       orderId: q.quotationId,
       orderNr: 'ORD-${q.quotationId}',
