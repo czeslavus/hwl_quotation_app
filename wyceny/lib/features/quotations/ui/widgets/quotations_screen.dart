@@ -239,12 +239,11 @@ class _ActionsRow extends StatelessWidget {
                   final ok = await vm.requestQuote();
                   if (!context.mounted) return;
                   if (!ok) {
+                    final msg = _getQuoteErrorMessage(context, vm);
                     await _showErrorDialog(
                       context: context,
-                      title: 'Blad wyceny',
-                      message:
-                          vm.lastRequestQuoteErrorMessage ??
-                          'Nie udalo sie pobrac wyceny. Sprobuj ponownie.',
+                      title: t.quotation_error_title,
+                      message: msg,
                     );
                     return;
                   }
@@ -295,6 +294,20 @@ class _ActionsRow extends StatelessWidget {
       ],
     );
   }
+
+  String _getQuoteErrorMessage(BuildContext context, QuotationViewModel vm) {
+    final t = AppLocalizations.of(context);
+    final status = vm.lastRequestQuoteStatusCode;
+    final details = vm.lastRequestQuoteDetails;
+
+    if (status != null && details != null && details.isNotEmpty) {
+      return t.quotation_error_status_details(status, details);
+    }
+    if (status != null) {
+      return t.quotation_error_status(status);
+    }
+    return t.quotation_error_fetch;
+  }
 }
 
 Future<bool?> _confirmDialog({
@@ -302,6 +315,7 @@ Future<bool?> _confirmDialog({
   required String title,
   required String message,
 }) {
+  final t = AppLocalizations.of(context);
   return showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -310,11 +324,11 @@ Future<bool?> _confirmDialog({
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Nie'),
+          child: Text(t.no.toUpperCase()),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: const Text('Tak'),
+          child: Text(t.yes.toUpperCase()),
         ),
       ],
     ),
@@ -326,6 +340,7 @@ Future<void> _showErrorDialog({
   required String title,
   required String message,
 }) {
+  final t = AppLocalizations.of(context);
   return showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -334,7 +349,7 @@ Future<void> _showErrorDialog({
       actions: [
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(),
-          child: const Text('OK'),
+          child: Text(t.ok),
         ),
       ],
     ),

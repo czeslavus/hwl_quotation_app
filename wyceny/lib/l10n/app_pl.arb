@@ -266,6 +266,16 @@
     "action_reject_order": "Odrzuć zlecenie",
     "@action_reject_order": {"description": "Akcja odrzucenia zlecenia"},
 
+    "action_back": "Powrót",
+    "col_route": "Trasa",
+    "col_dates": "Daty",
+    "col_loads": "Ładunki",
+
+    "pack_type_eur1": "EUR-1 (1,2x0,8)",
+    "pack_type_eur2": "EUR-2 (1,2x1,0)",
+    "pack_type_boxes": "Kartony",
+    "pack_type_crates": "Skrzynie",
+
     "confirm_reject_order_title": "Odrzucić zlecenie?",
     "@confirm_reject_order_title": {"description": "Tytuł potwierdzenia odrzucenia zlecenia"},
 
@@ -314,6 +324,21 @@
     "confirm_clear_all": "Usunąć wprowadzone dane wyceny (włączając w to wszystkie pozycje)?",
     "submit_ok": "Zapisane",
     "submit_error": "Błąd",
+  "quotation_error_title": "Błąd wyceny",
+  "quotation_error_fetch": "Nie udało się pobrać wyceny. Spróbuj ponownie.",
+  "quotation_error_status": "Nie udało się pobrać wyceny (HTTP {status}).",
+  "@quotation_error_status": {
+    "placeholders": {
+      "status": { "type": "int" }
+    }
+  },
+  "quotation_error_status_details": "Nie udało się pobrać wyceny (HTTP {status}): {details}",
+  "@quotation_error_status_details": {
+    "placeholders": {
+      "status": { "type": "int" },
+      "details": { "type": "String" }
+    }
+  },
   "items_empty_hint": "Dodaj pozycję",
   "item_cbm": "CBM",
   "item_lbm": "LDM",

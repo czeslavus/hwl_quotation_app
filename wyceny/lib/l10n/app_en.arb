@@ -194,6 +194,14 @@
   "action_calculate": "Calculate",
   "action_submit_order": "CONFIRM ORDER",
   "action_reject_order": "REJECT ORDER",
+  "action_back": "Back",
+  "col_route": "Route",
+  "col_dates": "Dates",
+  "col_loads": "Loads",
+  "pack_type_eur1": "EUR-1 (1,2x0,8)",
+  "pack_type_eur2": "EUR-2 (1,2x1,0)",
+  "pack_type_boxes": "Boxes",
+  "pack_type_crates": "Crates",
   "confirm_reject_order_title": "Reject order?",
   "confirm_reject_order_message": "This will cancel the order.",
   "validation_required": "Required",
@@ -213,6 +221,21 @@
   "confirm_clear_all": "Clear all quote data (icluding all items)?",
   "submit_ok": "Submit ok.",
   "submit_error": "Error",
+  "quotation_error_title": "Quotation error",
+  "quotation_error_fetch": "Failed to fetch quotation. Please try again.",
+  "quotation_error_status": "Failed to fetch quotation (HTTP {status}).",
+  "@quotation_error_status": {
+    "placeholders": {
+      "status": { "type": "int" }
+    }
+  },
+  "quotation_error_status_details": "Failed to fetch quotation (HTTP {status}): {details}",
+  "@quotation_error_status_details": {
+    "placeholders": {
+      "status": { "type": "int" },
+      "details": { "type": "String" }
+    }
+  },
   "items_empty_hint": "Add position",
   "item_cbm": "CBM",
   "item_lbm": "LDM",

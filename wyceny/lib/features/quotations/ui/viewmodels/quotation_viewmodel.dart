@@ -78,7 +78,11 @@ class QuotationViewModel extends ChangeNotifier {
   bool hasQuote = false;
   bool quoteIsFresh = false;
   bool quotePanelOpen = false;
-  String? lastRequestQuoteErrorMessage;
+  
+  // ================== BŁĘDY (L10n READY) ==================
+  int? lastRequestQuoteStatusCode;
+  String? lastRequestQuoteDetails;
+  bool hasRequestQuoteError = false;
 
   double get insurancePrice => lastQuotation?.insurancePrice ?? 0.0;
   double get additionalServicePrice =>
@@ -341,7 +345,12 @@ class QuotationViewModel extends ChangeNotifier {
 
     isSubmitting = true;
     quotePanelOpen = true;
-    lastRequestQuoteErrorMessage = null;
+    
+    // reset errorów
+    hasRequestQuoteError = false;
+    lastRequestQuoteStatusCode = null;
+    lastRequestQuoteDetails = null;
+    
     notifyListeners();
 
     try {
@@ -370,28 +379,17 @@ class QuotationViewModel extends ChangeNotifier {
       hasAnyChangesStored = true;
       return true;
     } on DioException catch (e) {
-      lastRequestQuoteErrorMessage = _requestQuoteErrorMessage(e);
+      hasRequestQuoteError = true;
+      lastRequestQuoteStatusCode = e.response?.statusCode;
+      lastRequestQuoteDetails = _readErrorDetails(e.response?.data);
       return false;
     } catch (e) {
-      lastRequestQuoteErrorMessage =
-          'Nie udalo sie pobrac wyceny. Sprobuj ponownie.';
+      hasRequestQuoteError = true;
       return false;
     } finally {
       isSubmitting = false;
       notifyListeners();
     }
-  }
-
-  String _requestQuoteErrorMessage(DioException e) {
-    final status = e.response?.statusCode;
-    final details = _readErrorDetails(e.response?.data);
-    if (status != null && details != null && details.isNotEmpty) {
-      return 'Nie udalo sie pobrac wyceny (HTTP $status): $details';
-    }
-    if (status != null) {
-      return 'Nie udalo sie pobrac wyceny (HTTP $status).';
-    }
-    return 'Nie udalo sie pobrac wyceny. Sprobuj ponownie.';
   }
 
   String? _readErrorDetails(dynamic data) {

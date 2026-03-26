@@ -216,16 +216,42 @@ class OrderViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ================== BŁĘDY (L10n READY) ==================
+  int? lastStatusCode;
+  String? lastErrorDetails;
+  bool hasError = false;
+
   Future<void> calculate() async {
     _recalcPricing();
   }
 
   Future<void> submit() async {
     // TODO: walidacja + submit do backendu
+    isSubmitting = true;
+    hasError = false;
+    lastStatusCode = null;
+    lastErrorDetails = null;
+    notifyListeners();
+    // Logika zapisu
+    isSubmitting = false;
+    notifyListeners();
   }
 
   Future<void> rejectOrder(String orderId) async {
-    await _ordersRepo.cancelOrder(orderId);
+    isSubmitting = true;
+    hasError = false;
+    lastStatusCode = null;
+    lastErrorDetails = null;
+    notifyListeners();
+    try {
+      await _ordersRepo.cancelOrder(orderId);
+    } catch (e) {
+      hasError = true;
+      // Tu można dodać ekstrakcję statusu z DioException
+    } finally {
+      isSubmitting = false;
+      notifyListeners();
+    }
   }
 
   String? countryCodeForId(int? id) {

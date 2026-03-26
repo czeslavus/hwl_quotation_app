@@ -223,25 +223,25 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
     final fields = <Widget>[
       _dateField(
         context: context,
-        label: 'Odbiór od',
+        label: t.field_pickup_from,
         value: _receiptFrom,
         onPick: (d) => setState(() => _receiptFrom = d),
       ),
       _dateField(
         context: context,
-        label: 'Odbiór do',
+        label: t.field_pickup_to,
         value: _receiptTo,
         onPick: (d) => setState(() => _receiptTo = d),
       ),
       _dateField(
         context: context,
-        label: 'Dostawa od',
+        label: t.field_delivery_from,
         value: _deliveryFrom,
         onPick: (d) => setState(() => _deliveryFrom = d),
       ),
       _dateField(
         context: context,
-        label: 'Dostawa do',
+        label: t.field_delivery_to,
         value: _deliveryTo,
         onPick: (d) => setState(() => _deliveryTo = d),
       ),
@@ -259,7 +259,7 @@ class _ResponsiveFiltersBarState extends State<_ResponsiveFiltersBar> {
         width: 160,
         child: TextField(
           controller: _deliveryZipCtrl,
-          decoration: const InputDecoration(labelText: 'Kod dostawy'),
+          decoration: InputDecoration(labelText: t.gen_dest_zip),
         ),
       ),
       SizedBox(
@@ -458,9 +458,9 @@ class _OrdersTable extends StatelessWidget {
                     dataRowMaxHeight: 72,
                     columns: [
                       DataColumn(label: Text(t.col_order_nr)),
-                      const DataColumn(label: Text('Trasa')),
-                      const DataColumn(label: Text('Daty')),
-                      const DataColumn(label: Text('Ładunki')),
+                      DataColumn(label: Text(t.col_route)),
+                      DataColumn(label: Text(t.col_dates)),
+                      DataColumn(label: Text(t.col_loads)),
                       DataColumn(label: Text(t.col_price)),
                       DataColumn(label: Text(t.col_status)),
                       DataColumn(label: Text(t.col_actions)),

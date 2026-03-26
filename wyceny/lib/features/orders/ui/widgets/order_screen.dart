@@ -756,7 +756,7 @@ class _BodyContentState extends State<_BodyContent> {
             alignment: Alignment.centerLeft,
             child: NeutralActionButton(
               icon: Icons.arrow_back,
-              label: 'Powrot',
+              label: t.action_back,
               onPressed: () => context.go('/order'),
             ),
           )
@@ -768,7 +768,14 @@ class _BodyContentState extends State<_BodyContent> {
               PositiveActionButton(
                 icon: Icons.calculate,
                 label: t.action_calculate,
-                onPressed: (vm.hasChangesStored && _formValid) ? vm.calculate : null,
+                onPressed: (vm.hasChangesStored && _formValid)
+                    ? () async {
+                        await vm.calculate();
+                        if (vm.hasError && context.mounted) {
+                          // TODO: show error dialog if needed
+                        }
+                      }
+                    : null,
               ),
               NeutralActionButton(
                 icon: Icons.delete_outline,
@@ -847,7 +854,7 @@ class _BodyContentState extends State<_BodyContent> {
               labelText: label,
               errorText: field.errorText,
             ),
-            child: Text(field.value != null ? "${field.value!.toLocal()}".split(' ')[0] : '—'),
+            child: Text(field.value != null ? "${field.value!.toLocal()}".split(' ')[0] : t.no.toUpperCase()),
           ),
         );
       },
@@ -1125,22 +1132,26 @@ class _OrderItemsTableState extends State<_OrderItemsTable> {
     required ValueChanged<String> onChanged,
     String? Function(String?)? validator,
   }) {
-    const packs = <String>[
-      'EUR-1 (1,2x0,8)',
-      'EUR-2 (1,2x1,0)',
-      'Kartony',
-      'Skrzynie',
-    ];
+    final t = AppLocalizations.of(context);
+    final packs = {
+      'EUR-1 (1,2x0,8)': t.pack_type_eur1,
+      'EUR-2 (1,2x1,0)': t.pack_type_eur2,
+      'Kartony': t.pack_type_boxes,
+      'Skrzynie': t.pack_type_crates,
+    };
+    final items = packs.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))).toList();
+    final initialValue = packs.containsKey(value) ? value : packs.keys.first;
+
     return SizedBox(
       width: width,
       child: DropdownButtonFormField<String>(
-        initialValue: packs.contains(value) ? value : packs.first,
+        initialValue: initialValue,
         isDense: true,
         decoration: _cellDeco().copyWith(
-          labelText: AppLocalizations.of(context).label_pack_type,
+          labelText: t.label_pack_type,
         ),
-        items: packs.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
-        onChanged: (v) => onChanged(v ?? packs.first),
+        items: items,
+        onChanged: (v) => onChanged(v ?? packs.keys.first),
         validator: validator,
       ),
     );
